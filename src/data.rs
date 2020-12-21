@@ -4,7 +4,7 @@ use byteorder::*;
 
 /* local use */
 use crate::kmer::Kmer;
-use crate::utils::{BitOrd, BitBox, BitVec, BitSlice};
+use crate::utils::{BitBox, BitOrd, BitSlice, BitVec};
 use crate::*;
 
 pub trait Reader<'input, R>: Iterator<Item = crate::Result<Kmer>>

@@ -8,32 +8,28 @@ pub struct Kmer {
 }
 
 impl Kmer {
-    pub fn new(bits: utils::BitBox, data: Box<[u8]>) -> Self{
-	Self {
-	    bits,
-	    data,
-	}
+    pub fn new(bits: utils::BitBox, data: Box<[u8]>) -> Self {
+        Self { bits, data }
     }
 
     // Getter
     pub fn bits(&self) -> &utils::BitSlice {
-	&self.bits
+        &self.bits
     }
 
     pub fn data(&self) -> &[u8] {
-	&self.data
+        &self.data
     }
 
-    pub fn seq(&self, rev_encoding: u8) -> Box<[u8]>  {
-	utils::bits2seq(&self.bits, rev_encoding)
+    pub fn seq(&self, rev_encoding: u8) -> Box<[u8]> {
+        utils::bits2seq(&self.bits, rev_encoding)
     }
 
     pub fn len(&self) -> usize {
-	self.data.len()
+        self.data.len()
     }
 
     pub fn is_empty(&self) -> bool {
-	self.data.is_empty()
+        self.data.is_empty()
     }
 }
-

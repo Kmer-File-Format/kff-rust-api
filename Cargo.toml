@@ -1,8 +1,16 @@
 [package]
 name = "kff"
 version = "0.1.0"
+description = "Kmer File Format rust parser"
+
 authors = ["Pierre Marijon <pierre.marijon@hhu.de>"]
-description = "Kmer File Format rust parser with C and Python binding"
+
+repository = "https://github.com/Kmer-File-Format/kff-rust-api"
+homepage = "https://github.com/Kmer-File-Format/kff-rust-api"
+documentation = "https://github.com/Kmer-File-Format/kff-rust-api"
+
+license = "AGPL"
+
 edition = "2018"
 
 [lib]

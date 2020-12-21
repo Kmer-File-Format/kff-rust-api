@@ -9,4 +9,3 @@ pub trait Metadata {
 
     fn serialize<W: std::io::Write>(&self, output: &mut W) -> Result<usize>;
 }
-

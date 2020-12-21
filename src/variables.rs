@@ -16,21 +16,20 @@ pub trait BaseVariables {
 
 impl BaseVariables for Variables {
     fn k(&self) -> crate::Result<u64> {
-	Ok(*self.get("k").ok_or(error::Data::KMissing)?)
+        Ok(*self.get("k").ok_or(error::Data::KMissing)?)
     }
 
     fn m(&self) -> crate::Result<u64> {
-	Ok(*self.get("m").ok_or(error::Data::KMissing)?)
-    }
-    
-    fn max(&self) -> crate::Result<u64> {
-	Ok(*self.get("max").ok_or(error::Data::KMissing)?)
-    }
-    
-    fn data_size(&self) -> crate::Result<u64> {
-	Ok(*self.get("data_size").ok_or(error::Data::KMissing)?)
+        Ok(*self.get("m").ok_or(error::Data::KMissing)?)
     }
 
+    fn max(&self) -> crate::Result<u64> {
+        Ok(*self.get("max").ok_or(error::Data::KMissing)?)
+    }
+
+    fn data_size(&self) -> crate::Result<u64> {
+        Ok(*self.get("data_size").ok_or(error::Data::KMissing)?)
+    }
 }
 
 impl Metadata for Variables {

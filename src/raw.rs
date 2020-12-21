@@ -8,7 +8,7 @@ use crate::data::Writer as DataWriter;
 use crate::error;
 use crate::kff::Reader as KffReader;
 use crate::kmer::Kmer;
-use crate::utils::{BitBox, BitSlice, BitOrd};
+use crate::utils::{BitBox, BitOrd, BitSlice};
 use crate::variables::BaseVariables;
 use crate::variables::Variables;
 use crate::*;
@@ -191,11 +191,7 @@ where
         })
     }
 
-    pub fn write_block(
-        &mut self,
-        seq: &BitSlice,
-        data: &[u8],
-    ) -> crate::Result<usize> {
+    pub fn write_block(&mut self, seq: &BitSlice, data: &[u8]) -> crate::Result<usize> {
         self.increment_nb_block()?;
 
         let nb_kmer = self.check_block(seq.len(), data.len())? as u64;

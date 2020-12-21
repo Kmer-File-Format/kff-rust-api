@@ -7,11 +7,11 @@ use crate::data::Reader as DataReader;
 use crate::data::Writer as DataWriter;
 use crate::error;
 use crate::kff::Reader as KffReader;
+use crate::kmer::Kmer;
+use crate::utils::{BitBox, BitSlice, BitVec};
 use crate::variables::BaseVariables;
 use crate::variables::Variables;
-use crate::kmer::Kmer;
 use crate::*;
-use crate::utils::{BitBox, BitVec, BitSlice};
 
 pub struct Reader<'input, R>
 where
@@ -47,14 +47,12 @@ where
         let max = reader.variables().max()?;
         let data_size = reader.variables().data_size()?;
 
-
-	
         let mut buffer = vec![0u8; utils::ceil_to_8(m * 2) as usize / 8];
         reader.input().read_exact(&mut buffer)?;
         let mut tmp = BitVec::from_vec(buffer);
         tmp.resize((m * 2) as usize, false);
         let minimizer = tmp.into_boxed_bitslice();
-	
+
         let remaining_block = reader.input().read_u32::<LittleEndian>()?;
 
         Ok(Self {
@@ -128,9 +126,9 @@ where
     }
 
     fn rev_encoding(&self) -> u8 {
-	self.reader.rev_encoding()
+        self.reader.rev_encoding()
     }
-    
+
     fn decrease_n(&mut self) {
         self.block_n -= 1;
     }
@@ -139,16 +137,16 @@ where
         if self.remaining_block == 0 {
             return Ok(0);
         }
-	
+
         self.block_n = self.read_n()?;
 
         self.block_idx = utils::read_dynamic_size_field(
             self.reader.input(),
             std::cmp::min(self.k + self.m - 1, u64::MAX),
         )?;
-	
+
         let seq_without_mini = self.read_seq(self.block_n + self.k - 1 - self.m)?;
-	
+
         let mut seq = bitvec![Lsb0, u8; 0; 0];
         seq.extend(&seq_without_mini[0..(self.block_idx as usize * 2)]);
         seq.extend(self.minimizer.iter());
@@ -190,7 +188,7 @@ where
     // Other
     output: &'output mut W,
     is_close: bool,
-    encoding: u8
+    encoding: u8,
 }
 
 impl<'output, W> Writer<'output, W>
@@ -200,7 +198,7 @@ where
     pub fn new(
         variables: &Variables,
         minimizer: &[u8],
-	encoding: u8,
+        encoding: u8,
         output: &'output mut W,
     ) -> crate::Result<Self> {
         let k = *variables.get("k").ok_or(error::Data::KMissing)?;
@@ -228,7 +226,7 @@ where
             nb_block: 0,
             output,
             is_close: false,
-	    encoding,
+            encoding,
         })
     }
 
@@ -272,7 +270,11 @@ where
         seq: &[u8],
         data: &[u8],
     ) -> crate::Result<usize> {
-        self.write_block(minimizer_idx, &utils::seq2bits(seq, self.encoding)[..], data)
+        self.write_block(
+            minimizer_idx,
+            &utils::seq2bits(seq, self.encoding)[..],
+            data,
+        )
     }
 }
 
@@ -501,26 +503,8 @@ mod tests {
     #[test]
     fn bin() {
         let mut block: &[u8] = &[
-            1,
-            0,
-            30,
-            0,
-            0,
-            0,
-            0, // version 1.0 encoding 0b00011011
-            0b10100101,
-            1,
-            0,
-            0,
-            0,
-            5,
-            2,
-            0b10011100,
-            0b00000011,
-            1,
-            2,
-            3,
-            4,
+            1, 0, 30, 0, 0, 0, 0, // version 1.0 encoding 0b00011011
+            0b10100101, 1, 0, 0, 0, 5, 2, 0b10011100, 0b00000011, 1, 2, 3, 4,
             5, // minimizer -> CCTT, 1 block, k -> 5, minimizer index -> 2
         ];
 
@@ -608,60 +592,44 @@ mod tests {
         reader.variables().insert("data_size".to_string(), 1);
 
         let minimizer = super::Reader::new(&mut reader).unwrap();
-	
+
         let mut it = Box::new(minimizer.into_iter());
 
-	let mut value = it.next().unwrap().unwrap();
+        let mut value = it.next().unwrap().unwrap();
         assert_eq!(
             value.seq(utils::rev_encoding(0b00011011)),
             vec![b'A', b'G', b'C', b'C', b'T'].into_boxed_slice()
-	);
-	    
-	assert_eq!(
-	    value.data(),
-	    &[1u8],	
         );
 
-	value = it.next().unwrap().unwrap();
+        assert_eq!(value.data(), &[1u8],);
+
+        value = it.next().unwrap().unwrap();
         assert_eq!(
             value.seq(utils::rev_encoding(0b00011011)),
             vec![b'G', b'C', b'C', b'T', b'T'].into_boxed_slice(),
         );
-	assert_eq!(
-	    value.data(),
-	    &[2],	
-        );
-	
-	value = it.next().unwrap().unwrap();
+        assert_eq!(value.data(), &[2],);
+
+        value = it.next().unwrap().unwrap();
         assert_eq!(
             value.seq(utils::rev_encoding(0b00011011)),
             vec![b'C', b'C', b'T', b'T', b'C'].into_boxed_slice()
         );
-	assert_eq!(
-	    value.data(),
-	    &[3],	
-        );
-	
-	value = it.next().unwrap().unwrap();
+        assert_eq!(value.data(), &[3],);
+
+        value = it.next().unwrap().unwrap();
         assert_eq!(
             value.seq(utils::rev_encoding(0b00011011)),
             vec![b'C', b'T', b'T', b'C', b'T'].into_boxed_slice(),
-            
         );
-	assert_eq!(
-	    value.data(),
-	    &[4],	
-        );
-	
-	value = it.next().unwrap().unwrap();
+        assert_eq!(value.data(), &[4],);
+
+        value = it.next().unwrap().unwrap();
         assert_eq!(
-            value.seq(utils::rev_encoding(0b00011011)),	
+            value.seq(utils::rev_encoding(0b00011011)),
             vec![b'T', b'T', b'C', b'T', b'G'].into_boxed_slice(),
-        );  
-	assert_eq!(
-	    value.data(),
-	    &[5],	
         );
+        assert_eq!(value.data(), &[5],);
 
         assert!(it.next().is_none());
 
@@ -683,9 +651,7 @@ mod tests {
         {
             let mut writer = Writer::new(&variables, minimizer, 0b00011011, &mut buffer).unwrap();
 
-            writer
-                .write_seq_block(4, b"GAGTT", &[10, 8, 9])
-                .unwrap();
+            writer.write_seq_block(4, b"GAGTT", &[10, 8, 9]).unwrap();
             writer.write_seq_block(0, b"GAT", &[1]).unwrap();
         }
 
@@ -710,16 +676,11 @@ mod tests {
         {
             let mut writer = Writer::new(&variables, minimizer, 0b00011011, &mut buffer).unwrap();
 
-            writer
-                .write_seq_block(1, b"GAG", &[10])
-                .unwrap();
+            writer.write_seq_block(1, b"GAG", &[10]).unwrap();
             writer.write_seq_block(0, b"GAT", &[1]).unwrap();
         }
 
-        assert_eq!(
-            buffer.into_inner(),
-            [4, 2, 0, 0, 0, 1, 51, 10, 0, 35, 1]
-        );
+        assert_eq!(buffer.into_inner(), [4, 2, 0, 0, 0, 1, 51, 10, 0, 35, 1]);
     }
 
     #[test]
@@ -731,16 +692,14 @@ mod tests {
         variables.insert("data_size".to_string(), 1);
 
         // minimizer sequence AC
-	let minimizer = b"AC";
+        let minimizer = b"AC";
 
         let mut buffer = std::io::Cursor::new(vec![1u8, 0, 30, 0]);
         buffer.set_position(7);
         {
             let mut writer = Writer::new(&variables, minimizer, 0b00011011, &mut buffer).unwrap();
 
-            writer
-                .write_seq_block(4, b"GAGTT", &[10, 8, 9])
-                .unwrap();
+            writer.write_seq_block(4, b"GAGTT", &[10, 8, 9]).unwrap();
             writer.write_seq_block(0, b"GAT", &[1]).unwrap();
         }
 
@@ -761,46 +720,33 @@ mod tests {
         let reader = super::Reader::new(&mut reader).unwrap();
         let mut it = reader.into_iter();
 
-	let mut value = it.next().unwrap().unwrap();
+        let mut value = it.next().unwrap().unwrap();
         assert_eq!(
-	    value.seq(utils::rev_encoding(0b00011011)),
+            value.seq(utils::rev_encoding(0b00011011)),
             vec![b'G', b'A', b'G', b'T', b'A'].into_boxed_slice(),
-	);
-	assert_eq!(
-	    value.data(),
-	    &[10]
         );
+        assert_eq!(value.data(), &[10]);
 
-	value = it.next().unwrap().unwrap();
+        value = it.next().unwrap().unwrap();
         assert_eq!(
-	    value.seq(utils::rev_encoding(0b00011011)),
+            value.seq(utils::rev_encoding(0b00011011)),
             vec![b'A', b'G', b'T', b'A', b'C'].into_boxed_slice()
-	);
-	assert_eq!(
-	    value.data(),
-            &[8]
         );
+        assert_eq!(value.data(), &[8]);
 
         value = it.next().unwrap().unwrap();
         assert_eq!(
-	    value.seq(utils::rev_encoding(0b00011011)),
-	    vec![b'G', b'T', b'A', b'C', b'T'].into_boxed_slice(),
-	);
-	assert_eq!(
-	    value.data(),
-            &[9]
+            value.seq(utils::rev_encoding(0b00011011)),
+            vec![b'G', b'T', b'A', b'C', b'T'].into_boxed_slice(),
         );
+        assert_eq!(value.data(), &[9]);
 
         value = it.next().unwrap().unwrap();
         assert_eq!(
-	    value.seq(utils::rev_encoding(0b00011011)),
-                vec![b'A', b'C', b'G', b'A', b'T'].into_boxed_slice(),
-	);
-	assert_eq!(
-	    value.data(),
-	    &[1]
-            
+            value.seq(utils::rev_encoding(0b00011011)),
+            vec![b'A', b'C', b'G', b'A', b'T'].into_boxed_slice(),
         );
+        assert_eq!(value.data(), &[1]);
 
         assert!(it.next().is_none());
     }
