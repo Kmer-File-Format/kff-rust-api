@@ -1,0 +1,16 @@
+[package]
+name = "kff"
+version = "0.1.0"
+authors = ["Pierre Marijon <pierre.marijon@hhu.de>"]
+description = "Kmer File Format rust parser with C and Python binding"
+edition = "2018"
+
+[lib]
+name = "kff"
+crate-type = ["rlib", "cdylib", "staticlib"]
+
+[dependencies]
+thiserror = "1"
+byteorder = "1"
+itertools = "0.9"
+bitvec    = "0.19"
