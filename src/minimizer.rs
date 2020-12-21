@@ -65,7 +65,7 @@ where
             remaining_block,
             block_n: 0,
             block_idx: 0,
-            block_seq: bitbox![Lsb0, u8; 0; 0],
+            block_seq: bitbox![Msb0, u8; 0; 0],
             block_data: vec![],
         })
     }
@@ -147,7 +147,7 @@ where
 
         let seq_without_mini = self.read_seq(self.block_n + self.k - 1 - self.m)?;
 
-        let mut seq = bitvec![Lsb0, u8; 0; 0];
+        let mut seq = bitvec![Msb0, u8; 0; 0];
         seq.extend(&seq_without_mini[0..(self.block_idx as usize * 2)]);
         seq.extend(self.minimizer.iter());
         seq.extend(&seq_without_mini[(self.block_idx as usize * 2)..]);
@@ -255,7 +255,9 @@ where
         bytes_write +=
             utils::bytes_to_store_n(std::cmp::min(self.k + self.m - 1, u64::MAX)) as usize;
 
-        self.output.write_all(seq.as_slice())?;
+        let mut write_seq = bitvec![Msb0, u8; 0; 8 - ((seq.len()) % 8)];
+        write_seq.extend(seq);
+        self.output.write_all(write_seq.as_slice())?;
         bytes_write += seq.as_slice().len();
 
         self.output.write_all(data)?;
@@ -421,27 +423,12 @@ mod tests {
     #[test]
     fn next_kmer() {
         let mut block: &[u8] = &[
-            1,
-            0,
-            30,
-            0,
-            0,
-            0,
-            0, // version 1.0 encoding 0b00011011
-            0b10100101,
-            1,
-            0,
-            0,
-            0,
-            5,
-            2,
-            0b10011100,
-            0b0000000011,
-            1,
-            2,
-            3,
-            4,
-            5, // minimizer -> CCTT, 1 block, k -> 5, minimizer index -> 2
+            1, 0, 30, 0, 0, 0, 0,          // version 1.0 encoding 0b00011011
+            0b10100101, // minimiwe -> TTCC
+            1, 0, 0, 0, // 1 block
+            5, 2, // 5 kmer in block, minimizer index 2
+            0b00000010, 0b01110011, // sequence
+            1, 2, 3, 4, 5, // data
         ];
 
         let mut reader = KffReader::new(&mut block).unwrap();
@@ -455,7 +442,7 @@ mod tests {
         assert_eq!(
             minimizer.next_kmer().unwrap(),
             Kmer::new(
-                bitbox![Lsb0, u8; 0, 0, 1, 1, 1, 0, 1, 0, 0, 1],
+                bitbox![Msb0, u8; 1, 0, 0, 1, 1, 0, 1, 0, 0, 1],
                 vec![1].into_boxed_slice()
             )
         );
@@ -463,49 +450,52 @@ mod tests {
         assert_eq!(
             minimizer.next_kmer().unwrap(),
             Kmer::new(
-                bitbox![Lsb0, u8; 1, 1, 1, 0, 1, 0, 0, 1, 0, 1],
+                bitbox![Msb0, u8; 0, 1, 1, 0, 1, 0, 0, 1, 0, 1],
                 vec![2].into_boxed_slice()
             )
         );
         assert_eq!(
             minimizer.next_kmer().unwrap(),
             Kmer::new(
-                bitbox![Lsb0, u8; 1, 0, 1, 0, 0, 1, 0, 1, 1, 0],
+                bitbox![Msb0, u8; 1, 0, 1, 0, 0, 1, 0, 1, 1, 1],
                 vec![3].into_boxed_slice()
             )
         );
         assert_eq!(
             minimizer.next_kmer().unwrap(),
             Kmer::new(
-                bitbox![Lsb0, u8; 1, 0, 0, 1, 0, 1, 1, 0, 0, 1],
+                bitbox![Msb0, u8; 1, 0, 0, 1, 0, 1, 1, 1, 0, 0],
                 vec![4].into_boxed_slice()
             )
         );
         assert_eq!(
             minimizer.next_kmer().unwrap(),
             Kmer::new(
-                bitbox![Lsb0, u8; 0, 1, 0, 1, 1, 0, 0, 1, 1, 1],
+                bitbox![Msb0, u8; 0, 1, 0, 1, 1, 1, 0, 0, 1, 1],
                 vec![5].into_boxed_slice()
             )
         );
 
         assert_eq!(
             minimizer.next_kmer().unwrap(),
-            Kmer::new(bitbox![Lsb0, u8; 0; 0], vec![].into_boxed_slice())
+            Kmer::new(bitbox![Msb0, u8; 0; 0], vec![].into_boxed_slice())
         );
 
         assert_eq!(
             minimizer.next_kmer().unwrap(),
-            Kmer::new(bitbox![Lsb0, u8; 0; 0], vec![].into_boxed_slice())
+            Kmer::new(bitbox![Msb0, u8; 0; 0], vec![].into_boxed_slice())
         );
     }
 
     #[test]
     fn bin() {
         let mut block: &[u8] = &[
-            1, 0, 30, 0, 0, 0, 0, // version 1.0 encoding 0b00011011
-            0b10100101, 1, 0, 0, 0, 5, 2, 0b10011100, 0b00000011, 1, 2, 3, 4,
-            5, // minimizer -> CCTT, 1 block, k -> 5, minimizer index -> 2
+            1, 0, 30, 0, 0, 0, 0,          // version 1.0 encoding 0b00011011
+            0b10100101, // minimiwe -> TTCC
+            1, 0, 0, 0, // 1 block
+            5, 2, // 5 kmer in block, minimizer index 2
+            0b00000010, 0b01110011, // sequence
+            1, 2, 3, 4, 5, // data
         ];
 
         let mut reader = KffReader::new(&mut block).unwrap();
@@ -521,35 +511,35 @@ mod tests {
         assert_eq!(
             it.next().unwrap().unwrap(),
             Kmer::new(
-                bitbox![Lsb0, u8; 0, 0, 1, 1, 1, 0, 1, 0, 0, 1],
+                bitbox![Msb0, u8; 1, 0, 0, 1, 1, 0, 1, 0, 0, 1],
                 vec![1].into_boxed_slice()
             )
         );
         assert_eq!(
             it.next().unwrap().unwrap(),
             Kmer::new(
-                bitbox![Lsb0, u8; 1, 1, 1, 0, 1, 0, 0, 1, 0, 1],
+                bitbox![Msb0, u8; 0, 1, 1, 0, 1, 0, 0, 1, 0, 1],
                 vec![2].into_boxed_slice()
             )
         );
         assert_eq!(
             it.next().unwrap().unwrap(),
             Kmer::new(
-                bitbox![Lsb0, u8; 1, 0, 1, 0, 0, 1, 0, 1, 1, 0],
+                bitbox![Msb0, u8; 1, 0, 1, 0, 0, 1, 0, 1, 1, 1],
                 vec![3].into_boxed_slice()
             )
         );
         assert_eq!(
             it.next().unwrap().unwrap(),
             Kmer::new(
-                bitbox![Lsb0, u8; 1, 0, 0, 1, 0, 1, 1, 0, 0, 1],
+                bitbox![Msb0, u8; 1, 0, 0, 1, 0, 1, 1, 1, 0, 0],
                 vec![4].into_boxed_slice()
             )
         );
         assert_eq!(
             it.next().unwrap().unwrap(),
             Kmer::new(
-                bitbox![Lsb0, u8; 0, 1, 0, 1, 1, 0, 0, 1, 1, 1],
+                bitbox![Msb0, u8; 0, 1, 0, 1, 1, 1, 0, 0, 1, 1],
                 vec![5].into_boxed_slice()
             )
         );
@@ -562,27 +552,12 @@ mod tests {
     #[test]
     fn seq() {
         let mut block: &[u8] = &[
-            1,
-            0,
-            30,
-            0,
-            0,
-            0,
-            0, // version 1.0 encoding 0b00011011
-            0b10100101,
-            1,
-            0,
-            0,
-            0,
-            5,
-            2,
-            0b10011100,
-            0b0000000011,
-            1,
-            2,
-            3,
-            4,
-            5, // minimizer -> CCTT, 1 block, k -> 5, minimizer index -> 2
+            1, 0, 30, 0, 0, 0, 0,          // version 1.0 encoding 0b00011011
+            0b10100101, // minimiwe -> TTCC
+            1, 0, 0, 0, // 1 block
+            5, 2, // 5 kmer in block, minimizer index 2
+            0b00000010, 0b01110011, // sequence
+            1, 2, 3, 4, 5, // data
         ];
 
         let mut reader = KffReader::new(&mut block).unwrap();
@@ -598,7 +573,7 @@ mod tests {
         let mut value = it.next().unwrap().unwrap();
         assert_eq!(
             value.seq(utils::rev_encoding(0b00011011)),
-            vec![b'A', b'G', b'C', b'C', b'T'].into_boxed_slice()
+            vec![b'T', b'C', b'T', b'T', b'C'].into_boxed_slice()
         );
 
         assert_eq!(value.data(), &[1u8],);
@@ -606,28 +581,28 @@ mod tests {
         value = it.next().unwrap().unwrap();
         assert_eq!(
             value.seq(utils::rev_encoding(0b00011011)),
-            vec![b'G', b'C', b'C', b'T', b'T'].into_boxed_slice(),
+            vec![b'C', b'T', b'T', b'C', b'C'].into_boxed_slice(),
         );
         assert_eq!(value.data(), &[2],);
 
         value = it.next().unwrap().unwrap();
         assert_eq!(
             value.seq(utils::rev_encoding(0b00011011)),
-            vec![b'C', b'C', b'T', b'T', b'C'].into_boxed_slice()
+            vec![b'T', b'T', b'C', b'C', b'G'].into_boxed_slice()
         );
         assert_eq!(value.data(), &[3],);
 
         value = it.next().unwrap().unwrap();
         assert_eq!(
             value.seq(utils::rev_encoding(0b00011011)),
-            vec![b'C', b'T', b'T', b'C', b'T'].into_boxed_slice(),
+            vec![b'T', b'C', b'C', b'G', b'A'].into_boxed_slice(),
         );
         assert_eq!(value.data(), &[4],);
 
         value = it.next().unwrap().unwrap();
         assert_eq!(
             value.seq(utils::rev_encoding(0b00011011)),
-            vec![b'T', b'T', b'C', b'T', b'G'].into_boxed_slice(),
+            vec![b'C', b'C', b'G', b'A', b'G'].into_boxed_slice(),
         );
         assert_eq!(value.data(), &[5],);
 
@@ -657,7 +632,7 @@ mod tests {
 
         assert_eq!(
             buffer.into_inner(),
-            [4, 2, 0, 0, 0, 3, 4, 179, 2, 10, 8, 9, 1, 0, 35, 1]
+            [0b00010000, 2, 0, 0, 0, 3, 4, 0b00000011, 0b00111010, 10, 8, 9, 1, 0, 0b00110010, 1]
         );
     }
 
@@ -680,7 +655,10 @@ mod tests {
             writer.write_seq_block(0, b"GAT", &[1]).unwrap();
         }
 
-        assert_eq!(buffer.into_inner(), [4, 2, 0, 0, 0, 1, 51, 10, 0, 35, 1]);
+        assert_eq!(
+            buffer.into_inner(),
+            [0b00010000, 2, 0, 0, 0, 1, 0b00110011, 10, 0, 0b00110010, 1]
+        );
     }
 
     #[test]
@@ -706,7 +684,10 @@ mod tests {
         let inp = buffer.into_inner();
         assert_eq!(
             inp,
-            [1, 0, 30, 0, 0, 0, 0, 4, 2, 0, 0, 0, 3, 4, 179, 2, 10, 8, 9, 1, 0, 35, 1]
+            [
+                1, 0, 30, 0, 0, 0, 0, 0b00010000, 2, 0, 0, 0, 3, 4, 0b00000011, 0b00111010, 10, 8,
+                9, 1, 0, 0b00110010, 1
+            ]
         );
 
         let mut input = std::io::Cursor::new(inp);

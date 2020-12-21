@@ -33,14 +33,16 @@ where
     }
 
     fn read_seq(&mut self, nb_nuc: u64) -> crate::Result<BitBox> {
-        let mut buffer = vec![0u8; (utils::ceil_to_8(nb_nuc * 2) / 8) as usize];
+        let buf_len = utils::ceil_to_8(nb_nuc * 2) as usize / 8;
+        let mut buffer = vec![0u8; buf_len];
 
         self.input().read_exact(&mut buffer)?;
 
-        let mut bit_buffer = BitVec::from_vec(buffer);
-        bit_buffer.resize((nb_nuc * 2) as usize, false);
+        let bit_buffer = BitVec::from_vec(buffer);
 
-        Ok(bit_buffer.into_boxed_bitslice())
+        Ok(BitBox::from_bitslice(
+            &bit_buffer[(buf_len * 8 - nb_nuc as usize * 2)..],
+        ))
     }
 
     fn read_data(&mut self) -> crate::Result<Vec<u8>> {

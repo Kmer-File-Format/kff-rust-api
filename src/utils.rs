@@ -2,9 +2,9 @@
 use byteorder::*;
 
 pub type Order = byteorder::LittleEndian;
-pub type BitOrd = bitvec::order::Lsb0;
+pub type BitOrd = bitvec::order::Msb0;
 pub type BitBox = bitvec::boxed::BitBox<BitOrd, u8>;
-pub type BitVec = bitvec::vec::BitVec<BitOrd, u8>;
+pub type BitVec = bitvec::vec::BitVec<bitvec::order::Msb0, u8>;
 pub type BitSlice = bitvec::slice::BitSlice<BitOrd, u8>;
 
 pub(crate) fn read_dynamic_size_field<R>(input: &mut R, max_value: u64) -> crate::Result<u64>
@@ -49,14 +49,14 @@ pub(crate) fn internal2nuc(internal: u8) -> u8 {
 
 #[inline]
 pub(crate) fn nuc2encoding(nuc: u8, encoding: u8) -> u8 {
-    let index = 6 - (nuc2internal(nuc) * 2);
+    let index = nuc2internal(nuc) * 2;
 
-    (encoding >> index) & 0b11
+    (encoding << index) & 0b11000000
 }
 
 #[inline]
 pub(crate) fn encoding2nuc(bits: u8, rev_encoding: u8) -> u8 {
-    internal2nuc((rev_encoding >> (6 - (bits * 2))) & 0b11)
+    internal2nuc((rev_encoding >> (6 - ((bits >> 6) * 2))) & 0b11)
 }
 
 #[inline]
@@ -83,7 +83,7 @@ pub(crate) fn bits2seq(bits: &BitSlice, rev_encoding: u8) -> Box<[u8]> {
 
     for bit in bits.chunks(2) {
         ret.push(encoding2nuc(
-            bit[0] as u8 ^ (bit[1] as u8) << 1,
+            ((bit[0] as u8) << 7) ^ (bit[1] as u8) << 6,
             rev_encoding,
         ))
     }
@@ -139,34 +139,34 @@ mod tests {
     fn encoding() {
         let encoding = 0b11100100;
 
-        assert_eq!(nuc2encoding(b'A', encoding), 3);
-        assert_eq!(nuc2encoding(b'C', encoding), 2);
-        assert_eq!(nuc2encoding(b'T', encoding), 1);
-        assert_eq!(nuc2encoding(b'G', encoding), 0);
+        assert_eq!(nuc2encoding(b'A', encoding), 0b11000000);
+        assert_eq!(nuc2encoding(b'C', encoding), 0b10000000);
+        assert_eq!(nuc2encoding(b'T', encoding), 0b01000000);
+        assert_eq!(nuc2encoding(b'G', encoding), 0b00000000);
     }
 
     #[test]
     fn decoding() {
         let mut rencoding = rev_encoding(0b00011011);
 
-        assert_eq!(encoding2nuc(0b00, rencoding), b'A');
-        assert_eq!(encoding2nuc(0b01, rencoding), b'C');
-        assert_eq!(encoding2nuc(0b10, rencoding), b'T');
-        assert_eq!(encoding2nuc(0b11, rencoding), b'G');
+        assert_eq!(encoding2nuc(0b00000000, rencoding), b'A');
+        assert_eq!(encoding2nuc(0b01000000, rencoding), b'C');
+        assert_eq!(encoding2nuc(0b10000000, rencoding), b'T');
+        assert_eq!(encoding2nuc(0b11000000, rencoding), b'G');
 
         rencoding = rev_encoding(0b11100100);
 
-        assert_eq!(encoding2nuc(0b11, rencoding), b'A');
-        assert_eq!(encoding2nuc(0b10, rencoding), b'C');
-        assert_eq!(encoding2nuc(0b01, rencoding), b'T');
-        assert_eq!(encoding2nuc(0b00, rencoding), b'G');
+        assert_eq!(encoding2nuc(0b11000000, rencoding), b'A');
+        assert_eq!(encoding2nuc(0b10000000, rencoding), b'C');
+        assert_eq!(encoding2nuc(0b01000000, rencoding), b'T');
+        assert_eq!(encoding2nuc(0b00000000, rencoding), b'G');
 
         rencoding = rev_encoding(0b01110010);
 
-        assert_eq!(encoding2nuc(0b01, rencoding), b'A');
-        assert_eq!(encoding2nuc(0b11, rencoding), b'C');
-        assert_eq!(encoding2nuc(0b00, rencoding), b'T');
-        assert_eq!(encoding2nuc(0b10, rencoding), b'G');
+        assert_eq!(encoding2nuc(0b01000000, rencoding), b'A');
+        assert_eq!(encoding2nuc(0b11000000, rencoding), b'C');
+        assert_eq!(encoding2nuc(0b00000000, rencoding), b'T');
+        assert_eq!(encoding2nuc(0b10000000, rencoding), b'G');
     }
 
     #[test]
@@ -174,33 +174,42 @@ mod tests {
         let mut encoding = 0b00011011;
 
         assert_eq!(nuc2bits(b'A', encoding), bitbox![0, 0]);
-        assert_eq!(nuc2bits(b'C', encoding), bitbox![1, 0]);
-        assert_eq!(nuc2bits(b'T', encoding), bitbox![0, 1]);
+        assert_eq!(nuc2bits(b'C', encoding), bitbox![0, 1]);
+        assert_eq!(nuc2bits(b'T', encoding), bitbox![1, 0]);
         assert_eq!(nuc2bits(b'G', encoding), bitbox![1, 1]);
 
         encoding = 0b01110010;
 
-        assert_eq!(nuc2bits(b'A', encoding), bitbox![1, 0]);
+        assert_eq!(nuc2bits(b'A', encoding), bitbox![0, 1]);
         assert_eq!(nuc2bits(b'C', encoding), bitbox![1, 1]);
         assert_eq!(nuc2bits(b'T', encoding), bitbox![0, 0]);
-        assert_eq!(nuc2bits(b'G', encoding), bitbox![0, 1]);
+        assert_eq!(nuc2bits(b'G', encoding), bitbox![1, 0]);
     }
 
     #[test]
     fn seq2bits_() {
         let encoding = 0b00011011;
 
-        assert_eq!(seq2bits(b"AC", encoding), bitbox![0, 0, 1, 0]);
-        assert_eq!(seq2bits(b"ACG", encoding), bitbox![0, 0, 1, 0, 1, 1]);
+        assert_eq!(seq2bits(b"AC", encoding), bitbox![0, 0, 0, 1]);
+        assert_eq!(seq2bits(b"ACG", encoding), bitbox![0, 0, 0, 1, 1, 1]);
         assert_eq!(
             seq2bits(b"ACGTA", encoding),
-            bitbox![0, 0, 1, 0, 1, 1, 0, 1, 0, 0]
+            bitbox![0, 0, 0, 1, 1, 1, 1, 0, 0, 0]
         );
     }
 
     #[test]
     fn bits2seq_() {
         let encoding = 0b00011011;
+
+        assert_eq!(seq2bits(b"AC", encoding), bitbox![0, 0, 0, 1]);
+
+        assert_eq!(seq2bits(b"ACGT", encoding), bitbox![0, 0, 0, 1, 1, 1, 1, 0]);
+
+        assert_eq!(
+            seq2bits(b"ACGTG", encoding),
+            bitbox![0, 0, 0, 1, 1, 1, 1, 0, 1, 1]
+        );
 
         assert_eq!(
             bits2seq(&seq2bits(b"AC", encoding), rev_encoding(encoding)),
