@@ -79,7 +79,7 @@ where
     }
 }
 
-pub trait Writer<'output, W>: Drop + Sized
+pub trait Writer<'output, W>: Sized
 where
     W: std::io::Write + std::io::Seek + 'output,
 {
