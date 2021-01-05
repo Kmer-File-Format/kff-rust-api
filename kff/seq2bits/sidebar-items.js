@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["Bits2Nuc","Convert Self into ASCII encoding"],["Nuc2Bits","Build Self, from some source"],["RangeNuc",""]],"type":[["Seq2Bits","Syntaxic sugar"],["Seq2Slice","Syntaxic sugar"]]});

@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["kff"] = [{"text":"impl&lt;'input, R&gt; Iterator for Reader&lt;'input, R&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;R: Read,&nbsp;</span>","synthetic":false,"types":[]},{"text":"impl&lt;'input, R&gt; Iterator for Reader&lt;'input, R&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;R: Read,&nbsp;</span>","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["Reader","Trait to read global variable section"],["Variables1","Trait of variable needed by KFF 1.0"],["Writer","Trait to write global variable section"]],"type":[["Variables","Variables is a specialisation of HashMap"]]});

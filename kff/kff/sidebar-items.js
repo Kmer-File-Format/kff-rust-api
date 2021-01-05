@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Reader","A Kff Reader"],["Writer","A Kff Writer"]]});

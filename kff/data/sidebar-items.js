@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["Reader","Reader trait must be implement by Struct want read kmer KFF section"],["Writer","Write trait must be implement by Struct want write kmer KFF section"]]});

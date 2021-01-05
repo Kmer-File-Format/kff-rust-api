@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["kff"] = [{"text":"impl Debug for Header","synthetic":false,"types":[]},{"text":"impl Debug for Variables","synthetic":false,"types":[]},{"text":"impl Debug for Data","synthetic":false,"types":[]},{"text":"impl Debug for Minimizer","synthetic":false,"types":[]},{"text":"impl Debug for Kff","synthetic":false,"types":[]},{"text":"impl Debug for Error","synthetic":false,"types":[]},{"text":"impl Debug for Kmer","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
