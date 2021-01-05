@@ -35,7 +35,7 @@
 //! writer.variables().insert("m".to_string(), 4);
 //! writer.write_variables().unwrap();
 //!
-//! // Write a Minimizer section, minimizer -> CTT 
+//! // Write a Minimizer section, minimizer -> CTT
 //! writer.write_minimizer_seq_section(b"CCTT", &[2], &[b"AGCTG"], &[&[6, 7, 8, 9, 10]])?;
 //!
 //! // Create Reader

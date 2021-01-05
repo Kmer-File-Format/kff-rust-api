@@ -45,7 +45,7 @@ impl<R> Reader<R>
 where
     R: std::io::Read,
 {
-    /// Create a new Kff reader from a reading stream 
+    /// Create a new Kff reader from a reading stream
     pub fn new(mut input: R) -> crate::Result<Self> {
         let major = input.read_u8().map_local()?;
         let minor = input.read_u8().map_local()?;
@@ -181,7 +181,11 @@ where
     }
 
     /// Write a raw section, with sequence encode in 2 bits
-    pub fn write_raw_section(&mut self, seqs: &[Seq2Bits], datas: &[&[u8]]) -> crate::Result<usize> {
+    pub fn write_raw_section(
+        &mut self,
+        seqs: &[Seq2Bits],
+        datas: &[&[u8]],
+    ) -> crate::Result<usize> {
         self.output.write_u8(b'r').map_local()?;
 
         let mut raw = RawWriter::new(&self.variables, self.encoding, &mut self.output)?;
@@ -198,7 +202,11 @@ where
     }
 
     /// Write a raw section with sequence encode in ASCII
-    pub fn write_raw_seq_section(&mut self, seqs: &[&[u8]], datas: &[&[u8]]) -> crate::Result<usize> {
+    pub fn write_raw_seq_section(
+        &mut self,
+        seqs: &[&[u8]],
+        datas: &[&[u8]],
+    ) -> crate::Result<usize> {
         let tmp: Vec<Seq2Bits> = seqs
             .iter()
             .map(|x| utils::seq2bits(x, self.encoding))
@@ -229,7 +237,7 @@ where
 
         Ok(nb_bytes)
     }
-    
+
     /// Write a raw section with sequence not encode in ASCII
     pub fn write_minimizer_seq_section(
         &mut self,
@@ -387,7 +395,7 @@ mod tests {
 
         assert_eq!(nb_kmer, 10);
     }
-    
+
     #[test]
     fn write_read() {
         let mut output = vec![0u8; 0];

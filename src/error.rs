@@ -30,7 +30,7 @@ pub enum Variables {
     DataSizeMissing,
 }
 
-/// Error can be generate in Raw or Minimizer section 
+/// Error can be generate in Raw or Minimizer section
 #[derive(Error, Debug)]
 pub enum Data {
     /// Number of kmer in block can't be larger than max

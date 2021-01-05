@@ -14,7 +14,7 @@ pub trait Nuc2Bits {
     /// Build Self from nucleotide encode on two bits store in bitslice
     fn from_bitslice(input: &BitSlice) -> Self;
 
-    /// Build Self from nucleotide encode on two bits store in slice of u8 
+    /// Build Self from nucleotide encode on two bits store in slice of u8
     fn from_bits(input: &[u8], nb_nuc: usize) -> Self;
 }
 
