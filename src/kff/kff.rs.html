@@ -507,6 +507,14 @@
 <span id="504">504</span>
 <span id="505">505</span>
 <span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Declaration of Kff::Reader and Kff::Writer</span>
 
@@ -555,7 +563,7 @@
 <span class="kw">where</span>
     <span class="ident">R</span>: <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Read</span>,
 {
-    <span class="doccomment">/// Create a new Kff reader from a reading stream </span>
+    <span class="doccomment">/// Create a new Kff reader from a reading stream</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw-2">mut</span> <span class="ident">input</span>: <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">major</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">read_u8</span>().<span class="ident">map_local</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">minor</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">read_u8</span>().<span class="ident">map_local</span>()<span class="question-mark">?</span>;
@@ -691,7 +699,11 @@
     }
 
     <span class="doccomment">/// Write a raw section, with sequence encode in 2 bits</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_raw_section</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">seqs</span>: <span class="kw-2">&amp;</span>[<span class="ident">Seq2Bits</span>], <span class="ident">datas</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]]) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_raw_section</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">seqs</span>: <span class="kw-2">&amp;</span>[<span class="ident">Seq2Bits</span>],
+        <span class="ident">datas</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]],
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">output</span>.<span class="ident">write_u8</span>(<span class="string">b&#39;r&#39;</span>).<span class="ident">map_local</span>()<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">raw</span> <span class="op">=</span> <span class="ident">RawWriter</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">variables</span>, <span class="self">self</span>.<span class="ident">encoding</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">output</span>)<span class="question-mark">?</span>;
@@ -708,7 +720,11 @@
     }
 
     <span class="doccomment">/// Write a raw section with sequence encode in ASCII</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_raw_seq_section</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">seqs</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]], <span class="ident">datas</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]]) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_raw_seq_section</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">seqs</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]],
+        <span class="ident">datas</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]],
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">tmp</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Seq2Bits</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">seqs</span>
             .<span class="ident">iter</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">utils</span>::<span class="ident">seq2bits</span>(<span class="ident">x</span>, <span class="self">self</span>.<span class="ident">encoding</span>))
@@ -739,7 +755,7 @@
 
         <span class="prelude-val">Ok</span>(<span class="ident">nb_bytes</span>)
     }
-    
+
     <span class="doccomment">/// Write a raw section with sequence not encode in ASCII</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_minimizer_seq_section</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
@@ -897,7 +913,7 @@
 
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">nb_kmer</span>, <span class="number">10</span>);
     }
-    
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">write_read</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">output</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0u8</span>; <span class="number">0</span>];
