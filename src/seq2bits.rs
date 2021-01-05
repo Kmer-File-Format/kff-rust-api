@@ -1,22 +1,33 @@
+//! Declaration of type and trait to store 2 bits representation of sequence
+
 /* standard use */
 use std::ops::Index;
 
 /* local use */
 use crate::utils::{bits2seq, seq2bits, BitBox, BitSlice, BitVec};
 
+/// Build Self, from some source
 pub trait Nuc2Bits {
+    /// Build Self from nucleotide encode in ASCII
     fn from_nuc(input: &[u8], encoding: u8) -> Self;
 
+    /// Build Self from nucleotide encode on two bits store in bitslice
     fn from_bitslice(input: &BitSlice) -> Self;
 
+    /// Build Self from nucleotide encode on two bits store in slice of u8 
     fn from_bits(input: &[u8], nb_nuc: usize) -> Self;
 }
 
+/// Convert Self into ASCII encoding
 pub trait Bits2Nuc {
+    /// Convert Self in ASCII encoding
     fn into_nuc(&self, rev_encoding: u8) -> Box<[u8]>;
 }
 
+/// Syntaxic sugar
 pub type Seq2Slice = BitSlice;
+
+/// Syntaxic sugar
 pub type Seq2Bits = BitBox;
 
 pub trait RangeNuc {

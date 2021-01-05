@@ -1,3 +1,5 @@
+//! Declaration of Minimizer section Reader and Writer
+
 /* crate use */
 use bitvec::prelude::*;
 use byteorder::*;
@@ -14,6 +16,7 @@ use crate::variables::Variables;
 use crate::variables::Variables1;
 use crate::*;
 
+/// A Minimizer section reader implement [data::Reader]
 pub struct Reader<'input, R>
 where
     R: std::io::Read,
@@ -42,6 +45,7 @@ impl<'input, R> Reader<'input, R>
 where
     R: std::io::Read,
 {
+    /// Create a new reader with a reference of kff::Reader
     pub fn new(reader: &'input mut KffReader<R>) -> crate::Result<Self> {
         let k = reader.variables().k()?;
         let m = reader.variables().m()?;
@@ -172,6 +176,7 @@ where
     }
 }
 
+/// A Minimizer section writer implement [data::Writer]
 pub struct Writer<'output, W>
 where
     W: std::io::Write + std::io::Seek + 'output,
@@ -196,6 +201,7 @@ impl<'output, W> Writer<'output, W>
 where
     W: std::io::Write + std::io::Seek + 'output,
 {
+    /// Create a new Minimizer section writer
     pub fn new(
         variables: &Variables,
         minimizer: &[u8],
@@ -233,6 +239,7 @@ where
         })
     }
 
+    /// Write a minimizer block
     pub fn write_block(
         &mut self,
         minimizer_idx: u64,
@@ -271,6 +278,7 @@ where
         Ok(bytes_write)
     }
 
+    /// Write a minimizer block, where sequence is encode in ASCII
     pub fn write_seq_block(
         &mut self,
         minimizer_idx: u64,

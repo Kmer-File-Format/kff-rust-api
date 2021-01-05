@@ -6,10 +6,19 @@ use crate::error;
 
 use crate::error::LocalResult;
 
+/// Read order of bytes in file
 pub type Order = byteorder::LittleEndian;
+
+/// Order of bit for bitvec
 pub type BitOrd = bitvec::order::Msb0;
+
+/// Syntaxic sugar around bitvec::BitBox
 pub type BitBox = bitvec::boxed::BitBox<BitOrd, u8>;
+
+/// Syntaxic sugar around bitvec::BitVec
 pub type BitVec = bitvec::vec::BitVec<bitvec::order::Msb0, u8>;
+
+/// Syntaxic sugar around bitvec::BitSlice
 pub type BitSlice = bitvec::slice::BitSlice<BitOrd, u8>;
 
 pub(crate) fn read_dynamic_size_field<R>(input: &mut R, max_value: u64) -> crate::Result<u64>

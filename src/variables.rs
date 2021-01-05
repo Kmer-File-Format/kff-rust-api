@@ -1,3 +1,5 @@
+//! Management of global variable
+
 /* crate use */
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 
@@ -5,24 +7,37 @@ use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use crate::error;
 use crate::error::LocalResult;
 
+/// Variables is a specialisation of HashMap
 pub type Variables = std::collections::HashMap<String, u64>;
 
+/// Trait to read global variable section
 pub trait Reader {
+    /// Read variable from input
     fn deserialize<R>(&mut self, input: &mut R) -> crate::Result<usize>
     where
         R: std::io::Read;
 }
 
+/// Trait to write global variable section
 pub trait Writer {
+    /// Write variable in output
     fn serialize<W>(&self, output: &mut W) -> crate::Result<usize>
     where
         W: std::io::Write;
 }
 
+/// Trait of variable needed by KFF 1.0
 pub trait Variables1 {
+    /// Get value of k
     fn k(&self) -> crate::Result<u64>;
+
+    /// Get value of m
     fn m(&self) -> crate::Result<u64>;
+
+    /// Get value of max
     fn max(&self) -> crate::Result<u64>;
+
+    /// Get value of data_size
     fn data_size(&self) -> crate::Result<u64>;
 }
 

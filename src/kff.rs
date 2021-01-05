@@ -1,4 +1,4 @@
-/* std use */
+//! Declaration of Kff::Reader and Kff::Writer
 
 /* crate use */
 use crate::seq2bits::Seq2Bits;
@@ -22,6 +22,7 @@ use crate::variables::Reader as VariablesReader;
 use crate::variables::Variables;
 use crate::variables::Writer as VariablesWriter;
 
+/// A Kff Reader
 pub struct Reader<R>
 where
     R: std::io::Read,
@@ -44,6 +45,7 @@ impl<R> Reader<R>
 where
     R: std::io::Read,
 {
+    /// Create a new Kff reader from a reading stream 
     pub fn new(mut input: R) -> crate::Result<Self> {
         let major = input.read_u8().map_local()?;
         let minor = input.read_u8().map_local()?;
@@ -52,7 +54,7 @@ where
         let rev_encoding = utils::rev_encoding(encoding);
 
         let mut comment =
-            vec![0; input.read_u32::<LittleEndian>().map_local()? as usize].into_boxed_slice();
+            vec![0; input.read_u32::<utils::Order>().map_local()? as usize].into_boxed_slice();
         input.read_exact(&mut comment).map_local()?;
         let comment = comment;
 
@@ -74,34 +76,42 @@ where
     }
 
     // Getter
+    /// Get the major verion number
     pub fn major(&self) -> u8 {
         self.major
     }
 
+    /// Get the minor verion number
     pub fn minor(&self) -> u8 {
         self.minor
     }
 
+    /// Get encoding used
     pub fn encoding(&self) -> u8 {
         self.encoding
     }
 
+    /// Get reverse encoding used
     pub fn rev_encoding(&self) -> u8 {
         self.rev_encoding
     }
 
+    /// Get comment
     pub fn comment(&self) -> &[u8] {
         &self.comment
     }
 
+    /// Get a mutable reference to input stream
     pub fn input(&mut self) -> &'_ mut R {
         &mut self.input
     }
 
+    /// Get a mutable reference of global variable
     pub fn variables(&mut self) -> &mut Variables {
         &mut self.variables
     }
 
+    /// Get the next kmer section we have to parse
     pub fn next_section(&mut self) -> crate::Result<Box<dyn data::Reader<R> + '_>> {
         match self.input.read_u8().map_local()? {
             b'r' => Ok(Box::new(RawReader::new(self)?)),
@@ -115,6 +125,7 @@ where
     }
 }
 
+/// A Kff Writer
 pub struct Writer<W>
 where
     W: std::io::Write,
@@ -129,6 +140,7 @@ impl<W> Writer<W>
 where
     W: std::io::Write + std::io::Seek,
 {
+    /// Create a Kff Writer from a seekable output, encoding and comment
     pub fn new(mut output: W, encoding: u8, comment: &[u8]) -> crate::Result<Self> {
         // write header
         output
@@ -147,14 +159,17 @@ where
         })
     }
 
+    /// Get encoding used
     pub fn encoding(&self) -> u8 {
         self.encoding
     }
 
+    /// Get a mutable reference of global variable
     pub fn variables(&mut self) -> &mut Variables {
         &mut self.variables_buffer
     }
 
+    /// Write variable section
     pub fn write_variables(&mut self) -> crate::Result<()> {
         self.output.write_u8(b'v').map_local()?;
 
@@ -165,7 +180,8 @@ where
         Ok(())
     }
 
-    pub fn write_raw_block(&mut self, seqs: &[Seq2Bits], datas: &[&[u8]]) -> crate::Result<usize> {
+    /// Write a raw section, with sequence encode in 2 bits
+    pub fn write_raw_section(&mut self, seqs: &[Seq2Bits], datas: &[&[u8]]) -> crate::Result<usize> {
         self.output.write_u8(b'r').map_local()?;
 
         let mut raw = RawWriter::new(&self.variables, self.encoding, &mut self.output)?;
@@ -181,15 +197,17 @@ where
         Ok(nb_bytes)
     }
 
-    pub fn write_raw_seq_block(&mut self, seqs: &[&[u8]], datas: &[&[u8]]) -> crate::Result<usize> {
+    /// Write a raw section with sequence encode in ASCII
+    pub fn write_raw_seq_section(&mut self, seqs: &[&[u8]], datas: &[&[u8]]) -> crate::Result<usize> {
         let tmp: Vec<Seq2Bits> = seqs
             .iter()
             .map(|x| utils::seq2bits(x, self.encoding))
             .collect();
-        self.write_raw_block(&tmp[..], datas)
+        self.write_raw_section(&tmp[..], datas)
     }
 
-    pub fn write_minimizer_block(
+    /// Write a minimizer section, with sequence encode in 2 bits
+    pub fn write_minimizer_section(
         &mut self,
         minimizer: &[u8],
         mini_index: &[u64],
@@ -211,8 +229,9 @@ where
 
         Ok(nb_bytes)
     }
-
-    pub fn write_minimizer_seq_block(
+    
+    /// Write a raw section with sequence not encode in ASCII
+    pub fn write_minimizer_seq_section(
         &mut self,
         minimizer: &[u8],
         mini_index: &[u64],
@@ -223,7 +242,7 @@ where
             .iter()
             .map(|x| utils::seq2bits(x, self.encoding))
             .collect();
-        self.write_minimizer_block(minimizer, mini_index, &tmp[..], datas)
+        self.write_minimizer_section(minimizer, mini_index, &tmp[..], datas)
     }
 }
 
@@ -368,7 +387,7 @@ mod tests {
 
         assert_eq!(nb_kmer, 10);
     }
-    /*
+    
     #[test]
     fn write_read() {
         let mut output = vec![0u8; 0];
@@ -383,7 +402,7 @@ mod tests {
         writer.write_variables().unwrap();
 
         writer
-            .write_raw_seq_block(&[b"GCGGGGATC"], &[&[1u8, 2, 3, 4, 5]])
+            .write_raw_seq_section(&[b"GCGGGGATC"], &[&[1u8, 2, 3, 4, 5]])
             .unwrap();
 
         writer.variables().insert("m".to_string(), 4);
@@ -391,7 +410,7 @@ mod tests {
         writer.write_variables().unwrap();
 
         writer
-            .write_minimizer_seq_block(b"CCTT", &[2], &[b"AGCTG"], &[&[6, 7, 8, 9, 10]])
+            .write_minimizer_seq_section(b"CCTT", &[2], &[b"AGCTG"], &[&[6, 7, 8, 9, 10]])
             .unwrap();
 
         let mut input = std::io::Cursor::new(output);
@@ -405,35 +424,35 @@ mod tests {
 
             let mut value = it.next().unwrap().unwrap();
             assert_eq!(
-                value.seq(rev_encoding),
+                value.seq().into_nuc(rev_encoding),
                 vec![b'G', b'C', b'G', b'G', b'G'].into_boxed_slice(),
             );
             assert_eq!(value.data(), &[1]);
 
             value = it.next().unwrap().unwrap();
             assert_eq!(
-                value.seq(rev_encoding),
+                value.seq().into_nuc(rev_encoding),
                 vec![b'C', b'G', b'G', b'G', b'G'].into_boxed_slice(),
             );
             assert_eq!(value.data(), &[2]);
 
             value = it.next().unwrap().unwrap();
             assert_eq!(
-                value.seq(rev_encoding),
+                value.seq().into_nuc(rev_encoding),
                 vec![b'G', b'G', b'G', b'G', b'A'].into_boxed_slice()
             );
             assert_eq!(value.data(), &[3]);
 
             value = it.next().unwrap().unwrap();
             assert_eq!(
-                value.seq(rev_encoding),
+                value.seq().into_nuc(rev_encoding),
                 vec![b'G', b'G', b'G', b'A', b'T'].into_boxed_slice()
             );
             assert_eq!(value.data(), &[4]);
 
             value = it.next().unwrap().unwrap();
             assert_eq!(
-                value.seq(rev_encoding),
+                value.seq().into_nuc(rev_encoding),
                 vec![b'G', b'G', b'A', b'T', b'C'].into_boxed_slice()
             );
             assert_eq!(value.data(), &[5]);
@@ -446,35 +465,35 @@ mod tests {
 
             let mut value = it.next().unwrap().unwrap();
             assert_eq!(
-                value.seq(rev_encoding),
+                value.seq().into_nuc(rev_encoding),
                 vec![b'A', b'G', b'C', b'C', b'T'].into_boxed_slice(),
             );
             assert_eq!(value.data(), &[6]);
 
             value = it.next().unwrap().unwrap();
             assert_eq!(
-                value.seq(rev_encoding),
+                value.seq().into_nuc(rev_encoding),
                 vec![b'G', b'C', b'C', b'T', b'T'].into_boxed_slice(),
             );
             assert_eq!(value.data(), &[7]);
 
             value = it.next().unwrap().unwrap();
             assert_eq!(
-                value.seq(rev_encoding),
+                value.seq().into_nuc(rev_encoding),
                 vec![b'C', b'C', b'T', b'T', b'C'].into_boxed_slice(),
             );
             assert_eq!(value.data(), &[8]);
 
             value = it.next().unwrap().unwrap();
             assert_eq!(
-                value.seq(rev_encoding),
+                value.seq().into_nuc(rev_encoding),
                 vec![b'C', b'T', b'T', b'C', b'T'].into_boxed_slice(),
             );
             assert_eq!(value.data(), &[9]);
 
             value = it.next().unwrap().unwrap();
             assert_eq!(
-                value.seq(rev_encoding),
+                value.seq().into_nuc(rev_encoding),
                 vec![b'T', b'T', b'C', b'T', b'G'].into_boxed_slice(),
             );
             assert_eq!(value.data(), &[10]);
@@ -483,5 +502,5 @@ mod tests {
         }
 
         assert!(reader.next_section().is_err());
-    }*/
+    }
 }

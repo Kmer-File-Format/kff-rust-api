@@ -1,3 +1,5 @@
+//! Declaration of Raw section Reader and Writer
+
 /* crate use */
 use bitvec::prelude::*;
 use byteorder::*;
@@ -13,6 +15,7 @@ use crate::variables::Variables;
 use crate::variables::Variables1;
 use crate::*;
 
+/// A Raw section reader implement [data::Reader]
 pub struct Reader<'input, R>
 where
     R: std::io::Read,
@@ -38,6 +41,7 @@ impl<'input, R> Reader<'input, R>
 where
     R: std::io::Read,
 {
+    /// Create a new reader with a reference of kff::Reader
     pub fn new(reader: &'input mut KffReader<R>) -> crate::Result<Self> {
         let k = reader.variables().k()?;
         let max = reader.variables().max()?;
@@ -146,6 +150,7 @@ where
     }
 }
 
+/// A Raw section writer implement [data::Writer]
 pub struct Writer<'output, W>
 where
     W: std::io::Write + std::io::Seek + 'output,
@@ -168,6 +173,7 @@ impl<'output, W> Writer<'output, W>
 where
     W: std::io::Write + std::io::Seek + 'output,
 {
+    /// Create a new Raw section writer
     pub fn new(variables: &Variables, encoding: u8, output: &'output mut W) -> crate::Result<Self> {
         let k = variables.k()?;
         let max = variables.max()?;
@@ -189,6 +195,7 @@ where
         })
     }
 
+    /// Write a raw block
     pub fn write_block(&mut self, seq: &BitSlice, data: &[u8]) -> crate::Result<usize> {
         self.increment_nb_block()?;
 
@@ -214,6 +221,7 @@ where
         Ok(bytes_write)
     }
 
+    /// Write a raw block, where sequence is encode in ASCII
     pub fn write_seq_block(&mut self, seq: &[u8], data: &[u8]) -> crate::Result<usize> {
         self.write_block(&utils::seq2bits(seq, self.encoding)[..], data)
     }
