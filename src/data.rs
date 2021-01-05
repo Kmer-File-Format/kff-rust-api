@@ -7,6 +7,8 @@ use crate::kmer::Kmer;
 use crate::utils::{BitBox, BitOrd, BitSlice, BitVec};
 use crate::*;
 
+use crate::error::LocalResult;
+
 pub trait Reader<'input, R>: Iterator<Item = crate::Result<Kmer>>
 where
     R: std::io::Read + 'input,
@@ -36,7 +38,7 @@ where
         let buf_len = utils::ceil_to_8(nb_nuc * 2) as usize / 8;
         let mut buffer = vec![0u8; buf_len];
 
-        self.input().read_exact(&mut buffer)?;
+        self.input().read_exact(&mut buffer).map_local()?;
 
         let bit_buffer = BitVec::from_vec(buffer);
 
@@ -48,7 +50,7 @@ where
     fn read_data(&mut self) -> crate::Result<Vec<u8>> {
         let mut buffer = vec![0u8; (self.block_n() * self.data_size()) as usize];
 
-        self.input().read_exact(&mut buffer)?;
+        self.input().read_exact(&mut buffer).map_local()?;
         Ok(buffer)
     }
 
@@ -106,9 +108,13 @@ where
             let offset = self.nb_block_offset();
             let nb_block = self.nb_block();
 
-            self.output().seek(std::io::SeekFrom::Start(offset))?;
-            self.output().write_u32::<LittleEndian>(nb_block)?;
-            self.output().seek(std::io::SeekFrom::End(0))?;
+            self.output()
+                .seek(std::io::SeekFrom::Start(offset))
+                .map_local()?;
+            self.output()
+                .write_u32::<LittleEndian>(nb_block)
+                .map_local()?;
+            self.output().seek(std::io::SeekFrom::End(0)).map_local()?;
             self.set_close(true);
 
             Ok(1)
@@ -121,7 +127,7 @@ where
                 self.set_nb_block(val);
                 Ok(())
             }
-            None => Err(Box::new(error::Data::ToManyBlock)),
+            None => Err(error::Error::Data(error::Data::ToManyBlock)),
         }
     }
 
@@ -130,11 +136,11 @@ where
         let nb_data = data_len / self.data_size() as usize;
 
         if nb_data != nb_kmer {
-            return Err(Box::new(error::Data::NbKmerNbDataDiff));
+            return Err(error::Error::Data(error::Data::NbKmerNbDataDiff));
         }
 
         if nb_kmer > self.max() as usize {
-            return Err(Box::new(error::Data::NUpperThanMax));
+            return Err(error::Error::Data(error::Data::NUpperThanMax));
         }
 
         Ok(nb_kmer)

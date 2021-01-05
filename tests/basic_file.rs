@@ -1,4 +1,5 @@
 use kff;
+use kff::seq2bits::Bits2Nuc;
 
 fn read_file(path: &str) -> (Vec<Vec<u8>>, Vec<u8>) {
     let mut input = std::io::BufReader::new(std::fs::File::open(path).unwrap());
@@ -20,7 +21,7 @@ fn read_file(path: &str) -> (Vec<Vec<u8>>, Vec<u8>) {
                     kmer.data()[0]
                 );
             */
-            kmers.push(kmer.seq(rev_encoding).to_vec());
+            kmers.push(kmer.seq().into_nuc(rev_encoding).to_vec());
             datas.push(kmer.data()[0]);
         }
     }

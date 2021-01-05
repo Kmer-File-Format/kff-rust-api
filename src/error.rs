@@ -1,7 +1,5 @@
 use thiserror::Error;
 
-pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
-
 #[derive(Error, Debug)]
 pub enum Header {
     #[error("Encoding isn't a valid")]
@@ -9,7 +7,7 @@ pub enum Header {
 }
 
 #[derive(Error, Debug)]
-pub enum Data {
+pub enum Variables {
     #[error("k global variable isn't set")]
     KMissing,
 
@@ -21,7 +19,10 @@ pub enum Data {
 
     #[error("data_size global variable isn't set")]
     DataSizeMissing,
+}
 
+#[derive(Error, Debug)]
+pub enum Data {
     #[error("kmer in block is upper than max kmer in block")]
     NUpperThanMax,
 
@@ -52,3 +53,42 @@ pub enum Kff {
     #[error("a block is already open you can't open ")]
     ABlockIsAlreadyOpen,
 }
+
+#[derive(Error, Debug)]
+pub enum Error {
+    #[error(transparent)]
+    Header(Header),
+
+    #[error(transparent)]
+    Variables(Variables),
+
+    #[error(transparent)]
+    Data(Data),
+
+    #[error(transparent)]
+    Minimizer(Minimizer),
+
+    #[error(transparent)]
+    Kff(Kff),
+
+    #[error(transparent)]
+    OtherError(Box<dyn std::error::Error>),
+}
+
+pub trait LocalResult<T> {
+    fn map_local(self) -> Result<T, Error>;
+}
+
+impl<T, E> LocalResult<T> for std::result::Result<T, E>
+where
+    E: std::error::Error + 'static,
+{
+    fn map_local(self) -> Result<T, Error> {
+        match self {
+            Ok(o) => Ok(o),
+            Err(e) => Err(crate::error::Error::OtherError(Box::new(e))),
+        }
+    }
+}
+
+pub type Result<T, E = Error> = std::result::Result<T, E>;

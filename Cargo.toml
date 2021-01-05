@@ -21,4 +21,4 @@ crate-type = ["rlib", "cdylib", "staticlib"]
 thiserror = "1"
 byteorder = "1"
 itertools = "0.9"
-bitvec    = "0.19"
+bitvec    = "0.20"

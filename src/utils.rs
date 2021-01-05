@@ -1,6 +1,11 @@
 /* crate use */
 use byteorder::*;
 
+/* local use */
+use crate::error;
+
+use crate::error::LocalResult;
+
 pub type Order = byteorder::LittleEndian;
 pub type BitOrd = bitvec::order::Msb0;
 pub type BitBox = bitvec::boxed::BitBox<BitOrd, u8>;
@@ -13,7 +18,7 @@ where
 {
     let mut buffer = vec![0u8; bytes_to_store_n(max_value) as usize];
 
-    input.read_exact(&mut buffer)?;
+    input.read_exact(&mut buffer).map_local()?;
 
     buffer.resize((9 - bytes_to_store_n(max_value)) as usize, 0);
 
@@ -29,8 +34,10 @@ where
     W: std::io::Write,
 {
     let mut buffer = vec![0u8; 0];
-    buffer.write_u64::<Order>(value)?;
-    output.write_all(&buffer[..bytes_to_store_n(max_value) as usize])?;
+    buffer.write_u64::<Order>(value).map_local()?;
+    output
+        .write_all(&buffer[..bytes_to_store_n(max_value) as usize])
+        .map_local()?;
 
     Ok(bytes_to_store_n(max_value) as usize)
 }
@@ -112,6 +119,24 @@ pub(crate) fn bytes_to_store_n(n: u64) -> u64 {
 #[inline]
 pub(crate) fn ceil_to_8(n: u64) -> u64 {
     (n + 7) & !(7)
+}
+
+pub(crate) fn switch_56_n_78(input: u8) -> u8 {
+    // Internal encoding order is ACTG kff order is ACGT
+    (input & 0b11110000) ^ ((input & 0b00000011) << 2) ^ ((input & 0b00001100) >> 2)
+}
+
+pub(crate) fn valid_encoding(encoding: u8) -> crate::Result<u8> {
+    let a = encoding >> 6;
+    let c = (encoding >> 4) & 0b11;
+    let t = (encoding >> 2) & 0b11;
+    let g = encoding & 0b11;
+
+    if a != c && a != t && a != g && c != t && t != g {
+        Ok(encoding)
+    } else {
+        Err(error::Error::Header(error::Header::BadEncoding))
+    }
 }
 
 #[cfg(test)]
@@ -249,5 +274,17 @@ mod tests {
         assert_eq!(ceil_to_8(16), 16);
         assert_eq!(ceil_to_8(25), 32);
         assert_eq!(ceil_to_8(46), 48);
+    }
+
+    #[test]
+    fn kff2internal_order() {
+        assert_eq!(switch_56_n_78(0b01011100), 0b01010011);
+        assert_eq!(switch_56_n_78(0b00000011), 0b00001100);
+    }
+
+    #[test]
+    fn validate_encoding() {
+        assert!(valid_encoding(0b00011011).is_ok());
+        assert!(valid_encoding(0b00011111).is_err());
     }
 }

@@ -1,11 +1,10 @@
 pub mod data;
 pub mod error;
-pub mod header;
 pub mod kff;
 pub mod kmer;
-pub mod metadata;
 pub mod minimizer;
 pub mod raw;
+pub mod seq2bits;
 pub mod utils;
 pub mod variables;
 
