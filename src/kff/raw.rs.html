@@ -641,15 +641,13 @@
 <span id="638">638</span>
 <span id="639">639</span>
 <span id="640">640</span>
-<span id="641">641</span>
-<span id="642">642</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Declaration of Raw section Reader and Writer</span>
 
 <span class="comment">/* crate use */</span>
+<span class="kw">use</span> <span class="ident">anyhow</span>::<span class="prelude-ty">Result</span>;
 <span class="kw">use</span> <span class="ident">bitvec</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">byteorder</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">anyhow</span>::<span class="prelude-ty">Result</span>;
 
 <span class="comment">/* local use */</span>
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">data</span>::<span class="ident">Reader</span> <span class="kw">as</span> <span class="ident">DataReader</span>;
@@ -856,9 +854,7 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">write_seq</span> <span class="op">=</span> <span class="macro">bitvec</span><span class="macro">!</span>[<span class="ident">Msb0</span>, <span class="ident">u8</span>; <span class="number">0</span>; <span class="number">8</span> <span class="op">-</span> ((<span class="ident">seq</span>.<span class="ident">len</span>()) <span class="op">%</span> <span class="number">8</span>)];
         <span class="ident">write_seq</span>.<span class="ident">extend</span>(<span class="ident">seq</span>);
-        <span class="self">self</span>.<span class="ident">output</span>
-            .<span class="ident">write_all</span>(<span class="ident">write_seq</span>.<span class="ident">as_raw_slice</span>())
-            <span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">output</span>.<span class="ident">write_all</span>(<span class="ident">write_seq</span>.<span class="ident">as_raw_slice</span>())<span class="question-mark">?</span>;
         <span class="ident">bytes_write</span> <span class="op">+</span><span class="op">=</span> <span class="ident">seq</span>.<span class="ident">as_slice</span>().<span class="ident">len</span>();
 
         <span class="self">self</span>.<span class="ident">output</span>.<span class="ident">write_all</span>(<span class="ident">data</span>)<span class="question-mark">?</span>;
@@ -929,9 +925,9 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">variables</span>::<span class="ident">Variables</span>;
     <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">seq2bits</span>::<span class="ident">Bits2Nuc</span>;
-    
+    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">variables</span>::<span class="ident">Variables</span>;
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">init</span>() {
         {

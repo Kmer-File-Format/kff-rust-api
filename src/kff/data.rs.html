@@ -187,17 +187,13 @@
 <span id="184">184</span>
 <span id="185">185</span>
 <span id="186">186</span>
-<span id="187">187</span>
-<span id="188">188</span>
-<span id="189">189</span>
-<span id="190">190</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Declaration of trait to read and write kmer section</span>
 
 <span class="comment">/* crate use */</span>
+<span class="kw">use</span> <span class="ident">anyhow</span>::<span class="prelude-ty">Result</span>;
 <span class="kw">use</span> <span class="ident">bitvec</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">byteorder</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">anyhow</span>::<span class="prelude-ty">Result</span>;
 
 <span class="comment">/* local use */</span>
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">kmer</span>::<span class="ident">Kmer</span>;
@@ -342,12 +338,8 @@
             <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">nb_block_offset</span>();
             <span class="kw">let</span> <span class="ident">nb_block</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">nb_block</span>();
 
-            <span class="self">self</span>.<span class="ident">output</span>()
-                .<span class="ident">seek</span>(<span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">SeekFrom</span>::<span class="ident">Start</span>(<span class="ident">offset</span>))
-                <span class="question-mark">?</span>;
-            <span class="self">self</span>.<span class="ident">output</span>()
-                .<span class="ident">write_u32</span>::<span class="op">&lt;</span><span class="ident">LittleEndian</span><span class="op">&gt;</span>(<span class="ident">nb_block</span>)
-                <span class="question-mark">?</span>;
+            <span class="self">self</span>.<span class="ident">output</span>().<span class="ident">seek</span>(<span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">SeekFrom</span>::<span class="ident">Start</span>(<span class="ident">offset</span>))<span class="question-mark">?</span>;
+            <span class="self">self</span>.<span class="ident">output</span>().<span class="ident">write_u32</span>::<span class="op">&lt;</span><span class="ident">LittleEndian</span><span class="op">&gt;</span>(<span class="ident">nb_block</span>)<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">output</span>().<span class="ident">seek</span>(<span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">SeekFrom</span>::<span class="ident">End</span>(<span class="number">0</span>))<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">set_close</span>(<span class="bool-val">true</span>);
 

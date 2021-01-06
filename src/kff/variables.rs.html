@@ -170,14 +170,12 @@
 <span id="167">167</span>
 <span id="168">168</span>
 <span id="169">169</span>
-<span id="170">170</span>
-<span id="171">171</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Management of global variable</span>
 
 <span class="comment">/* crate use */</span>
-<span class="kw">use</span> <span class="ident">byteorder</span>::{<span class="ident">LittleEndian</span>, <span class="ident">ReadBytesExt</span>, <span class="ident">WriteBytesExt</span>};
 <span class="kw">use</span> <span class="ident">anyhow</span>::<span class="prelude-ty">Result</span>;
+<span class="kw">use</span> <span class="ident">byteorder</span>::{<span class="ident">LittleEndian</span>, <span class="ident">ReadBytesExt</span>, <span class="ident">WriteBytesExt</span>};
 
 <span class="comment">/* local use */</span>
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">error</span>;
@@ -220,25 +218,25 @@
     <span class="kw">fn</span> <span class="ident">k</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get</span>(<span class="string">&quot;k&quot;</span>)
             .<span class="ident">copied</span>()
-            .<span class="ident">ok_or</span>(<span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">Variables</span>(<span class="ident">error</span>::<span class="ident">Variables</span>::<span class="ident">KMissing</span>).<span class="ident">into</span>())
+            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">Variables</span>(<span class="ident">error</span>::<span class="ident">Variables</span>::<span class="ident">KMissing</span>).<span class="ident">into</span>())
     }
 
     <span class="kw">fn</span> <span class="ident">m</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get</span>(<span class="string">&quot;m&quot;</span>)
             .<span class="ident">copied</span>()
-            .<span class="ident">ok_or</span>(<span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">Variables</span>(<span class="ident">error</span>::<span class="ident">Variables</span>::<span class="ident">MMissing</span>).<span class="ident">into</span>())
+            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">Variables</span>(<span class="ident">error</span>::<span class="ident">Variables</span>::<span class="ident">MMissing</span>).<span class="ident">into</span>())
     }
 
     <span class="kw">fn</span> <span class="ident">max</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get</span>(<span class="string">&quot;max&quot;</span>)
             .<span class="ident">copied</span>()
-            .<span class="ident">ok_or</span>(<span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">Variables</span>(<span class="ident">error</span>::<span class="ident">Variables</span>::<span class="ident">MaxMissing</span>).<span class="ident">into</span>())
+            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">Variables</span>(<span class="ident">error</span>::<span class="ident">Variables</span>::<span class="ident">MaxMissing</span>).<span class="ident">into</span>())
     }
 
     <span class="kw">fn</span> <span class="ident">data_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get</span>(<span class="string">&quot;data_size&quot;</span>)
             .<span class="ident">copied</span>()
-            .<span class="ident">ok_or</span>(<span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">Variables</span>(<span class="ident">error</span>::<span class="ident">Variables</span>::<span class="ident">DataSizeMissing</span>).<span class="ident">into</span>())
+            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">Variables</span>(<span class="ident">error</span>::<span class="ident">Variables</span>::<span class="ident">DataSizeMissing</span>).<span class="ident">into</span>())
     }
 }
 
@@ -283,9 +281,7 @@
     <span class="kw">where</span>
         <span class="ident">W</span>: <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Write</span>,
     {
-        <span class="ident">output</span>
-            .<span class="ident">write_u64</span>::<span class="op">&lt;</span><span class="ident">LittleEndian</span><span class="op">&gt;</span>(<span class="self">self</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>)
-            <span class="question-mark">?</span>;
+        <span class="ident">output</span>.<span class="ident">write_u64</span>::<span class="op">&lt;</span><span class="ident">LittleEndian</span><span class="op">&gt;</span>(<span class="self">self</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nb_bytes</span> <span class="op">=</span> <span class="number">8</span>;
         <span class="kw">for</span> (<span class="ident">key</span>, <span class="ident">value</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">iter</span>() {
