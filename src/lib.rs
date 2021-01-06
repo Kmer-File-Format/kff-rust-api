@@ -5,13 +5,12 @@
 //! ## Read
 //!
 //! ```rust
-//! use kff::error::Error;
+//! use anyhow::Result;
 //! use kff::Writer;
 //! use kff::Reader;
-//! use kff::error::LocalResult;
 //! use crate::kff::seq2bits::Bits2Nuc;
 //!
-//! # fn main() -> Result<(), Error> {
+//! # fn main() -> Result<()> {
 //!
 //! let mut output = vec![0u8; 0];
 //! let buffer = std::io::Cursor::new(&mut output);
@@ -48,7 +47,7 @@
 //! while let Ok(section) = reader.next_section() {
 //!     let mut it = section.into_iter();
 //!     while let Some(Ok(kmer)) = it.next() {
-//!        println!("{} {:?}", std::str::from_utf8(&kmer.seq().into_nuc(rev_encoding)).map_local()?, kmer.data());
+//!        println!("{} {:?}", std::str::from_utf8(&kmer.seq().into_nuc(rev_encoding))?, kmer.data());
 //!     }
 //! }
 //!
@@ -65,7 +64,5 @@ pub mod raw;
 pub mod seq2bits;
 pub mod utils;
 pub mod variables;
-
-pub use crate::error::Result;
 
 pub use crate::kff::*;

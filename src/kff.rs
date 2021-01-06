@@ -1,23 +1,20 @@
 //! Declaration of Kff::Reader and Kff::Writer
 
 /* crate use */
-use crate::seq2bits::Seq2Bits;
-use crate::utils::switch_56_n_78;
+use anyhow::Result;
 use byteorder::*;
 
 /* local use */
 use crate::data;
-use crate::error;
-use crate::utils;
-
 use crate::data::Writer as DataWriter;
+use crate::error;
 use crate::minimizer::Reader as MinimizerReader;
 use crate::minimizer::Writer as MinimizerWriter;
 use crate::raw::Reader as RawReader;
 use crate::raw::Writer as RawWriter;
-
-use crate::error::LocalResult;
-
+use crate::seq2bits::Seq2Bits;
+use crate::utils;
+use crate::utils::switch_56_n_78;
 use crate::variables::Reader as VariablesReader;
 use crate::variables::Variables;
 use crate::variables::Writer as VariablesWriter;
@@ -46,20 +43,18 @@ where
     R: std::io::Read,
 {
     /// Create a new Kff reader from a reading stream
-    pub fn new(mut input: R) -> crate::Result<Self> {
-        let major = input.read_u8().map_local()?;
-        let minor = input.read_u8().map_local()?;
-        let encoding = utils::valid_encoding(utils::switch_56_n_78(input.read_u8().map_local()?))
-            .map_local()?;
+    pub fn new(mut input: R) -> Result<Self> {
+        let major = input.read_u8()?;
+        let minor = input.read_u8()?;
+        let encoding = utils::valid_encoding(utils::switch_56_n_78(input.read_u8()?))?;
         let rev_encoding = utils::rev_encoding(encoding);
 
-        let mut comment =
-            vec![0; input.read_u32::<utils::Order>().map_local()? as usize].into_boxed_slice();
-        input.read_exact(&mut comment).map_local()?;
+        let mut comment = vec![0; input.read_u32::<utils::Order>()? as usize].into_boxed_slice();
+        input.read_exact(&mut comment)?;
         let comment = comment;
 
         if major < 1 {
-            return Err(error::Error::Kff(error::Kff::NotSupportVersionNumber));
+            return Err(error::Error::Kff(error::Kff::NotSupportVersionNumber).into());
         }
 
         let variables = Variables::default();
@@ -112,15 +107,15 @@ where
     }
 
     /// Get the next kmer section we have to parse
-    pub fn next_section(&mut self) -> crate::Result<Box<dyn data::Reader<R> + '_>> {
-        match self.input.read_u8().map_local()? {
+    pub fn next_section(&mut self) -> Result<Box<dyn data::Reader<R> + '_>> {
+        match self.input.read_u8()? {
             b'r' => Ok(Box::new(RawReader::new(self)?)),
             b'm' => Ok(Box::new(MinimizerReader::new(self)?)),
             b'v' => {
-                self.variables.deserialize(&mut self.input).map_local()?;
+                self.variables.deserialize(&mut self.input)?;
                 self.next_section()
             }
-            _ => Err(error::Error::Kff(error::Kff::UnknowSectionType)),
+            _ => Err(error::Error::Kff(error::Kff::UnknowSectionType).into()),
         }
     }
 }
@@ -141,15 +136,11 @@ where
     W: std::io::Write + std::io::Seek,
 {
     /// Create a Kff Writer from a seekable output, encoding and comment
-    pub fn new(mut output: W, encoding: u8, comment: &[u8]) -> crate::Result<Self> {
+    pub fn new(mut output: W, encoding: u8, comment: &[u8]) -> Result<Self> {
         // write header
-        output
-            .write_all(&[1u8, 0, switch_56_n_78(encoding)])
-            .map_local()?;
-        output
-            .write_u32::<BigEndian>(comment.len() as u32)
-            .map_local()?;
-        output.write_all(comment).map_local()?;
+        output.write_all(&[1u8, 0, switch_56_n_78(encoding)])?;
+        output.write_u32::<BigEndian>(comment.len() as u32)?;
+        output.write_all(comment)?;
 
         Ok(Self {
             output,
@@ -170,8 +161,8 @@ where
     }
 
     /// Write variable section
-    pub fn write_variables(&mut self) -> crate::Result<()> {
-        self.output.write_u8(b'v').map_local()?;
+    pub fn write_variables(&mut self) -> Result<()> {
+        self.output.write_u8(b'v')?;
 
         self.variables_buffer.serialize(&mut self.output)?;
 
@@ -181,12 +172,8 @@ where
     }
 
     /// Write a raw section, with sequence encode in 2 bits
-    pub fn write_raw_section(
-        &mut self,
-        seqs: &[Seq2Bits],
-        datas: &[&[u8]],
-    ) -> crate::Result<usize> {
-        self.output.write_u8(b'r').map_local()?;
+    pub fn write_raw_section(&mut self, seqs: &[Seq2Bits], datas: &[&[u8]]) -> Result<usize> {
+        self.output.write_u8(b'r')?;
 
         let mut raw = RawWriter::new(&self.variables, self.encoding, &mut self.output)?;
 
@@ -202,11 +189,7 @@ where
     }
 
     /// Write a raw section with sequence encode in ASCII
-    pub fn write_raw_seq_section(
-        &mut self,
-        seqs: &[&[u8]],
-        datas: &[&[u8]],
-    ) -> crate::Result<usize> {
+    pub fn write_raw_seq_section(&mut self, seqs: &[&[u8]], datas: &[&[u8]]) -> Result<usize> {
         let tmp: Vec<Seq2Bits> = seqs
             .iter()
             .map(|x| utils::seq2bits(x, self.encoding))
@@ -221,8 +204,8 @@ where
         mini_index: &[u64],
         seqs: &[Seq2Bits],
         datas: &[&[u8]],
-    ) -> crate::Result<usize> {
-        self.output.write_u8(b'm').map_local()?;
+    ) -> Result<usize> {
+        self.output.write_u8(b'm')?;
 
         let mut minimizer =
             MinimizerWriter::new(&self.variables, minimizer, self.encoding, &mut self.output)?;
@@ -245,7 +228,7 @@ where
         mini_index: &[u64],
         seqs: &[&[u8]],
         datas: &[&[u8]],
-    ) -> crate::Result<usize> {
+    ) -> Result<usize> {
         let tmp: Vec<Seq2Bits> = seqs
             .iter()
             .map(|x| utils::seq2bits(x, self.encoding))

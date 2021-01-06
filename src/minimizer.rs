@@ -1,6 +1,7 @@
 //! Declaration of Minimizer section Reader and Writer
 
 /* crate use */
+use anyhow::Result;
 use bitvec::prelude::*;
 use byteorder::*;
 
@@ -8,7 +9,6 @@ use byteorder::*;
 use crate::data::Reader as DataReader;
 use crate::data::Writer as DataWriter;
 use crate::error;
-use crate::error::LocalResult;
 use crate::kff::Reader as KffReader;
 use crate::kmer::Kmer;
 use crate::utils::{BitBox, BitSlice, BitVec};
@@ -46,19 +46,19 @@ where
     R: std::io::Read,
 {
     /// Create a new reader with a reference of kff::Reader
-    pub fn new(reader: &'input mut KffReader<R>) -> crate::Result<Self> {
+    pub fn new(reader: &'input mut KffReader<R>) -> Result<Self> {
         let k = reader.variables().k()?;
         let m = reader.variables().m()?;
         let max = reader.variables().max()?;
         let data_size = reader.variables().data_size()?;
 
         let mut buffer = vec![0u8; utils::ceil_to_8(m * 2) as usize / 8];
-        reader.input().read_exact(&mut buffer).map_local()?;
+        reader.input().read_exact(&mut buffer)?;
         let mut tmp = BitVec::from_vec(buffer);
         tmp.resize((m * 2) as usize, false);
         let minimizer = tmp.into_boxed_bitslice();
 
-        let remaining_block = reader.input().read_u32::<LittleEndian>().map_local()?;
+        let remaining_block = reader.input().read_u32::<LittleEndian>()?;
 
         Ok(Self {
             k,
@@ -80,7 +80,7 @@ impl<'input, R> Iterator for Reader<'input, R>
 where
     R: std::io::Read,
 {
-    type Item = crate::Result<Kmer>;
+    type Item = Result<Kmer>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let tmp = self.next_kmer();
@@ -138,7 +138,7 @@ where
         self.block_n -= 1;
     }
 
-    fn read_block(&mut self) -> crate::Result<usize> {
+    fn read_block(&mut self) -> Result<usize> {
         if self.remaining_block == 0 {
             return Ok(0);
         }
@@ -207,23 +207,19 @@ where
         minimizer: &[u8],
         encoding: u8,
         output: &'output mut W,
-    ) -> crate::Result<Self> {
+    ) -> Result<Self> {
         let k = variables.k()?;
         let m = variables.m()?;
         let max = variables.max()?;
         let data_size = variables.data_size()?;
 
         if m != minimizer.len() as u64 {
-            return Err(error::Error::Minimizer(
-                error::Minimizer::MinimizerSizeMDiff,
-            ));
+            return Err(error::Error::Minimizer(error::Minimizer::MinimizerSizeMDiff).into());
         }
 
-        output
-            .write_all(utils::seq2bits(minimizer, encoding).as_slice())
-            .map_local()?;
-        let nb_block_offset = output.seek(std::io::SeekFrom::Current(0)).map_local()?;
-        output.write_u32::<LittleEndian>(0).map_local()?;
+        output.write_all(utils::seq2bits(minimizer, encoding).as_slice())?;
+        let nb_block_offset = output.seek(std::io::SeekFrom::Current(0))?;
+        output.write_u32::<LittleEndian>(0)?;
 
         Ok(Self {
             k,
@@ -245,7 +241,7 @@ where
         minimizer_idx: u64,
         seq: &BitSlice,
         data: &[u8],
-    ) -> crate::Result<usize> {
+    ) -> Result<usize> {
         self.increment_nb_block()?;
 
         let nb_kmer = self.check_block(seq.len(), data.len())? as u64;
@@ -267,12 +263,10 @@ where
 
         let mut write_seq = bitvec![Msb0, u8; 0; 8 - ((seq.len()) % 8)];
         write_seq.extend(seq);
-        self.output
-            .write_all(write_seq.as_raw_slice())
-            .map_local()?;
+        self.output.write_all(write_seq.as_raw_slice())?;
         bytes_write += seq.as_slice().len();
 
-        self.output.write_all(data).map_local()?;
+        self.output.write_all(data)?;
         bytes_write += data.len();
 
         Ok(bytes_write)
@@ -284,7 +278,7 @@ where
         minimizer_idx: u64,
         seq: &[u8],
         data: &[u8],
-    ) -> crate::Result<usize> {
+    ) -> Result<usize> {
         self.write_block(
             minimizer_idx,
             &utils::seq2bits(seq, self.encoding)[..],
@@ -349,7 +343,6 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::data::Reader;
     use crate::seq2bits::Bits2Nuc;
 
     #[test]

@@ -69,7 +69,7 @@ pub enum Kff {
 /// Generale error type use in this parser
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error(transparent)]
+    #[error("Header error")]
     Header(Header),
 
     #[error(transparent)]
@@ -83,28 +83,4 @@ pub enum Error {
 
     #[error(transparent)]
     Kff(Kff),
-
-    /// Field used to store Error design outside of local crate
-    #[error(transparent)]
-    OtherError(Box<dyn std::error::Error>),
 }
-
-/// Trait to convert classic Result in Kff::Result
-pub trait LocalResult<T> {
-    fn map_local(self) -> Result<T, Error>;
-}
-
-impl<T, E> LocalResult<T> for std::result::Result<T, E>
-where
-    E: std::error::Error + 'static,
-{
-    fn map_local(self) -> Result<T, Error> {
-        match self {
-            Ok(o) => Ok(o),
-            Err(e) => Err(crate::error::Error::OtherError(Box::new(e))),
-        }
-    }
-}
-
-/// Just some syntaxic sugar
-pub type Result<T, E = Error> = std::result::Result<T, E>;

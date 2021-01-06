@@ -13,14 +13,6 @@ fn read_file(path: &str) -> (Vec<Vec<u8>>, Vec<u8>) {
     while let Ok(section) = reader.next_section() {
         let mut it = section.into_iter();
         while let Some(Ok(kmer)) = it.next() {
-            /*
-            println!(
-                    "{} {} {}",
-                    kmer.bits(),
-                    String::from_utf8(kmer.seq(rev_encoding).to_vec()).unwrap(),
-                    kmer.data()[0]
-                );
-            */
             kmers.push(kmer.seq().into_nuc(rev_encoding).to_vec());
             datas.push(kmer.data()[0]);
         }

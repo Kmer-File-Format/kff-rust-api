@@ -1,6 +1,7 @@
 //! Declaration of trait to read and write kmer section
 
 /* crate use */
+use anyhow::Result;
 use bitvec::prelude::*;
 use byteorder::*;
 
@@ -10,10 +11,8 @@ use crate::seq2bits::Seq2Slice;
 use crate::utils::{BitBox, BitOrd, BitVec};
 use crate::*;
 
-use crate::error::LocalResult;
-
 /// Reader trait must be implement by Struct want read kmer KFF section
-pub trait Reader<'input, R>: Iterator<Item = crate::Result<Kmer>>
+pub trait Reader<'input, R>: Iterator<Item = Result<Kmer>>
 where
     R: std::io::Read + 'input,
     R: ?Sized,
@@ -34,7 +33,7 @@ where
     fn data_size(&self) -> u64;
 
     /// Read on kmer block and return number of bytes read
-    fn read_block(&mut self) -> crate::Result<usize>;
+    fn read_block(&mut self) -> Result<usize>;
 
     /// Get the sequence of actual block
     fn block_seq(&self) -> &Seq2Slice;
@@ -49,7 +48,7 @@ where
     fn decrease_n(&mut self);
 
     /// Read the number of kmer in block
-    fn read_n(&mut self) -> crate::Result<u64> {
+    fn read_n(&mut self) -> Result<u64> {
         if self.max_kmer() == 1 {
             Ok(1)
         } else {
@@ -59,11 +58,11 @@ where
     }
 
     /// Read sequence of actual block need number of nucleotide want be to read
-    fn read_seq(&mut self, nb_nuc: u64) -> crate::Result<BitBox> {
+    fn read_seq(&mut self, nb_nuc: u64) -> Result<BitBox> {
         let buf_len = utils::ceil_to_8(nb_nuc * 2) as usize / 8;
         let mut buffer = vec![0u8; buf_len];
 
-        self.input().read_exact(&mut buffer).map_local()?;
+        self.input().read_exact(&mut buffer)?;
 
         let bit_buffer = BitVec::from_vec(buffer);
 
@@ -73,15 +72,15 @@ where
     }
 
     /// Read data of actual block
-    fn read_data(&mut self) -> crate::Result<Vec<u8>> {
+    fn read_data(&mut self) -> Result<Vec<u8>> {
         let mut buffer = vec![0u8; (self.block_n() * self.data_size()) as usize];
 
-        self.input().read_exact(&mut buffer).map_local()?;
+        self.input().read_exact(&mut buffer)?;
         Ok(buffer)
     }
 
     /// Get the next kmer
-    fn next_kmer(&mut self) -> crate::Result<Kmer> {
+    fn next_kmer(&mut self) -> Result<Kmer> {
         if self.block_n() == 0 && self.read_block()? == 0 {
             return Ok(Kmer::new(
                 bitbox![BitOrd, u8; 0; 0],
@@ -142,20 +141,16 @@ where
 
     // Default implementation
     /// Close the section, can return an error because number of block can only by write when number of block is know
-    fn close(&mut self) -> crate::Result<usize> {
+    fn close(&mut self) -> Result<usize> {
         if self.is_close() {
             Ok(0)
         } else {
             let offset = self.nb_block_offset();
             let nb_block = self.nb_block();
 
-            self.output()
-                .seek(std::io::SeekFrom::Start(offset))
-                .map_local()?;
-            self.output()
-                .write_u32::<LittleEndian>(nb_block)
-                .map_local()?;
-            self.output().seek(std::io::SeekFrom::End(0)).map_local()?;
+            self.output().seek(std::io::SeekFrom::Start(offset))?;
+            self.output().write_u32::<LittleEndian>(nb_block)?;
+            self.output().seek(std::io::SeekFrom::End(0))?;
             self.set_close(true);
 
             Ok(1)
@@ -163,27 +158,27 @@ where
     }
 
     /// Increase the number of block
-    fn increment_nb_block(&mut self) -> crate::Result<()> {
+    fn increment_nb_block(&mut self) -> Result<()> {
         match self.nb_block().checked_add(1) {
             Some(val) => {
                 self.set_nb_block(val);
                 Ok(())
             }
-            None => Err(error::Error::Data(error::Data::ToManyBlock)),
+            None => Err(error::Error::Data(error::Data::ToManyBlock).into()),
         }
     }
 
     /// Verify the number of the number of kmer and data length match and not upper than max number of kmer
-    fn check_block(&mut self, seq_len: usize, data_len: usize) -> crate::Result<usize> {
+    fn check_block(&mut self, seq_len: usize, data_len: usize) -> Result<usize> {
         let nb_kmer = self.nb_kmer(seq_len);
         let nb_data = data_len / self.data_size() as usize;
 
         if nb_data != nb_kmer {
-            return Err(error::Error::Data(error::Data::NbKmerNbDataDiff));
+            return Err(error::Error::Data(error::Data::NbKmerNbDataDiff).into());
         }
 
         if nb_kmer > self.max() as usize {
-            return Err(error::Error::Data(error::Data::NUpperThanMax));
+            return Err(error::Error::Data(error::Data::NUpperThanMax).into());
         }
 
         Ok(nb_kmer)

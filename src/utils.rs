@@ -1,10 +1,9 @@
 /* crate use */
+use anyhow::Result;
 use byteorder::*;
 
 /* local use */
 use crate::error;
-
-use crate::error::LocalResult;
 
 /// Read order of bytes in file
 pub type Order = byteorder::LittleEndian;
@@ -21,13 +20,13 @@ pub type BitVec = bitvec::vec::BitVec<bitvec::order::Msb0, u8>;
 /// Syntaxic sugar around bitvec::BitSlice
 pub type BitSlice = bitvec::slice::BitSlice<BitOrd, u8>;
 
-pub(crate) fn read_dynamic_size_field<R>(input: &mut R, max_value: u64) -> crate::Result<u64>
+pub(crate) fn read_dynamic_size_field<R>(input: &mut R, max_value: u64) -> Result<u64>
 where
     R: std::io::Read + ?Sized,
 {
     let mut buffer = vec![0u8; bytes_to_store_n(max_value) as usize];
 
-    input.read_exact(&mut buffer).map_local()?;
+    input.read_exact(&mut buffer)?;
 
     buffer.resize((9 - bytes_to_store_n(max_value)) as usize, 0);
 
@@ -38,15 +37,13 @@ pub(crate) fn write_dynamic_size_field<W>(
     output: &mut W,
     value: u64,
     max_value: u64,
-) -> crate::Result<usize>
+) -> Result<usize>
 where
     W: std::io::Write,
 {
     let mut buffer = vec![0u8; 0];
-    buffer.write_u64::<Order>(value).map_local()?;
-    output
-        .write_all(&buffer[..bytes_to_store_n(max_value) as usize])
-        .map_local()?;
+    buffer.write_u64::<Order>(value)?;
+    output.write_all(&buffer[..bytes_to_store_n(max_value) as usize])?;
 
     Ok(bytes_to_store_n(max_value) as usize)
 }
@@ -135,7 +132,7 @@ pub(crate) fn switch_56_n_78(input: u8) -> u8 {
     (input & 0b11110000) ^ ((input & 0b00000011) << 2) ^ ((input & 0b00001100) >> 2)
 }
 
-pub(crate) fn valid_encoding(encoding: u8) -> crate::Result<u8> {
+pub(crate) fn valid_encoding(encoding: u8) -> Result<u8> {
     let a = encoding >> 6;
     let c = (encoding >> 4) & 0b11;
     let t = (encoding >> 2) & 0b11;
@@ -144,7 +141,7 @@ pub(crate) fn valid_encoding(encoding: u8) -> crate::Result<u8> {
     if a != c && a != t && a != g && c != t && t != g {
         Ok(encoding)
     } else {
-        Err(error::Error::Header(error::Header::BadEncoding))
+        Err(error::Error::Header(error::Header::BadEncoding).into())
     }
 }
 

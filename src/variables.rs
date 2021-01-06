@@ -1,11 +1,11 @@
 //! Management of global variable
 
 /* crate use */
+use anyhow::Result;
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 
 /* local use */
 use crate::error;
-use crate::error::LocalResult;
 
 /// Variables is a specialisation of HashMap
 pub type Variables = std::collections::HashMap<String, u64>;
@@ -13,7 +13,7 @@ pub type Variables = std::collections::HashMap<String, u64>;
 /// Trait to read global variable section
 pub trait Reader {
     /// Read variable from input
-    fn deserialize<R>(&mut self, input: &mut R) -> crate::Result<usize>
+    fn deserialize<R>(&mut self, input: &mut R) -> Result<usize>
     where
         R: std::io::Read;
 }
@@ -21,7 +21,7 @@ pub trait Reader {
 /// Trait to write global variable section
 pub trait Writer {
     /// Write variable in output
-    fn serialize<W>(&self, output: &mut W) -> crate::Result<usize>
+    fn serialize<W>(&self, output: &mut W) -> Result<usize>
     where
         W: std::io::Write;
 }
@@ -29,61 +29,61 @@ pub trait Writer {
 /// Trait of variable needed by KFF 1.0
 pub trait Variables1 {
     /// Get value of k
-    fn k(&self) -> crate::Result<u64>;
+    fn k(&self) -> Result<u64>;
 
     /// Get value of m
-    fn m(&self) -> crate::Result<u64>;
+    fn m(&self) -> Result<u64>;
 
     /// Get value of max
-    fn max(&self) -> crate::Result<u64>;
+    fn max(&self) -> Result<u64>;
 
     /// Get value of data_size
-    fn data_size(&self) -> crate::Result<u64>;
+    fn data_size(&self) -> Result<u64>;
 }
 
 impl Variables1 for Variables {
-    fn k(&self) -> crate::Result<u64> {
+    fn k(&self) -> Result<u64> {
         self.get("k")
             .copied()
-            .ok_or(error::Error::Variables(error::Variables::KMissing))
+            .ok_or_else(|| error::Error::Variables(error::Variables::KMissing).into())
     }
 
-    fn m(&self) -> crate::Result<u64> {
+    fn m(&self) -> Result<u64> {
         self.get("m")
             .copied()
-            .ok_or(error::Error::Variables(error::Variables::MMissing))
+            .ok_or_else(|| error::Error::Variables(error::Variables::MMissing).into())
     }
 
-    fn max(&self) -> crate::Result<u64> {
+    fn max(&self) -> Result<u64> {
         self.get("max")
             .copied()
-            .ok_or(error::Error::Variables(error::Variables::MaxMissing))
+            .ok_or_else(|| error::Error::Variables(error::Variables::MaxMissing).into())
     }
 
-    fn data_size(&self) -> crate::Result<u64> {
+    fn data_size(&self) -> Result<u64> {
         self.get("data_size")
             .copied()
-            .ok_or(error::Error::Variables(error::Variables::DataSizeMissing))
+            .ok_or_else(|| error::Error::Variables(error::Variables::DataSizeMissing).into())
     }
 }
 
 impl Reader for Variables {
-    fn deserialize<R>(&mut self, input: &mut R) -> crate::Result<usize>
+    fn deserialize<R>(&mut self, input: &mut R) -> Result<usize>
     where
         R: std::io::Read,
     {
-        let nb_variables = input.read_u64::<LittleEndian>().map_local()?;
+        let nb_variables = input.read_u64::<LittleEndian>()?;
         let mut name = Vec::new();
         let mut char;
 
         let mut nb_bytes = 1;
 
         for _ in 0..nb_variables {
-            char = input.read_u8().map_local()?;
+            char = input.read_u8()?;
             nb_bytes += 1;
             while char != 0 {
                 name.push(char);
-                char = input.read_u8().map_local()?;
+                char = input.read_u8()?;
                 nb_bytes += 1;
 
                 if char == 0 {
@@ -92,8 +92,8 @@ impl Reader for Variables {
             }
 
             self.insert(
-                String::from_utf8(name.clone()).map_local()?,
-                input.read_u64::<LittleEndian>().map_local()?,
+                String::from_utf8(name.clone())?,
+                input.read_u64::<LittleEndian>()?,
             );
             nb_bytes += 8;
             name.clear();
@@ -104,19 +104,17 @@ impl Reader for Variables {
 }
 
 impl Writer for Variables {
-    fn serialize<W>(&self, output: &mut W) -> crate::Result<usize>
+    fn serialize<W>(&self, output: &mut W) -> Result<usize>
     where
         W: std::io::Write,
     {
-        output
-            .write_u64::<LittleEndian>(self.len() as u64)
-            .map_local()?;
+        output.write_u64::<LittleEndian>(self.len() as u64)?;
 
         let mut nb_bytes = 8;
         for (key, value) in self.iter() {
-            output.write_all(key.as_bytes()).map_local()?;
-            output.write_u8(0).map_local()?;
-            output.write_u64::<LittleEndian>(*value).map_local()?;
+            output.write_all(key.as_bytes())?;
+            output.write_u8(0)?;
+            output.write_u64::<LittleEndian>(*value)?;
 
             nb_bytes += key.len() + 1 + 8;
         }
