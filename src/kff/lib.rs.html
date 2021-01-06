@@ -69,9 +69,6 @@
 <span id="66">66</span>
 <span id="67">67</span>
 <span id="68">68</span>
-<span id="69">69</span>
-<span id="70">70</span>
-<span id="71">71</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! # kff-rust-api</span>
 <span class="doccomment">//!</span>
@@ -80,13 +77,12 @@
 <span class="doccomment">//! ## Read</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! use kff::error::Error;</span>
+<span class="doccomment">//! use anyhow::Result;</span>
 <span class="doccomment">//! use kff::Writer;</span>
 <span class="doccomment">//! use kff::Reader;</span>
-<span class="doccomment">//! use kff::error::LocalResult;</span>
 <span class="doccomment">//! use crate::kff::seq2bits::Bits2Nuc;</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! # fn main() -&gt; Result&lt;(), Error&gt; {</span>
+<span class="doccomment">//! # fn main() -&gt; Result&lt;()&gt; {</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let mut output = vec![0u8; 0];</span>
 <span class="doccomment">//! let buffer = std::io::Cursor::new(&amp;mut output);</span>
@@ -123,7 +119,7 @@
 <span class="doccomment">//! while let Ok(section) = reader.next_section() {</span>
 <span class="doccomment">//!     let mut it = section.into_iter();</span>
 <span class="doccomment">//!     while let Some(Ok(kmer)) = it.next() {</span>
-<span class="doccomment">//!        println!(&quot;{} {:?}&quot;, std::str::from_utf8(&amp;kmer.seq().into_nuc(rev_encoding)).map_local()?, kmer.data());</span>
+<span class="doccomment">//!        println!(&quot;{} {:?}&quot;, std::str::from_utf8(&amp;kmer.seq().into_nuc(rev_encoding))?, kmer.data());</span>
 <span class="doccomment">//!     }</span>
 <span class="doccomment">//! }</span>
 <span class="doccomment">//!</span>
@@ -140,8 +136,6 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">seq2bits</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">utils</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">variables</span>;
-
-<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">error</span>::<span class="prelude-ty">Result</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">kff</span>::<span class="kw-2">*</span>;
 </pre></div>

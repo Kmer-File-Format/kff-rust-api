@@ -748,19 +748,18 @@
 <span id="745">745</span>
 <span id="746">746</span>
 <span id="747">747</span>
-<span id="748">748</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Declaration of Minimizer section Reader and Writer</span>
 
 <span class="comment">/* crate use */</span>
 <span class="kw">use</span> <span class="ident">bitvec</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">byteorder</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">anyhow</span>::<span class="prelude-ty">Result</span>;
 
 <span class="comment">/* local use */</span>
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">data</span>::<span class="ident">Reader</span> <span class="kw">as</span> <span class="ident">DataReader</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">data</span>::<span class="ident">Writer</span> <span class="kw">as</span> <span class="ident">DataWriter</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">error</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">LocalResult</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">kff</span>::<span class="ident">Reader</span> <span class="kw">as</span> <span class="ident">KffReader</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">kmer</span>::<span class="ident">Kmer</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">utils</span>::{<span class="ident">BitBox</span>, <span class="ident">BitSlice</span>, <span class="ident">BitVec</span>};
@@ -798,19 +797,19 @@
     <span class="ident">R</span>: <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Read</span>,
 {
     <span class="doccomment">/// Create a new reader with a reference of kff::Reader</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input</span> <span class="kw-2">mut</span> <span class="ident">KffReader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input</span> <span class="kw-2">mut</span> <span class="ident">KffReader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">variables</span>().<span class="ident">k</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">variables</span>().<span class="ident">m</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">max</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">variables</span>().<span class="ident">max</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">data_size</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">variables</span>().<span class="ident">data_size</span>()<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0u8</span>; <span class="ident">utils</span>::<span class="ident">ceil_to_8</span>(<span class="ident">m</span> <span class="op">*</span> <span class="number">2</span>) <span class="kw">as</span> <span class="ident">usize</span> <span class="op">/</span> <span class="number">8</span>];
-        <span class="ident">reader</span>.<span class="ident">input</span>().<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buffer</span>).<span class="ident">map_local</span>()<span class="question-mark">?</span>;
+        <span class="ident">reader</span>.<span class="ident">input</span>().<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buffer</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tmp</span> <span class="op">=</span> <span class="ident">BitVec</span>::<span class="ident">from_vec</span>(<span class="ident">buffer</span>);
         <span class="ident">tmp</span>.<span class="ident">resize</span>((<span class="ident">m</span> <span class="op">*</span> <span class="number">2</span>) <span class="kw">as</span> <span class="ident">usize</span>, <span class="bool-val">false</span>);
         <span class="kw">let</span> <span class="ident">minimizer</span> <span class="op">=</span> <span class="ident">tmp</span>.<span class="ident">into_boxed_bitslice</span>();
 
-        <span class="kw">let</span> <span class="ident">remaining_block</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">input</span>().<span class="ident">read_u32</span>::<span class="op">&lt;</span><span class="ident">LittleEndian</span><span class="op">&gt;</span>().<span class="ident">map_local</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">remaining_block</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">input</span>().<span class="ident">read_u32</span>::<span class="op">&lt;</span><span class="ident">LittleEndian</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">k</span>,
@@ -832,7 +831,7 @@
 <span class="kw">where</span>
     <span class="ident">R</span>: <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Read</span>,
 {
-    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Kmer</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Kmer</span><span class="op">&gt;</span>;
 
     <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">tmp</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">next_kmer</span>();
@@ -890,7 +889,7 @@
         <span class="self">self</span>.<span class="ident">block_n</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
     }
 
-    <span class="kw">fn</span> <span class="ident">read_block</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_block</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">remaining_block</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="number">0</span>);
         }
@@ -959,7 +958,7 @@
         <span class="ident">minimizer</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
         <span class="ident">encoding</span>: <span class="ident">u8</span>,
         <span class="ident">output</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;output</span> <span class="kw-2">mut</span> <span class="ident">W</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">variables</span>.<span class="ident">k</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">variables</span>.<span class="ident">m</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">max</span> <span class="op">=</span> <span class="ident">variables</span>.<span class="ident">max</span>()<span class="question-mark">?</span>;
@@ -968,14 +967,14 @@
         <span class="kw">if</span> <span class="ident">m</span> <span class="op">!</span><span class="op">=</span> <span class="ident">minimizer</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">Minimizer</span>(
                 <span class="ident">error</span>::<span class="ident">Minimizer</span>::<span class="ident">MinimizerSizeMDiff</span>,
-            ));
+            ).<span class="ident">into</span>());
         }
 
         <span class="ident">output</span>
             .<span class="ident">write_all</span>(<span class="ident">utils</span>::<span class="ident">seq2bits</span>(<span class="ident">minimizer</span>, <span class="ident">encoding</span>).<span class="ident">as_slice</span>())
-            .<span class="ident">map_local</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">nb_block_offset</span> <span class="op">=</span> <span class="ident">output</span>.<span class="ident">seek</span>(<span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">SeekFrom</span>::<span class="ident">Current</span>(<span class="number">0</span>)).<span class="ident">map_local</span>()<span class="question-mark">?</span>;
-        <span class="ident">output</span>.<span class="ident">write_u32</span>::<span class="op">&lt;</span><span class="ident">LittleEndian</span><span class="op">&gt;</span>(<span class="number">0</span>).<span class="ident">map_local</span>()<span class="question-mark">?</span>;
+            <span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">nb_block_offset</span> <span class="op">=</span> <span class="ident">output</span>.<span class="ident">seek</span>(<span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">SeekFrom</span>::<span class="ident">Current</span>(<span class="number">0</span>))<span class="question-mark">?</span>;
+        <span class="ident">output</span>.<span class="ident">write_u32</span>::<span class="op">&lt;</span><span class="ident">LittleEndian</span><span class="op">&gt;</span>(<span class="number">0</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">k</span>,
@@ -997,7 +996,7 @@
         <span class="ident">minimizer_idx</span>: <span class="ident">u64</span>,
         <span class="ident">seq</span>: <span class="kw-2">&amp;</span><span class="ident">BitSlice</span>,
         <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">increment_nb_block</span>()<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">nb_kmer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">check_block</span>(<span class="ident">seq</span>.<span class="ident">len</span>(), <span class="ident">data</span>.<span class="ident">len</span>())<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">u64</span>;
@@ -1021,10 +1020,10 @@
         <span class="ident">write_seq</span>.<span class="ident">extend</span>(<span class="ident">seq</span>);
         <span class="self">self</span>.<span class="ident">output</span>
             .<span class="ident">write_all</span>(<span class="ident">write_seq</span>.<span class="ident">as_raw_slice</span>())
-            .<span class="ident">map_local</span>()<span class="question-mark">?</span>;
+            <span class="question-mark">?</span>;
         <span class="ident">bytes_write</span> <span class="op">+</span><span class="op">=</span> <span class="ident">seq</span>.<span class="ident">as_slice</span>().<span class="ident">len</span>();
 
-        <span class="self">self</span>.<span class="ident">output</span>.<span class="ident">write_all</span>(<span class="ident">data</span>).<span class="ident">map_local</span>()<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">output</span>.<span class="ident">write_all</span>(<span class="ident">data</span>)<span class="question-mark">?</span>;
         <span class="ident">bytes_write</span> <span class="op">+</span><span class="op">=</span> <span class="ident">data</span>.<span class="ident">len</span>();
 
         <span class="prelude-val">Ok</span>(<span class="ident">bytes_write</span>)
@@ -1036,7 +1035,7 @@
         <span class="ident">minimizer_idx</span>: <span class="ident">u64</span>,
         <span class="ident">seq</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
         <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">write_block</span>(
             <span class="ident">minimizer_idx</span>,
             <span class="kw-2">&amp;</span><span class="ident">utils</span>::<span class="ident">seq2bits</span>(<span class="ident">seq</span>, <span class="self">self</span>.<span class="ident">encoding</span>)[..],
@@ -1101,9 +1100,8 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">data</span>::<span class="ident">Reader</span>;
     <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">seq2bits</span>::<span class="ident">Bits2Nuc</span>;
-
+    
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">init</span>() {
         {

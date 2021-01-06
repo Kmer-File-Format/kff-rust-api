@@ -510,35 +510,27 @@
 <span id="507">507</span>
 <span id="508">508</span>
 <span id="509">509</span>
-<span id="510">510</span>
-<span id="511">511</span>
-<span id="512">512</span>
-<span id="513">513</span>
-<span id="514">514</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Declaration of Kff::Reader and Kff::Writer</span>
 
 <span class="comment">/* crate use */</span>
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">seq2bits</span>::<span class="ident">Seq2Bits</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">utils</span>::<span class="ident">switch_56_n_78</span>;
+<span class="kw">use</span> <span class="ident">anyhow</span>::<span class="prelude-ty">Result</span>;
 <span class="kw">use</span> <span class="ident">byteorder</span>::<span class="kw-2">*</span>;
 
 <span class="comment">/* local use */</span>
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">data</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">error</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">utils</span>;
-
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">data</span>::<span class="ident">Writer</span> <span class="kw">as</span> <span class="ident">DataWriter</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">seq2bits</span>::<span class="ident">Seq2Bits</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">utils</span>::<span class="ident">switch_56_n_78</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">minimizer</span>::<span class="ident">Reader</span> <span class="kw">as</span> <span class="ident">MinimizerReader</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">minimizer</span>::<span class="ident">Writer</span> <span class="kw">as</span> <span class="ident">MinimizerWriter</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">raw</span>::<span class="ident">Reader</span> <span class="kw">as</span> <span class="ident">RawReader</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">raw</span>::<span class="ident">Writer</span> <span class="kw">as</span> <span class="ident">RawWriter</span>;
-
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">LocalResult</span>;
-
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">variables</span>::<span class="ident">Reader</span> <span class="kw">as</span> <span class="ident">VariablesReader</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">variables</span>::<span class="ident">Variables</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">variables</span>::<span class="ident">Writer</span> <span class="kw">as</span> <span class="ident">VariablesWriter</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">data</span>::<span class="ident">Writer</span> <span class="kw">as</span> <span class="ident">DataWriter</span>;
 
 <span class="doccomment">/// A Kff Reader</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Reader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
@@ -564,20 +556,19 @@
     <span class="ident">R</span>: <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Read</span>,
 {
     <span class="doccomment">/// Create a new Kff reader from a reading stream</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw-2">mut</span> <span class="ident">input</span>: <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">major</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">read_u8</span>().<span class="ident">map_local</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">minor</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">read_u8</span>().<span class="ident">map_local</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">encoding</span> <span class="op">=</span> <span class="ident">utils</span>::<span class="ident">valid_encoding</span>(<span class="ident">utils</span>::<span class="ident">switch_56_n_78</span>(<span class="ident">input</span>.<span class="ident">read_u8</span>().<span class="ident">map_local</span>()<span class="question-mark">?</span>))
-            .<span class="ident">map_local</span>()<span class="question-mark">?</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw-2">mut</span> <span class="ident">input</span>: <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">major</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">read_u8</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">minor</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">read_u8</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">encoding</span> <span class="op">=</span> <span class="ident">utils</span>::<span class="ident">valid_encoding</span>(<span class="ident">utils</span>::<span class="ident">switch_56_n_78</span>(<span class="ident">input</span>.<span class="ident">read_u8</span>()<span class="question-mark">?</span>))<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">rev_encoding</span> <span class="op">=</span> <span class="ident">utils</span>::<span class="ident">rev_encoding</span>(<span class="ident">encoding</span>);
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">comment</span> <span class="op">=</span>
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0</span>; <span class="ident">input</span>.<span class="ident">read_u32</span>::<span class="op">&lt;</span><span class="ident">utils</span>::<span class="ident">Order</span><span class="op">&gt;</span>().<span class="ident">map_local</span>()<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">usize</span>].<span class="ident">into_boxed_slice</span>();
-        <span class="ident">input</span>.<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">comment</span>).<span class="ident">map_local</span>()<span class="question-mark">?</span>;
+            <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0</span>; <span class="ident">input</span>.<span class="ident">read_u32</span>::<span class="op">&lt;</span><span class="ident">utils</span>::<span class="ident">Order</span><span class="op">&gt;</span>()<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">usize</span>].<span class="ident">into_boxed_slice</span>();
+        <span class="ident">input</span>.<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">comment</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">comment</span> <span class="op">=</span> <span class="ident">comment</span>;
 
         <span class="kw">if</span> <span class="ident">major</span> <span class="op">&lt;</span> <span class="number">1</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">Kff</span>(<span class="ident">error</span>::<span class="ident">Kff</span>::<span class="ident">NotSupportVersionNumber</span>));
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">Kff</span>(<span class="ident">error</span>::<span class="ident">Kff</span>::<span class="ident">NotSupportVersionNumber</span>).<span class="ident">into</span>());
         }
 
         <span class="kw">let</span> <span class="ident">variables</span> <span class="op">=</span> <span class="ident">Variables</span>::<span class="ident">default</span>();
@@ -630,15 +621,15 @@
     }
 
     <span class="doccomment">/// Get the next kmer section we have to parse</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next_section</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">data</span>::<span class="ident">Reader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">input</span>.<span class="ident">read_u8</span>().<span class="ident">map_local</span>()<span class="question-mark">?</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next_section</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">data</span>::<span class="ident">Reader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">input</span>.<span class="ident">read_u8</span>()<span class="question-mark">?</span> {
             <span class="string">b&#39;r&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">RawReader</span>::<span class="ident">new</span>(<span class="self">self</span>)<span class="question-mark">?</span>)),
             <span class="string">b&#39;m&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">MinimizerReader</span>::<span class="ident">new</span>(<span class="self">self</span>)<span class="question-mark">?</span>)),
             <span class="string">b&#39;v&#39;</span> <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="self">self</span>.<span class="ident">variables</span>.<span class="ident">deserialize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">input</span>).<span class="ident">map_local</span>()<span class="question-mark">?</span>;
+                <span class="self">self</span>.<span class="ident">variables</span>.<span class="ident">deserialize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">input</span>)<span class="question-mark">?</span>;
                 <span class="self">self</span>.<span class="ident">next_section</span>()
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">Kff</span>(<span class="ident">error</span>::<span class="ident">Kff</span>::<span class="ident">UnknowSectionType</span>)),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">Kff</span>(<span class="ident">error</span>::<span class="ident">Kff</span>::<span class="ident">UnknowSectionType</span>).<span class="ident">into</span>()),
         }
     }
 }
@@ -659,15 +650,14 @@
     <span class="ident">W</span>: <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Write</span> <span class="op">+</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Seek</span>,
 {
     <span class="doccomment">/// Create a Kff Writer from a seekable output, encoding and comment</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw-2">mut</span> <span class="ident">output</span>: <span class="ident">W</span>, <span class="ident">encoding</span>: <span class="ident">u8</span>, <span class="ident">comment</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw-2">mut</span> <span class="ident">output</span>: <span class="ident">W</span>, <span class="ident">encoding</span>: <span class="ident">u8</span>, <span class="ident">comment</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="comment">// write header</span>
         <span class="ident">output</span>
-            .<span class="ident">write_all</span>(<span class="kw-2">&amp;</span>[<span class="number">1u8</span>, <span class="number">0</span>, <span class="ident">switch_56_n_78</span>(<span class="ident">encoding</span>)])
-            .<span class="ident">map_local</span>()<span class="question-mark">?</span>;
+            .<span class="ident">write_all</span>(<span class="kw-2">&amp;</span>[<span class="number">1u8</span>, <span class="number">0</span>, <span class="ident">switch_56_n_78</span>(<span class="ident">encoding</span>)])<span class="question-mark">?</span>;
         <span class="ident">output</span>
             .<span class="ident">write_u32</span>::<span class="op">&lt;</span><span class="ident">BigEndian</span><span class="op">&gt;</span>(<span class="ident">comment</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>)
-            .<span class="ident">map_local</span>()<span class="question-mark">?</span>;
-        <span class="ident">output</span>.<span class="ident">write_all</span>(<span class="ident">comment</span>).<span class="ident">map_local</span>()<span class="question-mark">?</span>;
+            <span class="question-mark">?</span>;
+        <span class="ident">output</span>.<span class="ident">write_all</span>(<span class="ident">comment</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">output</span>,
@@ -688,8 +678,8 @@
     }
 
     <span class="doccomment">/// Write variable section</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_variables</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">output</span>.<span class="ident">write_u8</span>(<span class="string">b&#39;v&#39;</span>).<span class="ident">map_local</span>()<span class="question-mark">?</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_variables</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">output</span>.<span class="ident">write_u8</span>(<span class="string">b&#39;v&#39;</span>)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.<span class="ident">variables_buffer</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">output</span>)<span class="question-mark">?</span>;
 
@@ -703,8 +693,8 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">seqs</span>: <span class="kw-2">&amp;</span>[<span class="ident">Seq2Bits</span>],
         <span class="ident">datas</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">output</span>.<span class="ident">write_u8</span>(<span class="string">b&#39;r&#39;</span>).<span class="ident">map_local</span>()<span class="question-mark">?</span>;
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">output</span>.<span class="ident">write_u8</span>(<span class="string">b&#39;r&#39;</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">raw</span> <span class="op">=</span> <span class="ident">RawWriter</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">variables</span>, <span class="self">self</span>.<span class="ident">encoding</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">output</span>)<span class="question-mark">?</span>;
 
@@ -724,7 +714,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">seqs</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]],
         <span class="ident">datas</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">tmp</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Seq2Bits</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">seqs</span>
             .<span class="ident">iter</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">utils</span>::<span class="ident">seq2bits</span>(<span class="ident">x</span>, <span class="self">self</span>.<span class="ident">encoding</span>))
@@ -739,8 +729,8 @@
         <span class="ident">mini_index</span>: <span class="kw-2">&amp;</span>[<span class="ident">u64</span>],
         <span class="ident">seqs</span>: <span class="kw-2">&amp;</span>[<span class="ident">Seq2Bits</span>],
         <span class="ident">datas</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">output</span>.<span class="ident">write_u8</span>(<span class="string">b&#39;m&#39;</span>).<span class="ident">map_local</span>()<span class="question-mark">?</span>;
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">output</span>.<span class="ident">write_u8</span>(<span class="string">b&#39;m&#39;</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">minimizer</span> <span class="op">=</span>
             <span class="ident">MinimizerWriter</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">variables</span>, <span class="ident">minimizer</span>, <span class="self">self</span>.<span class="ident">encoding</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">output</span>)<span class="question-mark">?</span>;
@@ -763,7 +753,7 @@
         <span class="ident">mini_index</span>: <span class="kw-2">&amp;</span>[<span class="ident">u64</span>],
         <span class="ident">seqs</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]],
         <span class="ident">datas</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">tmp</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Seq2Bits</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">seqs</span>
             .<span class="ident">iter</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">utils</span>::<span class="ident">seq2bits</span>(<span class="ident">x</span>, <span class="self">self</span>.<span class="ident">encoding</span>))
@@ -775,7 +765,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">seq2bits</span>::<span class="ident">Bits2Nuc</span>;
-
+    
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">read</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[
