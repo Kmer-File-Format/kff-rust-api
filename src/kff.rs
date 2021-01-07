@@ -172,7 +172,7 @@ where
     }
 
     /// Write a raw section, with sequence encode in 2 bits
-    pub fn write_raw_section(&mut self, seqs: &[Seq2Bits], datas: &[&[u8]]) -> Result<usize> {
+    pub fn write_raw_section<A: AsRef<[u8]>>(&mut self, seqs: &[Seq2Bits], datas: &[A]) -> Result<usize> {
         self.output.write_u8(b'r')?;
 
         let mut raw = RawWriter::new(&self.variables, self.encoding, &mut self.output)?;
@@ -180,7 +180,7 @@ where
         let mut nb_bytes = 0;
 
         for (seq, data) in seqs.iter().zip(datas) {
-            nb_bytes += raw.write_block(&seq, &data)?
+            nb_bytes += raw.write_block(&seq, &data.as_ref())?
         }
 
         raw.close()?;
@@ -189,21 +189,25 @@ where
     }
 
     /// Write a raw section with sequence encode in ASCII
-    pub fn write_raw_seq_section(&mut self, seqs: &[&[u8]], datas: &[&[u8]]) -> Result<usize> {
+    pub fn write_raw_seq_section<A: AsRef<[u8]>, B: AsRef<[u8]>>(&mut self, seqs: &[A], datas: &[B]) -> Result<usize> {
+        // Todo it's ugly
         let tmp: Vec<Seq2Bits> = seqs
             .iter()
-            .map(|x| utils::seq2bits(x, self.encoding))
+            .map(|x| utils::seq2bits(x.as_ref(), self.encoding))
             .collect();
-        self.write_raw_section(&tmp[..], datas)
+
+        let tmp2: Vec<&[u8]> = datas.iter().map(|x| x.as_ref()).collect();
+	
+        self.write_raw_section(&tmp[..], &tmp2[..])
     }
 
     /// Write a minimizer section, with sequence encode in 2 bits
-    pub fn write_minimizer_section(
+    pub fn write_minimizer_section<A: AsRef<[u8]>>(
         &mut self,
         minimizer: &[u8],
         mini_index: &[u64],
         seqs: &[Seq2Bits],
-        datas: &[&[u8]],
+        datas: &[A],
     ) -> Result<usize> {
         self.output.write_u8(b'm')?;
 
@@ -213,7 +217,7 @@ where
         let mut nb_bytes = 0;
 
         for (index, (seq, data)) in mini_index.iter().zip(seqs.iter().zip(datas)) {
-            nb_bytes += minimizer.write_block(*index, &seq, &data)?
+            nb_bytes += minimizer.write_block(*index, &seq, &data.as_ref())?
         }
 
         minimizer.close()?;
@@ -222,18 +226,23 @@ where
     }
 
     /// Write a raw section with sequence not encode in ASCII
-    pub fn write_minimizer_seq_section(
+    pub fn write_minimizer_seq_section<A: AsRef<[u8]>, B: AsRef<[u8]>>(
         &mut self,
         minimizer: &[u8],
         mini_index: &[u64],
-        seqs: &[&[u8]],
-        datas: &[&[u8]],
+        seqs: &[A],
+        datas: &[B],
     ) -> Result<usize> {
+        // Todo it's ugly
+
         let tmp: Vec<Seq2Bits> = seqs
             .iter()
-            .map(|x| utils::seq2bits(x, self.encoding))
+            .map(|x| utils::seq2bits(x.as_ref(), self.encoding))
             .collect();
-        self.write_minimizer_section(minimizer, mini_index, &tmp[..], datas)
+
+        let tmp2: Vec<&[u8]> = datas.iter().map(|x| x.as_ref()).collect();
+
+        self.write_minimizer_section(minimizer, mini_index, &tmp[..], &tmp2[..])
     }
 }
 
@@ -393,7 +402,7 @@ mod tests {
         writer.write_variables().unwrap();
 
         writer
-            .write_raw_seq_section(&[b"GCGGGGATC"], &[&[1u8, 2, 3, 4, 5]])
+            .write_raw_seq_section(&[b"GCGGGGATC"], &[vec![1u8, 2, 3, 4, 5]])
             .unwrap();
 
         writer.variables().insert("m".to_string(), 4);
