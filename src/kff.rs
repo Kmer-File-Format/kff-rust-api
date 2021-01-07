@@ -172,7 +172,11 @@ where
     }
 
     /// Write a raw section, with sequence encode in 2 bits
-    pub fn write_raw_section<A: AsRef<[u8]>>(&mut self, seqs: &[Seq2Bits], datas: &[A]) -> Result<usize> {
+    pub fn write_raw_section<A: AsRef<[u8]>>(
+        &mut self,
+        seqs: &[Seq2Bits],
+        datas: &[A],
+    ) -> Result<usize> {
         self.output.write_u8(b'r')?;
 
         let mut raw = RawWriter::new(&self.variables, self.encoding, &mut self.output)?;
@@ -189,7 +193,11 @@ where
     }
 
     /// Write a raw section with sequence encode in ASCII
-    pub fn write_raw_seq_section<A: AsRef<[u8]>, B: AsRef<[u8]>>(&mut self, seqs: &[A], datas: &[B]) -> Result<usize> {
+    pub fn write_raw_seq_section<A: AsRef<[u8]>, B: AsRef<[u8]>>(
+        &mut self,
+        seqs: &[A],
+        datas: &[B],
+    ) -> Result<usize> {
         // Todo it's ugly
         let tmp: Vec<Seq2Bits> = seqs
             .iter()
@@ -197,7 +205,7 @@ where
             .collect();
 
         let tmp2: Vec<&[u8]> = datas.iter().map(|x| x.as_ref()).collect();
-	
+
         self.write_raw_section(&tmp[..], &tmp2[..])
     }
 

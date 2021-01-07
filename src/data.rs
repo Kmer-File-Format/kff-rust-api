@@ -171,7 +171,11 @@ where
     /// Verify the number of the number of kmer and data length match and not upper than max number of kmer
     fn check_block(&mut self, seq_len: usize, data_len: usize) -> Result<usize> {
         let nb_kmer = self.nb_kmer(seq_len);
-        let nb_data = data_len / self.data_size() as usize;
+        let nb_data = if self.data_size() == 0 {
+            self.nb_kmer(seq_len)
+        } else {
+            data_len / self.data_size() as usize
+        };
 
         if nb_data != nb_kmer {
             return Err(error::Error::Data(error::Data::NbKmerNbDataDiff).into());
