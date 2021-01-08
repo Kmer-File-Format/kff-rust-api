@@ -297,6 +297,22 @@
 <span id="294">294</span>
 <span id="295">295</span>
 <span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">/* crate use */</span>
 <span class="kw">use</span> <span class="ident">anyhow</span>::<span class="prelude-ty">Result</span>;
@@ -451,6 +467,21 @@
     <span class="kw">use</span> <span class="ident">bitvec</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">write_dyn_size_field</span>() {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">test</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
+
+        <span class="ident">write_dynamic_size_field</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">test</span>, <span class="number">3</span>, <span class="number">240</span>).<span class="ident">unwrap</span>();
+
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="kw-2">&amp;</span><span class="ident">test</span>[..], <span class="kw-2">&amp;</span>[<span class="number">3</span>]);
+
+        <span class="ident">test</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
+
+        <span class="ident">write_dynamic_size_field</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">test</span>, <span class="number">3</span>, <span class="number">260</span>).<span class="ident">unwrap</span>();
+
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="kw-2">&amp;</span><span class="ident">test</span>[..], <span class="kw-2">&amp;</span>[<span class="number">3</span>, <span class="number">0</span>]);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">internal_encoding</span>() {
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">nuc2internal</span>(<span class="string">b&#39;A&#39;</span>), <span class="number">0</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">nuc2internal</span>(<span class="string">b&#39;C&#39;</span>), <span class="number">1</span>);
@@ -568,6 +599,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">padding_computation</span>() {
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">bytes_to_store_n</span>(<span class="number">2</span>), <span class="number">1</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">bytes_to_store_n</span>(<span class="number">240</span>), <span class="number">1</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">bytes_to_store_n</span>(<span class="number">255</span>), <span class="number">1</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">bytes_to_store_n</span>(<span class="number">256</span>), <span class="number">2</span>);
     }
