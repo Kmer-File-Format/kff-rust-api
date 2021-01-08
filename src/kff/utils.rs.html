@@ -312,7 +312,6 @@
 <span id="309">309</span>
 <span id="310">310</span>
 <span id="311">311</span>
-<span id="312">312</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">/* crate use */</span>
 <span class="kw">use</span> <span class="ident">anyhow</span>::<span class="prelude-ty">Result</span>;
@@ -343,7 +342,6 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0u8</span>; <span class="ident">bytes_to_store_n</span>(<span class="ident">max_value</span>) <span class="kw">as</span> <span class="ident">usize</span>];
 
     <span class="ident">input</span>.<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buffer</span>)<span class="question-mark">?</span>;
-
     <span class="ident">buffer</span>.<span class="ident">resize</span>((<span class="number">9</span> <span class="op">-</span> <span class="ident">bytes_to_store_n</span>(<span class="ident">max_value</span>)) <span class="kw">as</span> <span class="ident">usize</span>, <span class="number">0</span>);
 
     <span class="prelude-val">Ok</span>(<span class="ident">Order</span>::<span class="ident">read_u64</span>(<span class="kw-2">&amp;</span><span class="ident">buffer</span>))
