@@ -1,9 +1,6 @@
 use std::io::Read;
-use std::io::Write;
 
 use kff;
-use kff::seq2bits::Bits2Nuc;
-use kff::variables::Variables1;
 
 fn read_and_write(i: &str, o: &str, k: u64, m: u64, data_size: u64) {
     let mut input = std::io::BufReader::new(std::fs::File::open(i).unwrap());
@@ -50,27 +47,7 @@ fn r_0() {
     input = std::io::BufReader::new(std::fs::File::open("tests/temp_r_0.kff").unwrap());
     input.read_to_end(&mut my).unwrap();
 
-    std::fs::remove_file("tests/temp_r_0.kff");
+    std::fs::remove_file("tests/temp_r_0.kff").unwrap();
 
     assert_eq!(truth[67..], my[67..]);
-}
-
-#[test]
-fn kmers2kff() {
-    let mut input =
-        std::io::BufReader::new(std::fs::File::open("tests/data/kmers2kff.kff").unwrap());
-    let mut reader = kff::Reader::new(&mut input).unwrap();
-
-    let rev_encoding = reader.rev_encoding();
-
-    while let Ok(section) = reader.next_section() {
-        println!("section");
-        let mut it = section.into_iter();
-        while let Some(Ok(kmer)) = it.next() {
-            println!(
-                "{}",
-                std::str::from_utf8(&kmer.seq().into_nuc(rev_encoding)).unwrap()
-            );
-        }
-    }
 }
