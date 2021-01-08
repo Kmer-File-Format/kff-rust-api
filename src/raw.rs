@@ -208,7 +208,12 @@ where
             bytes_write += utils::bytes_to_store_n(self.max) as usize;
         }
 
-        let mut write_seq = bitvec![Msb0, u8; 0; 8 - ((seq.len()) % 8)];
+        let mut write_seq = if seq.len() % 8 == 0 {
+            bitvec![Msb0, u8; 0; 0]
+        } else {
+            bitvec![Msb0, u8; 0; 8 - (seq.len() % 8)]
+        };
+
         write_seq.extend(seq);
         self.output.write_all(write_seq.as_raw_slice())?;
         bytes_write += seq.as_slice().len();

@@ -151,6 +151,21 @@ mod tests {
     use bitvec::prelude::*;
 
     #[test]
+    fn write_dyn_size_field() {
+        let mut test: Vec<u8> = Vec::new();
+
+        write_dynamic_size_field(&mut test, 3, 240).unwrap();
+
+        assert_eq!(&test[..], &[3]);
+
+        test = Vec::new();
+
+        write_dynamic_size_field(&mut test, 3, 260).unwrap();
+
+        assert_eq!(&test[..], &[3, 0]);
+    }
+
+    #[test]
     fn internal_encoding() {
         assert_eq!(nuc2internal(b'A'), 0);
         assert_eq!(nuc2internal(b'C'), 1);
@@ -268,6 +283,7 @@ mod tests {
     #[test]
     fn padding_computation() {
         assert_eq!(bytes_to_store_n(2), 1);
+        assert_eq!(bytes_to_store_n(240), 1);
         assert_eq!(bytes_to_store_n(255), 1);
         assert_eq!(bytes_to_store_n(256), 2);
     }
