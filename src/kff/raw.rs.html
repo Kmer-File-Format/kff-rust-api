@@ -646,6 +646,31 @@
 <span id="643">643</span>
 <span id="644">644</span>
 <span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Declaration of Raw section Reader and Writer</span>
 
@@ -1199,6 +1224,31 @@
             [<span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0b00111101</span>, <span class="number">0b11100011</span>, <span class="number">10</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">1</span>, <span class="number">0b00000011</span>, <span class="number">0b01110010</span>, <span class="number">1</span>]
         );
     }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">write_data_size_0</span>() {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">variables</span> <span class="op">=</span> <span class="ident">Variables</span>::<span class="ident">new</span>();
+        <span class="ident">variables</span>.<span class="ident">insert</span>(<span class="string">&quot;k&quot;</span>.<span class="ident">to_string</span>(), <span class="number">5</span>);
+        <span class="ident">variables</span>.<span class="ident">insert</span>(<span class="string">&quot;max&quot;</span>.<span class="ident">to_string</span>(), <span class="number">5</span>);
+        <span class="ident">variables</span>.<span class="ident">insert</span>(<span class="string">&quot;data_size&quot;</span>.<span class="ident">to_string</span>(), <span class="number">0</span>);
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">out</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0u8</span>; <span class="number">0</span>];
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">output</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Cursor</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">out</span>);
+        {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">writer</span> <span class="op">=</span> <span class="ident">Writer</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">variables</span>, <span class="number">0b00011011</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">output</span>).<span class="ident">unwrap</span>();
+
+            <span class="ident">writer</span>.<span class="ident">write_seq_block</span>(<span class="string">b&quot;GGCGTAG&quot;</span>, <span class="kw-2">&amp;</span>[]).<span class="ident">unwrap</span>();
+            <span class="ident">writer</span>.<span class="ident">write_seq_block</span>(<span class="string">b&quot;GCGAT&quot;</span>, <span class="kw-2">&amp;</span>[]).<span class="ident">unwrap</span>();
+
+            <span class="ident">writer</span>.<span class="ident">close</span>().<span class="ident">unwrap</span>();
+        }
+
+        <span class="macro">assert_eq</span><span class="macro">!</span>(
+            <span class="ident">out</span>,
+            [<span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0b00111101</span>, <span class="number">0b11100011</span>, <span class="number">1</span>, <span class="number">0b00000011</span>, <span class="number">0b01110010</span>]
+        );
+    }
+
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">write_n1</span>() {
