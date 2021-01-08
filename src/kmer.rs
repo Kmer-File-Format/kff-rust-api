@@ -29,11 +29,11 @@ impl Kmer {
 
     /// Get length of kmer
     pub fn len(&self) -> usize {
-        self.data.len()
+        self.seq.len() / 2
     }
 
     /// Return true if kmer length is 0
     pub fn is_empty(&self) -> bool {
-        self.data.is_empty()
+        self.len() == 0
     }
 }

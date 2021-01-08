@@ -53,6 +53,7 @@ where
         let data_size = reader.variables().data_size()?;
 
         let mut buffer = vec![0u8; utils::ceil_to_8(m * 2) as usize / 8];
+
         reader.input().read_exact(&mut buffer)?;
         let mut tmp = BitVec::from_vec(buffer);
         tmp.resize((m * 2) as usize, false);

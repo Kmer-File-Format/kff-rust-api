@@ -17,6 +17,10 @@ edition = "2018"
 name = "kff"
 crate-type = ["rlib", "cdylib", "staticlib"]
 
+[[bin]]
+name = "kff2str"
+path = "src/kff2str.rs"
+
 [dependencies]
 anyhow    = "1"
 thiserror = "1"

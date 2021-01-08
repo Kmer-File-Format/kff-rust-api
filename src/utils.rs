@@ -25,9 +25,8 @@ where
     R: std::io::Read + ?Sized,
 {
     let mut buffer = vec![0u8; bytes_to_store_n(max_value) as usize];
-
+    
     input.read_exact(&mut buffer)?;
-
     buffer.resize((9 - bytes_to_store_n(max_value)) as usize, 0);
 
     Ok(Order::read_u64(&buffer))
