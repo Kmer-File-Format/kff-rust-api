@@ -552,6 +552,31 @@ mod tests {
     }
 
     #[test]
+    fn write_data_size_0() {
+        let mut variables = Variables::new();
+        variables.insert("k".to_string(), 5);
+        variables.insert("max".to_string(), 5);
+        variables.insert("data_size".to_string(), 0);
+
+        let mut out = vec![0u8; 0];
+        let mut output = std::io::Cursor::new(&mut out);
+        {
+            let mut writer = Writer::new(&variables, 0b00011011, &mut output).unwrap();
+
+            writer.write_seq_block(b"GGCGTAG", &[]).unwrap();
+            writer.write_seq_block(b"GCGAT", &[]).unwrap();
+
+            writer.close().unwrap();
+        }
+
+        assert_eq!(
+            out,
+            [2, 0, 0, 0, 3, 0b00111101, 0b11100011, 1, 0b00000011, 0b01110010]
+        );
+    }
+
+
+    #[test]
     fn write_n1() {
         let mut variables = Variables::new();
         variables.insert("k".to_string(), 5);

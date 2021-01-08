@@ -1,5 +1,4 @@
 use kff::seq2bits::Bits2Nuc;
-use kff::variables::Variables1;
 
 const TRUTH: &[&[u8]] = &[
     b"AAAAATCAACT",

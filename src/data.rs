@@ -75,7 +75,8 @@ where
     fn read_data(&mut self) -> Result<Vec<u8>> {
         let mut buffer = vec![0u8; (self.block_n() * self.data_size()) as usize];
 
-        self.input().read_exact(&mut buffer)?;
+	self.input().read_exact(&mut buffer)?;
+	
         Ok(buffer)
     }
 

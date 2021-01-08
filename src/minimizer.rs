@@ -262,7 +262,12 @@ where
         bytes_write +=
             utils::bytes_to_store_n(std::cmp::min(self.k + self.m - 1, u64::MAX)) as usize;
 
-        let mut write_seq = bitvec![Msb0, u8; 0; 8 - ((seq.len()) % 8)];
+	let mut write_seq = if seq.len() % 8 == 0 {
+	    bitvec![Msb0, u8; 0; 0]
+	} else {
+	    bitvec![Msb0, u8; 0; 8 - ((seq.len()) % 8)]
+	};
+	
         write_seq.extend(seq);
         self.output.write_all(write_seq.as_raw_slice())?;
         bytes_write += seq.as_slice().len();
@@ -644,6 +649,32 @@ mod tests {
         );
     }
 
+    #[test]
+    fn write_data_size_0() {
+        let mut variables = Variables::new();
+        variables.insert("k".to_string(), 5);
+        variables.insert("m".to_string(), 2);
+        variables.insert("max".to_string(), 255);
+        variables.insert("data_size".to_string(), 0);
+
+        // minimizer sequence AC
+        let minimizer = b"AC";
+
+        let mut buffer = std::io::Cursor::new(vec![0u8; 0]);
+        {
+            let mut writer = Writer::new(&variables, minimizer, 0b00011011, &mut buffer).unwrap();
+
+            writer.write_seq_block(4, b"GAGTT", &[]).unwrap();
+            writer.write_seq_block(0, b"GAT", &[]).unwrap();
+        }
+
+        assert_eq!(
+            buffer.into_inner(),
+            [0b00010000, 2, 0, 0, 0, 3, 4, 0b00000011, 0b00111010, 1, 0, 0b00110010]
+        );
+    }
+
+    
     #[test]
     fn write_n1() {
         let mut variables = Variables::new();
