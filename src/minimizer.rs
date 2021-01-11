@@ -59,7 +59,7 @@ where
         tmp.resize((m * 2) as usize, false);
         let minimizer = tmp.into_boxed_bitslice();
 
-        let remaining_block = reader.input().read_u32::<LittleEndian>()?;
+        let remaining_block = reader.input().read_u32::<utils::Order>()?;
 
         Ok(Self {
             k,
@@ -220,7 +220,7 @@ where
 
         output.write_all(utils::seq2bits(minimizer, encoding).as_slice())?;
         let nb_block_offset = output.seek(std::io::SeekFrom::Current(0))?;
-        output.write_u32::<LittleEndian>(0)?;
+        output.write_u32::<utils::Order>(0)?;
 
         Ok(Self {
             k,
@@ -262,12 +262,12 @@ where
         bytes_write +=
             utils::bytes_to_store_n(std::cmp::min(self.k + self.m - 1, u64::MAX)) as usize;
 
-	let mut write_seq = if seq.len() % 8 == 0 {
-	    bitvec![Msb0, u8; 0; 0]
-	} else {
-	    bitvec![Msb0, u8; 0; 8 - ((seq.len()) % 8)]
-	};
-	
+        let mut write_seq = if seq.len() % 8 == 0 {
+            bitvec![Msb0, u8; 0; 0]
+        } else {
+            bitvec![Msb0, u8; 0; 8 - ((seq.len()) % 8)]
+        };
+
         write_seq.extend(seq);
         self.output.write_all(write_seq.as_raw_slice())?;
         bytes_write += seq.as_slice().len();
@@ -674,7 +674,6 @@ mod tests {
         );
     }
 
-    
     #[test]
     fn write_n1() {
         let mut variables = Variables::new();

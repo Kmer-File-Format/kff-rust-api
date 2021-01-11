@@ -47,7 +47,7 @@ where
         let max = reader.variables().max()?;
         let data_size = reader.variables().data_size()?;
 
-        let remaining_block = reader.input().read_u32::<LittleEndian>()?;
+        let remaining_block = reader.input().read_u32::<utils::Order>()?;
 
         Ok(Self {
             k,
@@ -181,7 +181,7 @@ where
 
         let nb_block_offset = output.seek(std::io::SeekFrom::Current(0))?;
 
-        output.write_u32::<LittleEndian>(0)?;
+        output.write_u32::<utils::Order>(0)?;
 
         Ok(Self {
             k,
@@ -574,7 +574,6 @@ mod tests {
             [2, 0, 0, 0, 3, 0b00111101, 0b11100011, 1, 0b00000011, 0b01110010]
         );
     }
-
 
     #[test]
     fn write_n1() {

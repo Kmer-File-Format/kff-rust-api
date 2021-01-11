@@ -75,8 +75,8 @@ where
     fn read_data(&mut self) -> Result<Vec<u8>> {
         let mut buffer = vec![0u8; (self.block_n() * self.data_size()) as usize];
 
-	self.input().read_exact(&mut buffer)?;
-	
+        self.input().read_exact(&mut buffer)?;
+
         Ok(buffer)
     }
 
@@ -150,7 +150,7 @@ where
             let nb_block = self.nb_block();
 
             self.output().seek(std::io::SeekFrom::Start(offset))?;
-            self.output().write_u32::<LittleEndian>(nb_block)?;
+            self.output().write_u32::<utils::Order>(nb_block)?;
             self.output().seek(std::io::SeekFrom::End(0))?;
             self.set_close(true);
 

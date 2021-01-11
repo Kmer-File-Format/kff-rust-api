@@ -2,10 +2,11 @@
 
 /* crate use */
 use anyhow::Result;
-use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
+use byteorder::{ReadBytesExt, WriteBytesExt};
 
 /* local use */
 use crate::error;
+use crate::utils;
 
 /// Variables is a specialisation of HashMap
 pub type Variables = std::collections::HashMap<String, u64>;
@@ -72,7 +73,7 @@ impl Reader for Variables {
     where
         R: std::io::Read,
     {
-        let nb_variables = input.read_u64::<LittleEndian>()?;
+        let nb_variables = input.read_u64::<utils::Order>()?;
         let mut name = Vec::new();
         let mut char;
 
@@ -93,7 +94,7 @@ impl Reader for Variables {
 
             self.insert(
                 String::from_utf8(name.clone())?,
-                input.read_u64::<LittleEndian>()?,
+                input.read_u64::<utils::Order>()?,
             );
             nb_bytes += 8;
             name.clear();
@@ -108,13 +109,13 @@ impl Writer for Variables {
     where
         W: std::io::Write,
     {
-        output.write_u64::<LittleEndian>(self.len() as u64)?;
+        output.write_u64::<utils::Order>(self.len() as u64)?;
 
         let mut nb_bytes = 8;
         for (key, value) in self.iter() {
             output.write_all(key.as_bytes())?;
             output.write_u8(0)?;
-            output.write_u64::<LittleEndian>(*value)?;
+            output.write_u64::<utils::Order>(*value)?;
 
             nb_bytes += key.len() + 1 + 8;
         }
