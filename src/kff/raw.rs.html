@@ -670,7 +670,6 @@
 <span id="667">667</span>
 <span id="668">668</span>
 <span id="669">669</span>
-<span id="670">670</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Declaration of Raw section Reader and Writer</span>
 
@@ -721,7 +720,7 @@
         <span class="kw">let</span> <span class="ident">max</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">variables</span>().<span class="ident">max</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">data_size</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">variables</span>().<span class="ident">data_size</span>()<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">remaining_block</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">input</span>().<span class="ident">read_u32</span>::<span class="op">&lt;</span><span class="ident">LittleEndian</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">remaining_block</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">input</span>().<span class="ident">read_u32</span>::<span class="op">&lt;</span><span class="ident">utils</span>::<span class="ident">Order</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">k</span>,
@@ -855,7 +854,7 @@
 
         <span class="kw">let</span> <span class="ident">nb_block_offset</span> <span class="op">=</span> <span class="ident">output</span>.<span class="ident">seek</span>(<span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">SeekFrom</span>::<span class="ident">Current</span>(<span class="number">0</span>))<span class="question-mark">?</span>;
 
-        <span class="ident">output</span>.<span class="ident">write_u32</span>::<span class="op">&lt;</span><span class="ident">LittleEndian</span><span class="op">&gt;</span>(<span class="number">0</span>)<span class="question-mark">?</span>;
+        <span class="ident">output</span>.<span class="ident">write_u32</span>::<span class="op">&lt;</span><span class="ident">utils</span>::<span class="ident">Order</span><span class="op">&gt;</span>(<span class="number">0</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">k</span>,
@@ -1248,7 +1247,6 @@
             [<span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0b00111101</span>, <span class="number">0b11100011</span>, <span class="number">1</span>, <span class="number">0b00000011</span>, <span class="number">0b01110010</span>]
         );
     }
-
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">write_n1</span>() {
