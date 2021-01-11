@@ -54,7 +54,6 @@ fn r_0() {
 }
 
 #[test]
-#[should_panic]
 fn m_1() {
     let truth_path = "tests/data/m_1.kff";
     let test_path = "tests/temp_m_1.kff";
