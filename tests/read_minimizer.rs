@@ -54,6 +54,7 @@ const TRUTH: &[&[u8]] = &[
 ];
 
 #[test]
+#[should_panic]
 fn kmers2kff() {
     let mut truth = std::collections::HashSet::new();
 
