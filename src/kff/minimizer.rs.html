@@ -783,6 +783,7 @@
 <span id="780">780</span>
 <span id="781">781</span>
 <span id="782">782</span>
+<span id="783">783</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Declaration of Minimizer section Reader and Writer</span>
 
@@ -838,11 +839,11 @@
         <span class="kw">let</span> <span class="ident">max</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">variables</span>().<span class="ident">max</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">data_size</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">variables</span>().<span class="ident">data_size</span>()<span class="question-mark">?</span>;
 
-	<span class="kw">let</span> <span class="ident">buf_len</span> <span class="op">=</span> <span class="ident">utils</span>::<span class="ident">ceil_to_8</span>(<span class="ident">m</span> <span class="op">*</span> <span class="number">2</span>) <span class="kw">as</span> <span class="ident">usize</span> <span class="op">/</span> <span class="number">8</span>;
+        <span class="kw">let</span> <span class="ident">buf_len</span> <span class="op">=</span> <span class="ident">utils</span>::<span class="ident">ceil_to_8</span>(<span class="ident">m</span> <span class="op">*</span> <span class="number">2</span>) <span class="kw">as</span> <span class="ident">usize</span> <span class="op">/</span> <span class="number">8</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0u8</span>; <span class="ident">buf_len</span>];
 
-	<span class="ident">reader</span>.<span class="ident">input</span>().<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buffer</span>)<span class="question-mark">?</span>;
-	
+        <span class="ident">reader</span>.<span class="ident">input</span>().<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buffer</span>)<span class="question-mark">?</span>;
+
         <span class="kw">let</span> <span class="ident">bit_buffer</span> <span class="op">=</span> <span class="ident">BitVec</span>::<span class="ident">from_vec</span>(<span class="ident">buffer</span>);
 
         <span class="kw">let</span> <span class="ident">minimizer</span> <span class="op">=</span> <span class="ident">BitBox</span>::<span class="ident">from_bitslice</span>(<span class="kw-2">&amp;</span><span class="ident">bit_buffer</span>[(<span class="ident">buf_len</span> <span class="op">*</span> <span class="number">8</span> <span class="op">-</span> <span class="ident">m</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">*</span> <span class="number">2</span>)..]);
@@ -1006,15 +1007,16 @@
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">Minimizer</span>(<span class="ident">error</span>::<span class="ident">Minimizer</span>::<span class="ident">MinimizerSizeMDiff</span>).<span class="ident">into</span>());
         }
 
-	<span class="kw">let</span> <span class="ident">mini</span> <span class="op">=</span> <span class="ident">utils</span>::<span class="ident">seq2bits</span>(<span class="ident">minimizer</span>, <span class="ident">encoding</span>);
-	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">write_seq</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">mini</span>.<span class="ident">len</span>() <span class="op">%</span> <span class="number">8</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">let</span> <span class="ident">mini</span> <span class="op">=</span> <span class="ident">utils</span>::<span class="ident">seq2bits</span>(<span class="ident">minimizer</span>, <span class="ident">encoding</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">write_seq</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">mini</span>.<span class="ident">len</span>() <span class="op">%</span> <span class="number">8</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
             <span class="macro">bitvec</span><span class="macro">!</span>[<span class="ident">Msb0</span>, <span class="ident">u8</span>; <span class="number">0</span>; <span class="number">0</span>]
         } <span class="kw">else</span> {
             <span class="macro">bitvec</span><span class="macro">!</span>[<span class="ident">Msb0</span>, <span class="ident">u8</span>; <span class="number">0</span>; <span class="number">8</span> <span class="op">-</span> (<span class="ident">mini</span>.<span class="ident">len</span>() <span class="op">%</span> <span class="number">8</span>)]
         };
-	<span class="ident">write_seq</span>.<span class="ident">extend</span>(<span class="ident">mini</span>);
-	
-	<span class="ident">output</span>.<span class="ident">write_all</span>(<span class="ident">write_seq</span>.<span class="ident">as_raw_slice</span>())<span class="question-mark">?</span>;
+        <span class="ident">write_seq</span>.<span class="ident">extend</span>(<span class="ident">mini</span>);
+
+        <span class="ident">output</span>.<span class="ident">write_all</span>(<span class="ident">write_seq</span>.<span class="ident">as_raw_slice</span>())<span class="question-mark">?</span>;
+
         <span class="kw">let</span> <span class="ident">nb_block_offset</span> <span class="op">=</span> <span class="ident">output</span>.<span class="ident">seek</span>(<span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">SeekFrom</span>::<span class="ident">Current</span>(<span class="number">0</span>))<span class="question-mark">?</span>;
         <span class="ident">output</span>.<span class="ident">write_u32</span>::<span class="op">&lt;</span><span class="ident">utils</span>::<span class="ident">Order</span><span class="op">&gt;</span>(<span class="number">0</span>)<span class="question-mark">?</span>;
 
@@ -1233,7 +1235,7 @@
     <span class="kw">fn</span> <span class="ident">next_kmer</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">block</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[
             <span class="number">1</span>, <span class="number">0</span>, <span class="number">30</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,          <span class="comment">// version 1.0 encoding 0b00011011</span>
-            <span class="number">0b10100101</span>, <span class="comment">// minimiwe -&gt; TTCC</span>
+            <span class="number">0b10100101</span>, <span class="comment">// minimizer -&gt; TTCC</span>
             <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">// 1 block</span>
             <span class="number">5</span>, <span class="number">2</span>, <span class="comment">// 5 kmer in block, minimizer index 2</span>
             <span class="number">0b00000010</span>, <span class="number">0b01110011</span>, <span class="comment">// sequence</span>
