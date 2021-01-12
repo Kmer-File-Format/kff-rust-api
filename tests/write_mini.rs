@@ -27,6 +27,6 @@ fn write_minimizer() {
 
     assert_eq!(
         vec![109, 0, 60, 1, 0, 0, 0, 6, 5, 0, 13, 166, 179],
-        out[66..]
+        out[66..].to_vec()
     );
 }
