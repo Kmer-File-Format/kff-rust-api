@@ -150,7 +150,7 @@ where
 
         self.block_idx = utils::read_dynamic_size_field(
             self.reader.input(),
-            std::cmp::min(self.k + self.m - 1, u64::MAX),
+            std::cmp::min(self.k + self.max - 1, u64::MAX),
         )?;
 
         let seq_without_mini = self.read_seq(self.block_n + self.k - 1 - self.m)?;
@@ -268,10 +268,10 @@ where
         utils::write_dynamic_size_field(
             self.output,
             minimizer_idx,
-            std::cmp::min(self.k + self.m - 1, u64::MAX),
+            std::cmp::min(self.k + self.max - 1, u64::MAX),
         )?;
         bytes_write +=
-            utils::bytes_to_store_n(std::cmp::min(self.k + self.m - 1, u64::MAX)) as usize;
+            utils::bytes_to_store_n(std::cmp::min(self.k + self.max - 1, u64::MAX)) as usize;
 
         let mut write_seq = if seq.len() % 8 == 0 {
             bitvec![Msb0, u8; 0; 0]
@@ -656,7 +656,10 @@ mod tests {
 
         assert_eq!(
             buffer.into_inner(),
-            [0b00000001, 2, 0, 0, 0, 3, 4, 0b00000011, 0b00111010, 10, 8, 9, 1, 0, 0b00110010, 1]
+            [
+                0b00000001, 2, 0, 0, 0, 3, 4, 0, 0b00000011, 0b00111010, 10, 8, 9, 1, 0, 0,
+                0b00110010, 1
+            ]
         );
     }
 
@@ -681,7 +684,7 @@ mod tests {
 
         assert_eq!(
             buffer.into_inner(),
-            [0b00000001, 2, 0, 0, 0, 3, 4, 0b00000011, 0b00111010, 1, 0, 0b00110010]
+            [0b00000001, 2, 0, 0, 0, 3, 4, 0, 0b00000011, 0b00111010, 1, 0, 0, 0b00110010]
         );
     }
 
@@ -734,8 +737,8 @@ mod tests {
         assert_eq!(
             inp,
             [
-                1, 0, 30, 0, 0, 0, 0, 0b00000001, 2, 0, 0, 0, 3, 4, 0b00000011, 0b00111010, 10, 8,
-                9, 1, 0, 0b00110010, 1
+                1, 0, 30, 0, 0, 0, 0, 0b00000001, 2, 0, 0, 0, 3, 4, 0, 0b00000011, 0b00111010, 10,
+                8, 9, 1, 0, 0, 0b00110010, 1
             ]
         );
 

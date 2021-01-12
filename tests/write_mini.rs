@@ -25,5 +25,8 @@ fn write_minimizer() {
         .unwrap();
     let out = output.into_inner();
 
-    assert_eq!(vec![109, 0, 60, 1, 0, 0, 0, 6, 5, 13, 166, 179], out[66..]);
+    assert_eq!(
+        vec![109, 0, 60, 1, 0, 0, 0, 6, 5, 0, 13, 166, 179],
+        out[66..]
+    );
 }
