@@ -52,12 +52,14 @@ where
         let max = reader.variables().max()?;
         let data_size = reader.variables().data_size()?;
 
-        let mut buffer = vec![0u8; utils::ceil_to_8(m * 2) as usize / 8];
+        let buf_len = utils::ceil_to_8(m * 2) as usize / 8;
+        let mut buffer = vec![0u8; buf_len];
 
         reader.input().read_exact(&mut buffer)?;
-        let mut tmp = BitVec::from_vec(buffer);
-        tmp.resize((m * 2) as usize, false);
-        let minimizer = tmp.into_boxed_bitslice();
+
+        let bit_buffer = BitVec::from_vec(buffer);
+
+        let minimizer = BitBox::from_bitslice(&bit_buffer[(buf_len * 8 - m as usize * 2)..]);
 
         let remaining_block = reader.input().read_u32::<utils::Order>()?;
 
@@ -218,7 +220,16 @@ where
             return Err(error::Error::Minimizer(error::Minimizer::MinimizerSizeMDiff).into());
         }
 
-        output.write_all(utils::seq2bits(minimizer, encoding).as_slice())?;
+        let mini = utils::seq2bits(minimizer, encoding);
+        let mut write_seq = if mini.len() % 8 == 0 {
+            bitvec![Msb0, u8; 0; 0]
+        } else {
+            bitvec![Msb0, u8; 0; 8 - (mini.len() % 8)]
+        };
+        write_seq.extend(mini);
+
+        output.write_all(write_seq.as_raw_slice())?;
+
         let nb_block_offset = output.seek(std::io::SeekFrom::Current(0))?;
         output.write_u32::<utils::Order>(0)?;
 
@@ -437,7 +448,7 @@ mod tests {
     fn next_kmer() {
         let mut block: &[u8] = &[
             1, 0, 30, 0, 0, 0, 0,          // version 1.0 encoding 0b00011011
-            0b10100101, // minimiwe -> TTCC
+            0b10100101, // minimizer -> TTCC
             1, 0, 0, 0, // 1 block
             5, 2, // 5 kmer in block, minimizer index 2
             0b00000010, 0b01110011, // sequence
@@ -645,7 +656,7 @@ mod tests {
 
         assert_eq!(
             buffer.into_inner(),
-            [0b00010000, 2, 0, 0, 0, 3, 4, 0b00000011, 0b00111010, 10, 8, 9, 1, 0, 0b00110010, 1]
+            [0b00000001, 2, 0, 0, 0, 3, 4, 0b00000011, 0b00111010, 10, 8, 9, 1, 0, 0b00110010, 1]
         );
     }
 
@@ -670,7 +681,7 @@ mod tests {
 
         assert_eq!(
             buffer.into_inner(),
-            [0b00010000, 2, 0, 0, 0, 3, 4, 0b00000011, 0b00111010, 1, 0, 0b00110010]
+            [0b00000001, 2, 0, 0, 0, 3, 4, 0b00000011, 0b00111010, 1, 0, 0b00110010]
         );
     }
 
@@ -695,7 +706,7 @@ mod tests {
 
         assert_eq!(
             buffer.into_inner(),
-            [0b00010000, 2, 0, 0, 0, 1, 0b00110011, 10, 0, 0b00110010, 1]
+            [0b00000001, 2, 0, 0, 0, 1, 0b00110011, 10, 0, 0b00110010, 1]
         );
     }
 
@@ -723,7 +734,7 @@ mod tests {
         assert_eq!(
             inp,
             [
-                1, 0, 30, 0, 0, 0, 0, 0b00010000, 2, 0, 0, 0, 3, 4, 0b00000011, 0b00111010, 10, 8,
+                1, 0, 30, 0, 0, 0, 0, 0b00000001, 2, 0, 0, 0, 3, 4, 0b00000011, 0b00111010, 10, 8,
                 9, 1, 0, 0b00110010, 1
             ]
         );

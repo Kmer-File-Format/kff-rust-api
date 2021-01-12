@@ -74,6 +74,7 @@ impl Reader for Variables {
         R: std::io::Read,
     {
         let nb_variables = input.read_u64::<utils::Order>()?;
+
         let mut name = Vec::new();
         let mut char;
 

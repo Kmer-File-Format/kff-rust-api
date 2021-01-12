@@ -42,7 +42,7 @@ where
 {
     let mut buffer = vec![0u8; 0];
     buffer.write_u64::<Order>(value)?;
-    output.write_all(&buffer[..bytes_to_store_n(max_value) as usize])?;
+    output.write_all(&buffer[..(bytes_to_store_n(max_value) as usize)])?;
 
     Ok(bytes_to_store_n(max_value) as usize)
 }

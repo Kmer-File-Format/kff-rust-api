@@ -49,7 +49,10 @@ where
         let encoding = utils::valid_encoding(utils::switch_56_n_78(input.read_u8()?))?;
         let rev_encoding = utils::rev_encoding(encoding);
 
-        let mut comment = vec![0; input.read_u32::<utils::Order>()? as usize].into_boxed_slice();
+        let comment_len = input.read_u32::<utils::Order>()? as usize;
+
+        let mut comment = vec![0; comment_len].into_boxed_slice();
+
         input.read_exact(&mut comment)?;
         let comment = comment;
 
@@ -271,7 +274,6 @@ mod tests {
             // Raw block, 5 kmer in block,
             b'v', 1, 0, 0, 0, 0, 0, 0, 0, // 1 variable
             109, 0, 4, 0, 0, 0, 0, 0, 0, 0, // m -> 4
-            // varibale m -> 4
             b'm', 0b10100101, 1, 0, 0, 0, 5, 2, 0b00000010, 0b01110011, 1, 2, 3, 4,
             5,
             // Minimizer block, minimizer -> TTCC, 1 block, 5 kmer, minimizer index -> 2
@@ -369,17 +371,19 @@ mod tests {
     #[test]
     fn realistic_bin_read() {
         let mut input: &[u8] = &[
-            1, 0, 30, 0, 0, 0, 0, // version 1.0 encoding 0b00011011 no comment
-            b'v', 3, 0, 0, 0, 0, 0, 0, 0, 109, 97, 120, 0, 5, 0, 0, 0, 0, 0, 0, 0, 100, 97, 116,
-            97, 95, 115, 105, 122, 101, 0, 1, 0, 0, 0, 0, 0, 0, 0, 107, 0, 5, 0, 0, 0, 0, 0, 0, 0,
-            // variable k -> 5, max -> 5, data_size -> 1
-            b'r', 1, 0, 0, 0, 5, 0b11110111, 0b10001111, 0b0000001, 1, 2, 3, 4, 5,
+            1, 0, 30, 0, 0, 0, 0, // version 1.0 encoding 0b00011011
+            b'v', 3, 0, 0, 0, 0, 0, 0, 0, // 3 variables
+            109, 97, 120, 0, 5, 0, 0, 0, 0, 0, 0, 0, // max -> 5
+            100, 97, 116, 97, 95, 115, 105, 122, 101, 0, 1, 0, 0, 0, 0, 0, 0,
+            0, // data size -> 1
+            107, 0, 5, 0, 0, 0, 0, 0, 0, 0, // variable k -> 5
+            b'r', 1, 0, 0, 0, 5, 0b00000011, 0b11011110, 0b00111101, 1, 2, 3, 4, 5,
             // Raw block, 5 kmer in block,
-            b'v', 1, 0, 0, 0, 0, 0, 0, 0, 109, 0, 4, 0, 0, 0, 0, 0, 0, 0,
-            // varibale m -> 4
-            b'm', 0b10100101, 1, 0, 0, 0, 5, 2, 0b10011100, 0b00000011, 1, 2, 3, 4,
+            b'v', 1, 0, 0, 0, 0, 0, 0, 0, // 1 variable
+            109, 0, 4, 0, 0, 0, 0, 0, 0, 0, // m -> 4
+            b'm', 0b10100101, 1, 0, 0, 0, 5, 2, 0b00000010, 0b01110011, 1, 2, 3, 4,
             5,
-            // Minimizer block, minimizer -> CCTT, 1 block, k -> 5, minimizer index -> 2
+            // Minimizer block, minimizer -> TTCC, 1 block, 5 kmer, minimizer index -> 2
         ];
 
         let mut reader = super::Reader::new(&mut input).unwrap();
