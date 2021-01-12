@@ -784,6 +784,9 @@
 <span id="781">781</span>
 <span id="782">782</span>
 <span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Declaration of Minimizer section Reader and Writer</span>
 
@@ -937,7 +940,7 @@
 
         <span class="self">self</span>.<span class="ident">block_idx</span> <span class="op">=</span> <span class="ident">utils</span>::<span class="ident">read_dynamic_size_field</span>(
             <span class="self">self</span>.<span class="ident">reader</span>.<span class="ident">input</span>(),
-            <span class="ident">std</span>::<span class="ident">cmp</span>::<span class="ident">min</span>(<span class="self">self</span>.<span class="ident">k</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">m</span> <span class="op">-</span> <span class="number">1</span>, <span class="ident">u64</span>::<span class="ident">MAX</span>),
+            <span class="ident">std</span>::<span class="ident">cmp</span>::<span class="ident">min</span>(<span class="self">self</span>.<span class="ident">k</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">max</span> <span class="op">-</span> <span class="number">1</span>, <span class="ident">u64</span>::<span class="ident">MAX</span>),
         )<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">seq_without_mini</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_seq</span>(<span class="self">self</span>.<span class="ident">block_n</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">k</span> <span class="op">-</span> <span class="number">1</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">m</span>)<span class="question-mark">?</span>;
@@ -1443,7 +1446,10 @@
 
         <span class="macro">assert_eq</span><span class="macro">!</span>(
             <span class="ident">buffer</span>.<span class="ident">into_inner</span>(),
-            [<span class="number">0b00000001</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">0b00000011</span>, <span class="number">0b00111010</span>, <span class="number">10</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0b00110010</span>, <span class="number">1</span>]
+            [
+                <span class="number">0b00000001</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">0</span>, <span class="number">0b00000011</span>, <span class="number">0b00111010</span>, <span class="number">10</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>,
+                <span class="number">0b00110010</span>, <span class="number">1</span>
+            ]
         );
     }
 
@@ -1468,7 +1474,7 @@
 
         <span class="macro">assert_eq</span><span class="macro">!</span>(
             <span class="ident">buffer</span>.<span class="ident">into_inner</span>(),
-            [<span class="number">0b00000001</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">0b00000011</span>, <span class="number">0b00111010</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0b00110010</span>]
+            [<span class="number">0b00000001</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">0</span>, <span class="number">0b00000011</span>, <span class="number">0b00111010</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0b00110010</span>]
         );
     }
 
@@ -1521,8 +1527,8 @@
         <span class="macro">assert_eq</span><span class="macro">!</span>(
             <span class="ident">inp</span>,
             [
-                <span class="number">1</span>, <span class="number">0</span>, <span class="number">30</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0b00000001</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">0b00000011</span>, <span class="number">0b00111010</span>, <span class="number">10</span>, <span class="number">8</span>,
-                <span class="number">9</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0b00110010</span>, <span class="number">1</span>
+                <span class="number">1</span>, <span class="number">0</span>, <span class="number">30</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0b00000001</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">0</span>, <span class="number">0b00000011</span>, <span class="number">0b00111010</span>, <span class="number">10</span>,
+                <span class="number">8</span>, <span class="number">9</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0b00110010</span>, <span class="number">1</span>
             ]
         );
 
