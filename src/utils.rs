@@ -27,10 +27,8 @@ where
     let mut buffer = vec![0u8; bytes_to_store_n(max_value) as usize];
 
     input.read_exact(&mut buffer)?;
-    println!("{:?}", buffer);
+
     buffer.resize(8, 0);
-    println!("{:?}", buffer);
-    println!("{:?}", Order::read_u64(&buffer));
 
     Ok(Order::read_u64(&buffer))
 }
