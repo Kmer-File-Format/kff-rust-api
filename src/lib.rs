@@ -7,6 +7,7 @@
 /* project use */
 
 /* mod declaration */
+mod encoding;
 mod error;
 mod header;
 mod io;

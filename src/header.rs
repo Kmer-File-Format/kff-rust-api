@@ -13,7 +13,7 @@ struct Header {
     marker: [u8; 3],
     major: u8,
     minor: u8,
-    encoding: u8,
+    encoding: encoding::Encoding,
     uniq_kmer: bool,
     canonical_kmer: bool,
     free_block: Vec<u8>,
@@ -24,7 +24,7 @@ impl Header {
     pub fn new(
         major: u8,
         minor: u8,
-        encoding: u8,
+        encoding: encoding::Encoding,
         uniq_kmer: bool,
         canonical_kmer: bool,
         free_block: Vec<u8>,
@@ -58,7 +58,7 @@ impl Header {
             return Err(error::Error::VersionNotSupport);
         }
 
-        let encoding = input.read_u8()?;
+        let encoding = encoding::Encoding::new(input.read_u8()?)?;
 
         let uniq_kmer = input.read_u8()? > 0;
 
