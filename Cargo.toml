@@ -3,23 +3,28 @@ name = "kff"
 version = "0.1.0"
 description = "Kmer File Format rust parser"
 
+edition = "2021"
+rust-version = "1.56"
+
 authors = ["Pierre Marijon <pierre.marijon@hhu.de>"]
 
 repository = "https://github.com/Kmer-File-Format/kff-rust-api"
 homepage = "https://github.com/Kmer-File-Format/kff-rust-api"
 documentation = "https://github.com/Kmer-File-Format/kff-rust-api"
 
+readme = "Readme.md"
 license = "AGPL"
 
-edition = "2018"
+keywords = ["bioinformatics", "kmer"]
+
 
 [lib]
 name = "kff"
 crate-type = ["rlib", "cdylib", "staticlib"]
 
+
 [dependencies]
-anyhow    = "1"
 thiserror = "1"
 byteorder = "1"
-itertools = "0.9"
-bitvec    = "0.20"
+itertools = "0.10"
+bitvec    = "1"
