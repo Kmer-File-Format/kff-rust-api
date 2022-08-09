@@ -18,19 +18,21 @@ license-file = "LICENSE"
 # Error management
 thiserror      = { version = "1" }
 
-# Logging and error management
+# Logging management
 log            = { version = "0.4" }
 
 
 [dev-dependencies]
-criterion      = { version = "0.3" }
-
 # CLI management
 clap           = { version = "3", features = ["derive"] }
 
 # Logging management
 stderrlog      = { version = "0.4" }
 
+# Profiling
+criterion      = { version = "0.3" }
+
+rand           = { version = "0.8" }
 
 [profile.release]
 lto = 'thin'
