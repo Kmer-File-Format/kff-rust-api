@@ -1,32 +1,11 @@
-//! Define error produce by kff crates
-
-/* std use */
+//! Error struct of project kff
 
 /* crate use */
+use thiserror;
 
-/* project use */
+/// Enum to manage error
+#[derive(std::fmt::Debug, thiserror::Error)]
+pub enum Error {}
 
-/* mod declaration */
-
-/// Enum of all error can be produce by KFF
-#[derive(thiserror::Error, std::fmt::Debug)]
-pub enum Error {
-    /// std::io error
-    #[error(transparent)]
-    IO(#[from] std::io::Error),
-
-    /// KFF header section start by string 'KFF'
-    #[error("KFF format start by string 'KFF'")]
-    HeaderMissingMarker,
-
-    /// KFF version isn't support
-    #[error("KFF version support is 1.0 or lower")]
-    VersionNotSupport,
-
-    /// Invalid encoding
-    #[error("Encoding isn't valid")]
-    EncodingNotValid,
-}
-
-/// A type alias to simplify usage of Result
-pub type Result<T> = std::result::Result<T, Error>;
+/// Alias of result
+pub type Result<T> = core::result::Result<T, Error>;

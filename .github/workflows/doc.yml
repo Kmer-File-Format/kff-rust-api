@@ -9,7 +9,7 @@ jobs:
   release:
     name: Github Pages
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2

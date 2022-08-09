@@ -1,16 +1,18 @@
-# kff-rust-bio 🧬 💻
-
-[![License](https://img.shields.io/badge/license-AGPL--3.0-green)](https://github.com/Kmer-File-Format/kff-rust-api/blob/master/LICENSE)
-![CI](https://github.com/Kmer-File-Format/kff-rust-api/workflows/CI/badge.svg)
-[![Documentation](https://github.com/Kmer-File-Format/kff-rust-api/workflows/Documentation/badge.svg)](https://kmer-file-format.github.io/kff-rust-api/kff/)
+![Test](https://github.com/Kmer-File-Format/kff-rust-api/workflows/Test/badge.svg)
+![Lints](https://github.com/Kmer-File-Format/kff-rust-api/workflows/Lints/badge.svg)
+![MSRV](https://github.com/Kmer-File-Format/kff-rust-api/workflows/MSRV/badge.svg)
 [![CodeCov](https://codecov.io/gh/Kmer-File-Format/kff-rust-api/branch/master/graph/badge.svg)](https://codecov.io/gh/Kmer-File-Format/kff-rust-api)
+[![Documentation](https://github.com/Kmer-File-Format/kff-rust-api/workflows/Documentation/badge.svg)](https://natir.github.io/kff/kff)
 
-A rust crate to work with Kmer File Format
+
+# Kmer File Format Rust parser
 
 ## Usage
 
-WORK IN PROGRESS
+```
+kff = { git = "git@github.com:Kmer-File-Format/kff-rust-api.git" }
+```
 
 ## Minimum supported Rust version
 
-Currently the minimum supported Rust version is 1.56.0.
+Currently the minimum supported Rust version is 1.62.

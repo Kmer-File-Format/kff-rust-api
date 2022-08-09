@@ -1,30 +1,45 @@
 [package]
 name = "kff"
 version = "0.1.0"
-description = "Kmer File Format rust parser"
-
+authors = ["Pierre Marijon <pierre@marijon.fr>"]
 edition = "2021"
-rust-version = "1.56"
+description = "Kmer File Format Rust parser"
+rust-version = "1.62"
 
-authors = ["Pierre Marijon <pierre.marijon@hhu.de>"]
-
-repository = "https://github.com/Kmer-File-Format/kff-rust-api"
-homepage = "https://github.com/Kmer-File-Format/kff-rust-api"
-documentation = "https://github.com/Kmer-File-Format/kff-rust-api"
+homepage = "https://github.com/natir/kff"
+repository = "https://github.com/natir/kff"
+documentation = "https://natir.github.io/kff/kff"
 
 readme = "Readme.md"
-license = "AGPL"
-
-keywords = ["bioinformatics", "kmer"]
-
-
-[lib]
-name = "kff"
-crate-type = ["rlib", "cdylib", "staticlib"]
+license-file = "LICENSE"
 
 
 [dependencies]
-thiserror = "1"
-byteorder = "1"
-itertools = "0.10"
-bitvec    = "1"
+# Error management
+thiserror      = { version = "1" }
+
+# Logging and error management
+log            = { version = "0.4" }
+
+
+[dev-dependencies]
+criterion      = { version = "0.3" }
+
+# CLI management
+clap           = { version = "3", features = ["derive"] }
+
+# Logging management
+stderrlog      = { version = "0.4" }
+
+
+[profile.release]
+lto = 'thin'
+opt-level = 3
+overflow-checks = false
+panic = 'abort'
+incremental = false
+
+
+[profile.profiling]
+inherits = "release"
+debug = true

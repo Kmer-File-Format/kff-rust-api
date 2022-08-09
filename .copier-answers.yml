@@ -1,0 +1,10 @@
+_commit: v1.2.2
+_src_path: gh:natir/copier-rust
+author_email: pierre@marijon.fr
+author_name: Pierre Marijon
+cli: false
+license: AGPL
+msrv: '1.62'
+project_description: Kmer File Format Rust parser
+project_name: kff
+vcs: git

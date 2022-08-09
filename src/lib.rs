@@ -1,4 +1,6 @@
-//! KFF rust crate to handle, read and write [KFF format](https://github.com/Kmer-File-Format/kff-reference)
+//! Kmer File Format Rust parser
+
+#![warn(missing_docs)]
 
 /* std use */
 
@@ -7,9 +9,14 @@
 /* project use */
 
 /* mod declaration */
-mod encoding;
-mod error;
-mod header;
-mod io;
 
-pub type Endianess = byteorder::BigEndian;
+pub mod error;
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        let result = 2 + 2;
+        assert_eq!(result, 4);
+    }
+}
