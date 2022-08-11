@@ -1,4 +1,4 @@
-//! Parse and access to Header information
+//! Parse, manage and write Header information
 
 /* std use */
 
@@ -7,11 +7,9 @@
 /* project use */
 use crate::error;
 
-/// Struct to parse and store Header information
-
+/// Struct to parse, manage and write Header information
 #[derive(std::fmt::Debug, getset::Getters, getset::Setters, getset::MutGetters)]
 #[getset(get = "pub")]
-#[allow(missing_docs)]
 pub struct Header {
     /// Major version number
     major_version: u8,
@@ -89,18 +87,18 @@ impl Header {
     }
 
     /// Write this Header in KFF format
-    pub fn write<W>(&self, inner: &mut W) -> error::Result<()>
+    pub fn write<W>(&self, outer: &mut W) -> error::Result<()>
     where
-        W: std::io::Write,
+        W: std::io::Write + crate::KffWrite,
     {
-        inner.write_all(b"KFF")?; // Write magic number
-        inner.write_all(&self.major_version.to_be_bytes())?; // Major version
-        inner.write_all(&self.minor_version.to_be_bytes())?; // Minor version
-        inner.write_all(&self.encoding.to_be_bytes())?; // Encoding
-        inner.write_all(&(self.uniq_kmer as u8).to_be_bytes())?; // Uniq kmer
-        inner.write_all(&(self.canonical_kmer as u8).to_be_bytes())?; // Canonical kmer
-        inner.write_all(&(self.free_block.len() as u32).to_be_bytes())?; // Size of free block
-        inner.write_all(&self.free_block)?; // Free block
+        outer.write_bytes(b"KFF")?; // Write magic number
+        outer.write_u8(&self.major_version)?; // Major version
+        outer.write_u8(&self.minor_version)?; // Minor version
+        outer.write_u8(&self.encoding)?; // Encoding
+        outer.write_bool(&self.uniq_kmer)?; // Uniq kmer
+        outer.write_bool(&self.canonical_kmer)?; // Canonical kmer
+        outer.write_u32(&(self.free_block.len() as u32))?; // Size of free block
+        outer.write_ascii(&self.free_block)?; // Free block
 
         Ok(())
     }
@@ -170,7 +168,7 @@ mod tests {
     use super::*;
 
     const VALID: &[u8] = &[
-        b'K', b'F', b'F', 1, 0, 0b00101110, 1, 0, 0, 0, 0, 4, b't', b'e', b's', b't',
+        b'K', b'F', b'F', 1, 0, 0b00101110, 1, 0, 0, 0, 0, 4, b't', b'e', b's', b't', 0,
     ];
 
     const BAD_MAGIC_NUMBER: &[u8] = b"KKF";

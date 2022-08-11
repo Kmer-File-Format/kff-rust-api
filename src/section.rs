@@ -8,6 +8,8 @@
 
 /* mod declaration */
 pub mod header;
+pub mod values;
 
 /* pub use */
 pub use header::Header;
+pub use values::Values;
