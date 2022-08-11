@@ -17,10 +17,14 @@ where
 {
     /// Inner read source
     inner: R,
+
     /// Header extract from `inner`
     #[getset(set = "pub", get_mut = "pub")]
     header: section::Header,
-    // values: section::Values,
+
+    /// Current Values extract from `inner`
+    #[getset(set = "pub", get_mut = "pub")]
+    values: section::Values,
     // index: section::Index,
 }
 
@@ -31,8 +35,13 @@ where
     /// Create a new Kff reader by accept mutable reference on [std::io::Read]
     pub fn new(mut inner: R) -> error::Result<Self> {
         let header = section::Header::read(&mut inner)?;
+        let values = section::Values::default();
 
-        Ok(Self { inner, header })
+        Ok(Self {
+            inner,
+            header,
+            values,
+        })
     }
 
     /// Create a new Kff by read file match with path in parameter

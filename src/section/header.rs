@@ -13,16 +13,21 @@ use crate::error;
 pub struct Header {
     /// Major version number
     major_version: u8,
+
     /// Minor version number
     minor_version: u8,
+
     /// Encoding schema
     encoding: u8,
+
     /// This file contains only uniq kmer
     #[getset(set = "pub", get_mut = "pub")]
     uniq_kmer: bool,
+
     /// This file contains only canonical kmer
     #[getset(set = "pub", get_mut = "pub")]
     canonical_kmer: bool,
+
     /// Comment link to this file
     #[getset(set = "pub", get_mut = "pub")]
     free_block: Vec<u8>,
