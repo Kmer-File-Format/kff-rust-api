@@ -8,13 +8,25 @@
 use crate::error;
 
 /// Struct to parse and store Header information
-#[derive(std::fmt::Debug)]
+
+#[derive(std::fmt::Debug, getset::Getters, getset::Setters, getset::MutGetters)]
+#[getset(get = "pub")]
+#[allow(missing_docs)]
 pub struct Header {
+    /// Major version number
     major_version: u8,
+    /// Minor version number
     minor_version: u8,
+    /// Encoding schema
     encoding: u8,
+    /// This file contains only uniq kmer
+    #[getset(set = "pub", get_mut = "pub")]
     uniq_kmer: bool,
+    /// This file contains only canonical kmer
+    #[getset(set = "pub", get_mut = "pub")]
     canonical_kmer: bool,
+    /// Comment link to this file
+    #[getset(set = "pub", get_mut = "pub")]
     free_block: Vec<u8>,
 }
 
@@ -37,7 +49,9 @@ impl Header {
             free_block,
         };
 
-        obj.check()
+        obj.check()?;
+
+        Ok(obj)
     }
 
     /// Read a readable to create a new header
@@ -66,18 +80,48 @@ impl Header {
         obj.canonical_kmer = inner.read_bool()?;
 
         let free_block_size = inner.read_u32()? as usize;
-        println!("free block size {}", free_block_size);
+
         obj.free_block = inner.read_n_bytes_dyn(free_block_size)?;
 
-        obj.check()
+        obj.check()?;
+
+        Ok(obj)
+    }
+
+    /// Set major version
+    pub fn set_major_version(&mut self, val: u8) -> error::Result<&mut Self> {
+        self.major_version = val;
+
+        self.check_version()?;
+
+        Ok(self)
+    }
+
+    /// Set minor version
+    pub fn set_minor_version(&mut self, val: u8) -> error::Result<&mut Self> {
+        self.minor_version = val;
+
+        self.check_version()?;
+
+        Ok(self)
+    }
+
+    /// Set encoding
+    pub fn set_encoding(&mut self, val: u8) -> error::Result<&mut Self> {
+        self.encoding = val;
+
+        self.check_encoding()?;
+
+        Ok(self)
     }
 
     /// Function run after construction of header to check value
-    fn check(self) -> error::Result<Self> {
+    fn check(&self) -> error::Result<&Self> {
         self.check_version()?.check_encoding()
     }
 
-    fn check_version(self) -> error::Result<Self> {
+    /// Function check if version number is support
+    fn check_version(&self) -> error::Result<&Self> {
         if self.major_version > 1 {
             return Err(error::Kff::HighMajorVersionNumber(self.major_version).into());
         }
@@ -89,7 +133,8 @@ impl Header {
         Ok(self)
     }
 
-    fn check_encoding(self) -> error::Result<Self> {
+    /// Function check encoding is a valid one
+    fn check_encoding(&self) -> error::Result<&Self> {
         let a = self.encoding >> 6;
         let c = (self.encoding >> 4) & 0b11;
         let t = (self.encoding >> 2) & 0b11;
@@ -133,6 +178,29 @@ mod tests {
         let mut reader = std::io::Cursor::new(BAD_MAGIC_NUMBER);
 
         assert!(Header::read(&mut reader).is_err());
+
+        Ok(())
+    }
+
+    #[test]
+    fn setter() -> error::Result<()> {
+        let mut reader = std::io::Cursor::new(VALID);
+
+        let mut header = Header::read(&mut reader)?;
+
+        assert!(header.set_major_version(0).is_ok());
+        assert!(header.set_major_version(1).is_ok());
+        assert!(header.set_major_version(2).is_err());
+        assert!(header.set_major_version(1).is_ok());
+
+        assert!(header.set_minor_version(0).is_ok());
+        assert!(header.set_minor_version(1).is_err());
+        assert!(header.set_minor_version(2).is_err());
+        assert!(header.set_minor_version(0).is_ok());
+
+        assert!(header.set_encoding(0b00101101).is_ok());
+        assert!(header.set_encoding(1).is_err());
+        assert!(header.set_encoding(2).is_err());
 
         Ok(())
     }

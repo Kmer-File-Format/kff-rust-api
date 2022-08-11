@@ -12,7 +12,7 @@
 
 pub mod error;
 pub mod read;
-pub mod utils;
 pub mod section;
+pub mod utils;
 
 pub use utils::*;

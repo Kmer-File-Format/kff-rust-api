@@ -21,6 +21,8 @@ thiserror      = { version = "1" }
 # Logging management
 log            = { version = "0.4" }
 
+getset         = { version = "0.1" }
+
 
 [dev-dependencies]
 # CLI management

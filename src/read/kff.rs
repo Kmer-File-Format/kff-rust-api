@@ -9,11 +9,16 @@ use crate::error;
 use crate::section;
 
 /// Struct to read a kff file
+#[derive(getset::Getters, getset::Setters, getset::MutGetters)]
+#[getset(get = "pub")]
 pub struct Kff<R>
 where
     R: std::io::Read,
 {
+    /// Inner read source
     inner: R,
+    /// Header extract from `inner`
+    #[getset(set = "pub", get_mut = "pub")]
     header: section::Header,
     // values: section::Values,
     // index: section::Index,
@@ -69,12 +74,21 @@ where
 mod tests {
     use super::*;
 
-    const KFF_FILE: &[u8] = b"KFF test KFF";
+    const KFF_FILE: &[u8] = &[
+        b'K', b'F', b'F',       // Magic number
+        1,          // Major version number
+        0,          // Minor version number
+        0b00101110, // Encoding
+        1,          // Uniq kmer
+        0,          // Canonical kmer
+        0, 0, 0, 4, // Free space size
+        b't', b'e', b's', b't', // Free space
+        b'K', b'F', b'F', // Magic number
+    ];
 
     use std::io::Write;
 
     #[test]
-    #[ignore]
     fn create_kff_reader() -> error::Result<()> {
         let inner = std::io::Cursor::new(KFF_FILE.to_vec());
 
@@ -92,25 +106,39 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
+    fn check_header() -> error::Result<()> {
+        let inner = std::io::Cursor::new(KFF_FILE.to_vec());
+
+        let reader = Kff::new(inner)?;
+
+        assert_eq!(reader.header().major_version(), &1);
+        assert_eq!(reader.header().minor_version(), &0);
+        assert_eq!(reader.header().encoding(), &0b00101110);
+        assert_eq!(reader.header().uniq_kmer(), &true);
+        assert_eq!(reader.header().canonical_kmer(), &false);
+        assert_eq!(reader.header().free_block(), b"test");
+
+        Ok(())
+    }
+
+    #[test]
     fn check() -> error::Result<()> {
         let inner_len = KFF_FILE.len();
         let mut readable = std::io::Cursor::new(KFF_FILE.to_vec());
 
         let mut file = Kff::new(readable.clone())?;
 
-        assert!(file.check()?);
+        assert!(file.check()?); // Header init and check work
 
         readable.get_mut()[1] = b'K';
-        let mut file = Kff::new(readable.clone())?;
-
-        assert!(file.check().is_err());
+        let file = Kff::new(readable.clone());
+        assert!(file.is_err()); // Header init failled
 
         readable.get_mut()[1] = b'F';
         readable.get_mut()[inner_len - 1] = b'K';
         let mut file = Kff::new(readable.clone())?;
 
-        assert!(file.check().is_err());
+        assert!(file.check().is_err()); // Header init work but check failled
 
         Ok(())
     }
