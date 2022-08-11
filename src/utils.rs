@@ -35,6 +35,32 @@ pub trait KffRead {
 
     /// Function some base in 2bits representation
     fn read_2bits(&mut self, k: usize) -> error::Result<Vec<u8>>;
+
+    /// Function that read one bit and convert it as bool
+    fn read_bool(&mut self) -> error::Result<bool> {
+        self.read_u8().map(|x| x != 0)
+    }
+
+    /// Function that read u8
+    fn read_u8(&mut self) -> error::Result<u8> {
+        self.read_n_bytes::<1>()
+            .map(|x| unsafe { *x.get_unchecked(0) })
+    }
+
+    /// Function that read u16
+    fn read_u16(&mut self) -> error::Result<u16> {
+        self.read_n_bytes::<2>().map(u16::from_be_bytes)
+    }
+
+    /// Function that read u32
+    fn read_u32(&mut self) -> error::Result<u32> {
+        self.read_n_bytes::<4>().map(u32::from_be_bytes)
+    }
+
+    /// Function that read u64
+    fn read_u64(&mut self) -> error::Result<u64> {
+        self.read_n_bytes::<8>().map(u64::from_be_bytes)
+    }
 }
 
 impl<T> KffRead for T
@@ -188,6 +214,59 @@ mod tests {
         let kmer = reader.read_2bits(5)?;
 
         assert_eq!(&kmer, &[238, 17]);
+
+        Ok(())
+    }
+
+    #[test]
+    fn read_bool() -> error::Result<()> {
+        let mut reader = std::io::Cursor::new(LOREM);
+
+        assert!(reader.read_bool()?);
+
+        let _ = reader.read_n_bytes::<16>()?;
+
+        assert!(!reader.read_bool()?);
+
+        Ok(())
+    }
+
+    #[test]
+    fn read_u8() -> error::Result<()> {
+        let mut reader = std::io::Cursor::new(LOREM);
+
+        assert_eq!(reader.read_u8()?, b'L');
+        assert_eq!(reader.read_u8()?, b'o');
+
+        Ok(())
+    }
+
+    #[test]
+    fn read_u16() -> error::Result<()> {
+        let mut reader = std::io::Cursor::new(LOREM);
+
+        assert_eq!(reader.read_u16()?, 19567);
+        assert_eq!(reader.read_u16()?, 29285);
+
+        Ok(())
+    }
+
+    #[test]
+    fn read_u32() -> error::Result<()> {
+        let mut reader = std::io::Cursor::new(LOREM);
+
+        assert_eq!(reader.read_u32()?, 1282372197);
+        assert_eq!(reader.read_u32()?, 1830840688);
+
+        Ok(())
+    }
+
+    #[test]
+    fn read_u64() -> error::Result<()> {
+        let mut reader = std::io::Cursor::new(LOREM);
+
+        assert_eq!(reader.read_u64()?, 5507746649245510000);
+        assert_eq!(reader.read_u64()?, 8319675872528264303);
 
         Ok(())
     }
