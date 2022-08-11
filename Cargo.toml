@@ -25,6 +25,8 @@ getset         = { version = "0.1" }
 
 rustc-hash     = { version = "1" }
 
+bitvec         = { version = "1" }
+
 
 [dev-dependencies]
 # CLI management

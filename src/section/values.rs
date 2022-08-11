@@ -10,7 +10,8 @@ use crate::error;
 /// Struct to parse, manage and write Values section
 pub type Values = rustc_hash::FxHashMap<String, u64>;
 
-trait AbcValues: Sized {
+/// A trait to implement some function around Values alias
+pub trait AbcValues: Sized {
     /// Build an empty Values
     fn new() -> Self;
 

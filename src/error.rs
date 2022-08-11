@@ -37,6 +37,14 @@ pub enum Kff {
     /// Encoding isn't valid each pair of bits must be different
     #[error("Encoding {0:#b} isn't a valid encoding, each pair of bits must be different")]
     BadEncoding(u8),
+
+    /// Value with name 'name' isn't present in Values this kff file seems not correct
+    #[error("Value with name '{0}' isn't present in Values this kff file seems not correct")]
+    FieldIsMissing(String),
+
+    /// Value max seems to be too large
+    #[error("Value max `{0}` seems to be too large")]
+    MaxValueIsTooLarge(u64),
 }
 
 /// Alias of result

@@ -5,7 +5,6 @@
 /* crate use */
 
 /* project use */
-use crate::error;
 
 /* mod declaration */
 pub mod read;
@@ -34,6 +33,7 @@ pub(crate) fn bytes2store_k(k: u64) -> u64 {
 mod tests {
     use super::*;
 
+    use crate::error;
     use rand::distributions::Distribution;
 
     #[test]
