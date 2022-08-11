@@ -85,4 +85,59 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn read() -> error::Result<()> {
+        let mut input_file: std::io::BufReader<&[u8]> = std::io::BufReader::new(&[
+            0, 0, 0, 0, 0, 0, 0, 4, 109, 97, 120, 0, 0, 0, 0, 0, 0, 0, 0, 255, 100, 97, 116, 97,
+            95, 115, 105, 122, 101, 0, 0, 0, 0, 0, 0, 0, 0, 1, 111, 114, 100, 101, 114, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 107, 0, 0, 0, 0, 0, 0, 0, 0, 15,
+        ]);
+
+        let values = Values::read(&mut input_file)?;
+
+        let mut keys: Vec<String> = values.keys().cloned().collect();
+        let mut values: Vec<u64> = values.values().cloned().collect();
+
+        keys.sort();
+        values.sort();
+
+        assert_eq!(
+            keys,
+            [
+                "data_size".to_string(),
+                "k".to_string(),
+                "max".to_string(),
+                "order".to_string(),
+            ]
+        );
+
+        assert_eq!(values, [0, 1, 15, 255]);
+
+        Ok(())
+    }
+
+    #[test]
+    fn write() -> error::Result<()> {
+        let mut values = Values::with_capacity(20);
+
+        values.insert("k".to_string(), 15);
+        values.insert("order".to_string(), 0);
+        values.insert("max".to_string(), 255);
+        values.insert("data_size".to_string(), 1);
+
+        let mut outer = Vec::new();
+        values.write(&mut outer)?;
+
+        assert_eq!(
+            outer,
+            &[
+                0, 0, 0, 0, 0, 0, 0, 4, 109, 97, 120, 0, 0, 0, 0, 0, 0, 0, 0, 255, 100, 97, 116,
+                97, 95, 115, 105, 122, 101, 0, 0, 0, 0, 0, 0, 0, 0, 1, 111, 114, 100, 101, 114, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 107, 0, 0, 0, 0, 0, 0, 0, 0, 15
+            ]
+        );
+
+        Ok(())
+    }
 }

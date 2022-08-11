@@ -13,6 +13,10 @@ pub enum Error {
     /// Standard io error
     #[error(transparent)]
     Io(#[from] std::io::Error),
+
+    /// Standard from Utf8 error
+    #[error(transparent)]
+    FromUtf8(#[from] std::string::FromUtf8Error),
 }
 
 /// Kff specific error

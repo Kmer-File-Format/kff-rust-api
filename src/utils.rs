@@ -88,6 +88,10 @@ where
 
         self.read_until(0, &mut values)?;
 
+        if let Some(0) = values.last() {
+            values.pop();
+        }
+
         Ok(values)
     }
 
@@ -240,9 +244,9 @@ mod tests {
 
         let values = reader.read_ascii()?;
 
-        assert_eq!(&values, b"Lorem ipsum dolor\0");
+        assert_eq!(&values, b"Lorem ipsum dolor");
 
-        reader.seek(std::io::SeekFrom::Start(values.len() as u64))?;
+        reader.seek(std::io::SeekFrom::Start(values.len() as u64 + 1))?; // Move after first \0
         let values = reader.read_ascii()?;
 
         assert_eq!(&values, b"sit amet, consectetur adipiscing elit.");
