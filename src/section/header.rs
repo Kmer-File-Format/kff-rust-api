@@ -88,6 +88,23 @@ impl Header {
         Ok(obj)
     }
 
+    /// Write this Header in KFF format
+    pub fn write<W>(&self, inner: &mut W) -> error::Result<()>
+    where
+        W: std::io::Write,
+    {
+        inner.write_all(b"KFF")?; // Write magic number
+        inner.write_all(&self.major_version.to_be_bytes())?; // Major version
+        inner.write_all(&self.minor_version.to_be_bytes())?; // Minor version
+        inner.write_all(&self.encoding.to_be_bytes())?; // Encoding
+        inner.write_all(&(self.uniq_kmer as u8).to_be_bytes())?; // Uniq kmer
+        inner.write_all(&(self.canonical_kmer as u8).to_be_bytes())?; // Canonical kmer
+        inner.write_all(&(self.free_block.len() as u32).to_be_bytes())?; // Size of free block
+        inner.write_all(&self.free_block)?; // Free block
+
+        Ok(())
+    }
+
     /// Set major version
     pub fn set_major_version(&mut self, val: u8) -> error::Result<&mut Self> {
         self.major_version = val;
@@ -178,6 +195,19 @@ mod tests {
         let mut reader = std::io::Cursor::new(BAD_MAGIC_NUMBER);
 
         assert!(Header::read(&mut reader).is_err());
+
+        Ok(())
+    }
+
+    #[test]
+    fn write() -> error::Result<()> {
+        let header = Header::new(1, 0, 0b00101110, true, false, b"test".to_vec())?;
+
+        let mut writer = std::io::Cursor::new(Vec::new());
+
+        assert!(header.write(&mut writer).is_ok());
+
+        assert_eq!(VALID, writer.into_inner());
 
         Ok(())
     }
