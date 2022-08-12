@@ -19,7 +19,10 @@ pub trait KffRead {
     fn read_ascii(&mut self) -> error::Result<Vec<u8>>;
 
     /// Function some base in 2bits representation
-    fn read_2bits(&mut self, k: usize) -> error::Result<Vec<u8>>;
+    fn read_2bits(
+        &mut self,
+        k: usize,
+    ) -> error::Result<bitvec::vec::BitVec<u8, bitvec::order::Msb0>>;
 
     /// Function that read one bit and convert it as bool
     fn read_bool(&mut self) -> error::Result<bool> {
@@ -80,10 +83,15 @@ where
         Ok(values)
     }
 
-    fn read_2bits(&mut self, k: usize) -> error::Result<Vec<u8>> {
-        let mut values = self.read_n_bytes_dyn(crate::bytes2store_k(k as u64) as usize)?;
+    fn read_2bits(
+        &mut self,
+        k: usize,
+    ) -> error::Result<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> {
+        let mut values = bitvec::vec::BitVec::from_slice(
+            &self.read_n_bytes_dyn(crate::bytes2store_k(k as u64) as usize)?,
+        );
 
-        values.iter_mut().for_each(|v| *v = u8::from_be(*v));
+        values.resize(k * 2, false);
 
         Ok(values)
     }
@@ -162,7 +170,10 @@ mod tests {
 
         let kmer = reader.read_2bits(5)?;
 
-        assert_eq!(&kmer, &[238, 17]);
+        assert_eq!(
+            kmer,
+            bitvec::bitvec![u8, bitvec::order::Msb0; 1, 1, 1, 0, 1, 1, 1, 0, 0, 0]
+        );
 
         Ok(())
     }
