@@ -9,3 +9,7 @@
 /* mod declaration */
 pub mod iterator;
 pub mod kff;
+
+/* pub use */
+pub use self::kff::Kff;
+pub use iterator::KmerIterator;

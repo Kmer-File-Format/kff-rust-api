@@ -10,6 +10,8 @@ use crate::section;
 
 use crate::section::values::AbcValues as _;
 
+use super::KmerIterator;
+
 /// Struct to read a kff file
 #[derive(getset::Getters, getset::Setters, getset::MutGetters)]
 #[getset(get = "pub")]
@@ -54,6 +56,44 @@ where
         std::fs::File::open(&path)
             .map(std::io::BufReader::new)
             .map(Kff::new)?
+    }
+
+    /// Consume Kff object to create a KmerIterator
+    pub fn kmers(self) -> KmerIterator<R> {
+        crate::read::KmerIterator::new(self)
+    }
+
+    /// Read Kff until last kmer section
+    pub fn next_kmer_section(
+        &mut self,
+    ) -> std::option::Option<error::Result<Vec<(section::block::Kmer, section::block::Data)>>> {
+        loop {
+            match self.inner.read_u8() {
+                Ok(b'v') => {
+                    self.values = {
+                        match section::Values::read(&mut self.inner) {
+                            Err(e) => return Some(Err(e)),
+                            Ok(v) => v,
+                        }
+                    }
+                }
+                Ok(b'r') => match section::Raw::new(&self.values) {
+                    Ok(section) => return Some(section.read(&mut self.inner)),
+                    Err(e) => return Some(Err(e)),
+                },
+                Ok(b'm') => match section::Minimizer::new(&self.values) {
+                    Ok(section) => return Some(section.read(&mut self.inner)),
+                    Err(e) => return Some(Err(e)),
+                },
+                Ok(b'K') => return None, // It's the begin of last signature stop reading
+                Ok(b'i') => match section::Index::read(&mut self.inner) {
+                    Err(e) => return Some(Err(e)),
+                    Ok(_) => continue,
+                },
+                Ok(e) => return Some(Err(error::Kff::NotASectionPrefix(e).into())), // Any other value is an error
+                Err(e) => return Some(Err(e)),
+            }
+        }
     }
 }
 

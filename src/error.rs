@@ -49,6 +49,10 @@ pub enum Kff {
     /// Footer size isn't correct or file not respect footer good practices
     #[error("Footer size isn't correct of file not respect footer good practices")]
     FooterSizeNotCorrect,
+
+    /// Not a valid Kff section prefix
+    #[error("'{0}' isn't a valid Kff section prefix")]
+    NotASectionPrefix(u8),
 }
 
 /// Alias of result
