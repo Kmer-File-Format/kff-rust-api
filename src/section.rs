@@ -9,6 +9,7 @@
 /* mod declaration */
 pub mod block;
 pub mod header;
+pub mod index;
 pub mod minimizer;
 pub mod raw;
 pub mod values;
@@ -16,6 +17,7 @@ pub mod values;
 /* pub use */
 pub use block::Block;
 pub use header::Header;
+pub use index::Index;
 pub use minimizer::Minimizer;
 pub use raw::Raw;
 pub use values::Values;

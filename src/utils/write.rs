@@ -42,6 +42,11 @@ pub trait KffWrite {
     fn write_u64(&mut self, value: &u64) -> error::Result<()> {
         self.write_bytes(&value.to_be_bytes())
     }
+
+    /// Function that write i64
+    fn write_i64(&mut self, value: &i64) -> error::Result<()> {
+        self.write_bytes(&value.to_be_bytes())
+    }
 }
 
 impl<T> KffWrite for T

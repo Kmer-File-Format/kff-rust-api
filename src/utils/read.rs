@@ -49,6 +49,11 @@ pub trait KffRead {
     fn read_u64(&mut self) -> error::Result<u64> {
         self.read_n_bytes::<8>().map(u64::from_be_bytes)
     }
+
+    /// Function that read i64
+    fn read_i64(&mut self) -> error::Result<i64> {
+        self.read_n_bytes::<8>().map(i64::from_be_bytes)
+    }
 }
 
 impl<T> KffRead for T
