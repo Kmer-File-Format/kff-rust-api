@@ -8,6 +8,8 @@
 use crate::error;
 use crate::section;
 
+use crate::section::values::AbcValues as _;
+
 /// Struct to read a kff file
 #[derive(getset::Getters, getset::Setters, getset::MutGetters)]
 #[getset(get = "pub")]
@@ -44,7 +46,7 @@ where
         })
     }
 
-    /// Create a new Kff by read file match with path in parameter
+    /// Create a new Kff by read file match with path
     pub fn open<P>(path: P) -> error::Result<Kff<std::io::BufReader<std::fs::File>>>
     where
         P: std::convert::AsRef<std::path::Path>,
@@ -77,6 +79,24 @@ where
 
         Ok(true)
     }
+
+    /// Load footer, assume last section is a value and last value of this section is footer_size
+    pub fn load_footer(&mut self) -> error::Result<()> {
+        self.inner.seek(std::io::SeekFrom::End(-11))?;
+        let footer_size = self.inner.read_u64()?;
+
+        self.inner
+            .seek(std::io::SeekFrom::End(-(footer_size as i64 + 3)))?;
+
+        let v = self.inner.read_u8()?;
+        if v != b'v' {
+            Err(error::Kff::FooterSizeNotCorrect.into())
+        } else {
+            self.values = section::Values::read(&mut self.inner)?;
+
+            Ok(())
+        }
+    }
 }
 
 #[cfg(test)]
@@ -92,6 +112,11 @@ mod tests {
         0,          // Canonical kmer
         0, 0, 0, 4, // Free space size
         b't', b'e', b's', b't', // Free space
+        b'v', // Footer
+        0, 0, 0, 0, 0, 0, 0, 1, // Footer nb variables
+        b'f', b'o', b'o', b't', b'e', b'r', b'_', b's', b'i', b'z', b'e',
+        0, // name of variable footer_size
+        0, 0, 0, 0, 0, 0, 0, 29, // value of variable footer_size
         b'K', b'F', b'F', // Magic number
     ];
 
@@ -148,6 +173,25 @@ mod tests {
         let mut file = Kff::new(readable.clone())?;
 
         assert!(file.check().is_err()); // Header init work but check failled
+
+        Ok(())
+    }
+
+    #[test]
+    fn load_footer() -> error::Result<()> {
+        let inner_len = KFF_FILE.len();
+        let mut inner = std::io::Cursor::new(KFF_FILE.to_vec());
+        let mut reader = Kff::new(inner.clone())?;
+
+        assert!(reader.load_footer().is_ok());
+
+        assert_eq!(reader.values.get("footer_size"), Some(&29));
+
+        inner.get_mut()[inner_len - 32] = b'f';
+
+        let mut reader = Kff::new(inner.clone())?;
+
+        assert!(reader.load_footer().is_err());
 
         Ok(())
     }

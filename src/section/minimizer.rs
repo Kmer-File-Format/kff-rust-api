@@ -67,10 +67,8 @@ impl Minimizer {
         let mut output = Vec::new();
 
         let minimizer = inner.read_2bits(self.m as usize)?.into_boxed_bitslice();
-        println!("{:?}", minimizer);
 
         let nb_block = inner.read_u64()?;
-        println!("{:?}", nb_block);
 
         for _ in 0..nb_block {
             let block = section::Block::read_minimizer(
@@ -81,8 +79,6 @@ impl Minimizer {
                 self.max,
                 &minimizer,
             )?;
-
-            println!("{:?}", block);
 
             for (kmer, data) in block {
                 output.push((kmer, data))

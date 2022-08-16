@@ -100,23 +100,16 @@ impl Block {
         } else {
             read_nb_kmer(inner, max)? as usize
         };
-        println!("nb_kmer {}", nb_kmer);
 
         let minimizer_offset = read_nb_kmer(inner, std::cmp::min(k + max - 1, u64::MAX))? as usize;
-        println!("{}, {}", k + max - 1, std::cmp::min(k + max - 1, u64::MAX));
-        println!("{}", minimizer_offset);
 
         let kmer_without_minimizer = inner.read_2bits(nb_kmer + k as usize - 1 - m as usize)?;
-        println!("{}", kmer_without_minimizer);
 
         let mut kmer = bitvec::vec::BitVec::from_bitslice(
             &kmer_without_minimizer[..(minimizer_offset as usize * 2)],
         );
-        println!("{:?}", kmer);
-        kmer.extend_from_bitslice(&minimizer);
-        println!("{:?}", kmer);
+        kmer.extend_from_bitslice(minimizer);
         kmer.extend_from_bitslice(&kmer_without_minimizer[(minimizer_offset as usize * 2)..]);
-        println!("{:?}", kmer);
 
         let data = inner.read_n_bytes_dyn((nb_kmer * data_size) as usize)?;
 
@@ -151,15 +144,9 @@ impl Block {
         let mut kmer =
             bitvec::vec::BitVec::from_bitslice(&self.kmer[..(self.minimizer_offset as usize * 2)]);
 
-        println!("{:?}", kmer);
-
         kmer.extend_from_bitslice(&self.kmer[((self.minimizer_offset + m * 2) as usize + 1)..]);
 
-        println!("{:?}", kmer);
-
         kmer.resize((self.minimizer_offset + m * 2) as usize, false);
-
-        println!("{:?}", kmer);
 
         outer.write_bytes(kmer.as_raw_slice())?;
         outer.write_bytes(self.data.as_slice())?;
@@ -169,7 +156,6 @@ impl Block {
 
     /// Get the next kmer of the block
     pub fn next_kmer(&mut self) -> std::option::Option<(Kmer, Data)> {
-        println!("{} {} {}", self.offset, self.offset * 2, self.kmer.len());
         if (self.offset + self.k as usize) * 2 > self.kmer.len() {
             None
         } else {
@@ -211,7 +197,6 @@ pub(crate) fn write_nb_kmer<W>(outer: &mut W, max: u64, value: u64) -> error::Re
 where
     W: std::io::Write + crate::KffWrite,
 {
-    println!("{} {:064b} {}", max, max, max.leading_zeros());
     match max.leading_zeros() {
         0..=31 => Ok(outer.write_u64(&value)?),
         32..=47 => Ok(outer.write_u32(&(value as u32))?),

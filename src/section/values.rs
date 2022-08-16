@@ -8,7 +8,8 @@
 use crate::error;
 
 /// Struct to parse, manage and write Values section
-pub type Values = rustc_hash::FxHashMap<String, u64>;
+pub type Values =
+    std::collections::HashMap<String, u64, core::hash::BuildHasherDefault<rustc_hash::FxHasher>>;
 
 /// A trait to implement some function around Values alias
 pub trait AbcValues: Sized {
@@ -27,6 +28,11 @@ pub trait AbcValues: Sized {
     fn write<W>(&self, outer: &mut W) -> error::Result<()>
     where
         W: std::io::Write;
+
+    /// Write contents of Values in a writables as a footer
+    fn write_as_footer<W>(&self, outer: &mut W) -> error::Result<()>
+    where
+        W: std::io::Write + crate::KffWrite;
 }
 
 impl AbcValues for Values {
@@ -67,6 +73,29 @@ impl AbcValues for Values {
             outer.write_ascii(key.as_bytes())?;
             outer.write_u64(value)?;
         }
+
+        Ok(())
+    }
+
+    fn write_as_footer<W>(&self, outer: &mut W) -> error::Result<()>
+    where
+        W: std::io::Write + crate::KffWrite,
+    {
+        outer.write_u64(&((self.len() + 1) as u64))?;
+        for (key, value) in self.iter() {
+            outer.write_ascii(key.as_bytes())?;
+            outer.write_u64(value)?;
+        }
+
+        outer.write_ascii(b"footer_size")?;
+        outer.write_u64(
+            &(1 // v at begin of Variables section
+		+ 8 // Number of variable in section is write on 8 bytes
+		+ self.keys().map(|x| x.len() as u64 + 1).sum::<u64>() // Variables name
+                + self.len() as u64 * 8 // Variables values
+                + 12 // footer_size length as c-string
+                + 8), // footer_size value size
+        )?;
 
         Ok(())
     }
@@ -138,6 +167,33 @@ mod tests {
                 0, 0, 0, 0, 0, 0, 0, 0, 107, 0, 0, 0, 0, 0, 0, 0, 0, 15
             ]
         );
+
+        Ok(())
+    }
+
+    #[test]
+    fn write_as_footer() -> error::Result<()> {
+        let mut values = Values::with_capacity(20);
+
+        values.insert("k".to_string(), 15);
+        values.insert("order".to_string(), 0);
+        values.insert("max".to_string(), 255);
+        values.insert("data_size".to_string(), 1);
+
+        let mut outer = Vec::new();
+        values.write_as_footer(&mut outer)?;
+
+        assert_eq!(
+            outer,
+            &[
+                0, 0, 0, 0, 0, 0, 0, 5, 109, 97, 120, 0, 0, 0, 0, 0, 0, 0, 0, 255, 100, 97, 116,
+                97, 95, 115, 105, 122, 101, 0, 0, 0, 0, 0, 0, 0, 0, 1, 111, 114, 100, 101, 114, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 107, 0, 0, 0, 0, 0, 0, 0, 0, 15, 102, 111, 111, 116, 101,
+                114, 95, 115, 105, 122, 101, 0, 0, 0, 0, 0, 0, 0, 0, 83
+            ]
+        );
+
+        assert_eq!(outer.len(), *outer.last().unwrap() as usize - 1);
 
         Ok(())
     }

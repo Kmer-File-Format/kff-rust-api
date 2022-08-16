@@ -45,6 +45,10 @@ pub enum Kff {
     /// Value max seems to be too large
     #[error("Value max `{0}` seems to be too large")]
     MaxValueIsTooLarge(u64),
+
+    /// Footer size isn't correct or file not respect footer good practices
+    #[error("Footer size isn't correct of file not respect footer good practices")]
+    FooterSizeNotCorrect,
 }
 
 /// Alias of result
