@@ -7,7 +7,6 @@
 /* project use */
 use crate::error;
 use crate::section;
-use crate::section::block::Block;
 
 /// Struct to Read and Write Raw section
 #[derive(getset::Getters, getset::Setters, getset::MutGetters)]
@@ -67,21 +66,22 @@ impl Minimizer {
     {
         let mut output = Vec::new();
 
-        let minimizer = inner.read_2bits(self.m as usize)?;
+        let minimizer = inner.read_2bits(self.m as usize)?.into_boxed_bitslice();
         println!("{:?}", minimizer);
 
         let nb_block = inner.read_u64()?;
         println!("{:?}", nb_block);
 
         for _ in 0..nb_block {
-            let mut block = section::block::Minimizer::new(
+            let block = section::Block::read_minimizer(
+                inner,
                 self.k,
                 self.m,
-                self.max,
                 self.data_size as usize,
-                minimizer.clone().into_boxed_bitslice(),
-            );
-            block.read(inner)?;
+                self.max,
+                &minimizer,
+            )?;
+
             println!("{:?}", block);
 
             for (kmer, data) in block {
@@ -97,7 +97,7 @@ impl Minimizer {
         &self,
         outer: &mut W,
         minimizer: section::block::Kmer,
-        blocks: Vec<section::block::Minimizer>,
+        blocks: Vec<section::block::Block>,
     ) -> error::Result<()>
     where
         W: std::io::Write + crate::KffWrite,
@@ -106,7 +106,7 @@ impl Minimizer {
         outer.write_u64(&(blocks.len() as u64))?;
 
         for block in blocks {
-            block.write(outer)?;
+            block.write_minimizer(outer, self.m as usize, self.max)?;
         }
 
         Ok(())
@@ -215,38 +215,27 @@ mod tests {
             &mut writable,
 	    bitvec::bitbox![u8, bitvec::order::Msb0; 0, 1, 1, 0, 1, 1],
             vec![
-                section::block::Minimizer{
+                section::block::Block{
                     k: 5,
-		    m: 3,
-		    max: 100,
                     data_size: 1,
-                    nb_kmer: 3,
-                    kmer: bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0],
+                    kmer: bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
                     data: vec![1, 2, 3],
-		    minimizer: bitvec::bitbox![u8, bitvec::order::Msb0; 0, 1, 1, 0, 1, 1],
 		    minimizer_offset: 1,
 		    offset: 0,
                 },
-                section::block::Minimizer {
+                section::block::Block {
 		    k: 5,
-		    m: 3,
-		    max: 100,                    data_size: 1,
-                    nb_kmer: 2,
-		    kmer: bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+		    data_size: 1,
+		    kmer: bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
                     data: vec![1, 2],
-		    minimizer: bitvec::bitbox![u8, bitvec::order::Msb0; 0, 1, 1, 0, 1, 1],
 		    minimizer_offset: 1,
 		    offset: 0,
                 },
-                section::block::Minimizer {
+                section::block::Block {
 		    k: 5,
-		    m: 3,
-		    max: 100,
                     data_size: 1,
-                    nb_kmer: 1,
-		    kmer: bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+		    kmer: bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1],
 		    data: vec![1],
-		    minimizer: bitvec::bitbox![u8, bitvec::order::Msb0; 0, 1, 1, 0, 1, 1],
 		    minimizer_offset: 1,
 		    offset: 0,
                 }
