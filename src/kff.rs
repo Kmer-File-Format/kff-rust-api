@@ -84,7 +84,7 @@ where
                     Err(e) => return Some(Err(e)),
                 },
                 Ok(b'K') => return None, // It's the begin of last signature stop reading
-                Ok(b'i') => match section::Index::read(&mut self.inner) {
+                Ok(b'i') => match section::Index::skip(&mut self.inner) {
                     Err(e) => return Some(Err(e)),
                     Ok(_) => continue,
                 },

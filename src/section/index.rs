@@ -18,6 +18,23 @@ pub struct Index {
 }
 
 impl Index {
+    /// Skip index section
+    pub fn skip<R>(inner: &mut R) -> error::Result<Self>
+    where
+        R: std::io::Read + crate::KffRead,
+    {
+        let nb_block = inner.read_u64()?;
+
+        let _ = inner.read_n_bytes_dyn((8 * nb_block + nb_block + 8) as usize)?;
+
+        Ok(Self {
+            pair: Vec::default(),
+            next_index: 0,
+        })
+    }
+}
+
+impl Index {
     /// Read an Index section
     pub fn read<R>(inner: &mut R) -> error::Result<Self>
     where
