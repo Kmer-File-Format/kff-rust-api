@@ -7,6 +7,7 @@
 /* project use */
 use crate::error;
 use crate::section;
+use crate::Kmer;
 
 use crate::section::values::AbcValues as _;
 
@@ -64,9 +65,7 @@ where
     }
 
     /// Read Kff until last kmer section
-    pub fn next_kmer_section(
-        &mut self,
-    ) -> std::option::Option<error::Result<Vec<(section::block::Kmer, section::block::Data)>>> {
+    pub fn next_kmer_section(&mut self) -> std::option::Option<error::Result<Vec<Kmer>>> {
         loop {
             match self.inner.read_u8() {
                 Ok(b'v') => {

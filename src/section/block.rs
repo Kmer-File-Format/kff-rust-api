@@ -6,12 +6,8 @@
 
 /* project use */
 use crate::error;
-
-/// Represent a kmer
-pub type Kmer = bitvec::boxed::BitBox<u8, bitvec::order::Msb0>;
-
-/// Represent data associate to a kmer
-pub type Data = Vec<u8>;
+use crate::kmer::Seq2Bit;
+use crate::Kmer;
 
 /// Struct to data present in KFF Raw or Minimizer block
 #[derive(getset::Getters, std::fmt::Debug)]
@@ -25,9 +21,6 @@ pub struct Block {
 
     /// Bit field store all kmer of this block
     pub(crate) kmer: Kmer,
-
-    /// Array store data associate to kmer of this block
-    pub(crate) data: Data,
 
     /// Minimizer offset
     pub(crate) minimizer_offset: usize,
@@ -58,8 +51,7 @@ impl Block {
         Ok(Self {
             k,
             data_size,
-            kmer,
-            data,
+            kmer: Kmer::new(kmer, data),
             minimizer_offset: 0,
             offset: 0,
         })
@@ -74,11 +66,11 @@ impl Block {
             write_nb_kmer(
                 outer,
                 max,
-                (self.kmer.len() / 2 - self.k as usize + 1) as u64,
+                (self.kmer.seq2bit().len() / 2 - self.k as usize + 1) as u64,
             )?;
         }
-        outer.write_bytes(self.kmer.as_raw_slice())?;
-        outer.write_bytes(self.data.as_slice())?;
+        outer.write_bytes(self.kmer.seq2bit().as_raw_slice())?;
+        outer.write_bytes(self.kmer.data().as_slice())?;
 
         Ok(())
     }
@@ -90,7 +82,7 @@ impl Block {
         m: u64,
         data_size: usize,
         max: u64,
-        minimizer: &Kmer,
+        minimizer: &Seq2Bit,
     ) -> error::Result<Self>
     where
         R: std::io::Read + crate::KffRead,
@@ -116,8 +108,7 @@ impl Block {
         Ok(Self {
             k,
             data_size,
-            kmer: kmer.into_boxed_bitslice(),
-            data,
+            kmer: Kmer::new(kmer.into_boxed_bitslice(), data),
             minimizer_offset,
             offset: 0,
         })
@@ -132,7 +123,7 @@ impl Block {
             write_nb_kmer(
                 outer,
                 max,
-                (self.kmer.len() / 2 - self.k as usize + 1) as u64,
+                (self.kmer.seq2bit().len() / 2 - self.k as usize + 1) as u64,
             )?;
         }
         write_nb_kmer(
@@ -141,22 +132,25 @@ impl Block {
             self.minimizer_offset as u64,
         )?;
 
-        let mut kmer =
-            bitvec::vec::BitVec::from_bitslice(&self.kmer[..(self.minimizer_offset as usize * 2)]);
+        let mut kmer = bitvec::vec::BitVec::from_bitslice(
+            &self.kmer.seq2bit()[..(self.minimizer_offset as usize * 2)],
+        );
 
-        kmer.extend_from_bitslice(&self.kmer[((self.minimizer_offset + m * 2) as usize + 1)..]);
+        kmer.extend_from_bitslice(
+            &self.kmer.seq2bit()[((self.minimizer_offset + m * 2) as usize + 1)..],
+        );
 
         kmer.resize((self.minimizer_offset + m * 2) as usize, false);
 
         outer.write_bytes(kmer.as_raw_slice())?;
-        outer.write_bytes(self.data.as_slice())?;
+        outer.write_bytes(self.kmer.data().as_slice())?;
 
         Ok(())
     }
 
     /// Get the next kmer of the block
-    pub fn next_kmer(&mut self) -> std::option::Option<(Kmer, Data)> {
-        if (self.offset + self.k as usize) * 2 > self.kmer.len() {
+    pub fn next_kmer(&mut self) -> std::option::Option<Kmer> {
+        if (self.offset + self.k as usize) * 2 > self.kmer.seq2bit().len() {
             None
         } else {
             let k_range = self.offset * 2..(self.offset + self.k as usize) * 2;
@@ -164,16 +158,16 @@ impl Block {
                 self.offset * self.data_size as usize..(self.offset + 1) * self.data_size as usize;
 
             self.offset += 1;
-            Some((
-                bitvec::boxed::BitBox::from_bitslice(&self.kmer()[k_range]),
-                self.data()[d_range].to_vec(),
+            Some(Kmer::new(
+                bitvec::boxed::BitBox::from_bitslice(&self.kmer.seq2bit()[k_range]),
+                self.kmer.data()[d_range].to_vec(),
             ))
         }
     }
 }
 
 impl std::iter::Iterator for Block {
-    type Item = (Kmer, Data);
+    type Item = Kmer;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.next_kmer()
@@ -210,6 +204,8 @@ where
 mod tests {
     use super::*;
 
+    use crate::{Data, Seq2Bit};
+
     mod raw {
         use super::*;
 
@@ -219,11 +215,11 @@ mod tests {
 
             let block = Block::read_raw(&mut readable, 5, 1, 255)?;
 
-            let mut kmers: Vec<Kmer> = Vec::new();
+            let mut kmers: Vec<Seq2Bit> = Vec::new();
             let mut datas: Vec<Data> = Vec::new();
-            for (kmer, data) in block {
-                kmers.push(kmer);
-                datas.push(data);
+            for kmer in block {
+                kmers.push(kmer.seq2bit().clone());
+                datas.push(kmer.data().clone());
             }
 
             assert_eq!(
@@ -245,11 +241,11 @@ mod tests {
 
             let block = Block::read_raw(&mut readable, 5, 0, 255)?;
 
-            let mut kmers: Vec<Kmer> = Vec::new();
+            let mut kmers: Vec<Seq2Bit> = Vec::new();
             let mut datas: Vec<Data> = Vec::new();
-            for (kmer, data) in block {
-                kmers.push(kmer);
-                datas.push(data);
+            for kmer in block {
+                kmers.push(kmer.seq2bit().clone());
+                datas.push(kmer.data().clone());
             }
 
             assert_eq!(
@@ -271,11 +267,11 @@ mod tests {
 
             let block = Block::read_raw(&mut readable, 5, 1, 1)?;
 
-            let mut kmers: Vec<Kmer> = Vec::new();
+            let mut kmers: Vec<Seq2Bit> = Vec::new();
             let mut datas: Vec<Data> = Vec::new();
-            for (kmer, data) in block {
-                kmers.push(kmer);
-                datas.push(data);
+            for kmer in block {
+                kmers.push(kmer.seq2bit().clone());
+                datas.push(kmer.data().clone());
             }
 
             assert_eq!(
@@ -292,8 +288,10 @@ mod tests {
             let block = Block {
                 k: 5,
                 data_size: 1,
-                kmer: bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1,],
-                data: vec![1, 2, 3],
+                kmer: Kmer::new(
+                    bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1,],
+                    vec![1, 2, 3],
+                ),
                 minimizer_offset: 0,
                 offset: 0,
             };
@@ -318,11 +316,11 @@ mod tests {
             let minimizer = bitvec::bitbox![u8, bitvec::order::Msb0; 0, 1, 1, 0, 1, 1];
             let block = Block::read_minimizer(&mut readable, 5, 3, 1, 200, &minimizer)?;
 
-            let mut kmers: Vec<Kmer> = Vec::new();
+            let mut kmers: Vec<Seq2Bit> = Vec::new();
             let mut datas: Vec<Data> = Vec::new();
-            for (kmer, data) in block {
-                kmers.push(kmer);
-                datas.push(data);
+            for kmer in block {
+                kmers.push(kmer.seq2bit().clone());
+                datas.push(kmer.data().clone());
             }
 
             assert_eq!(
@@ -345,11 +343,11 @@ mod tests {
             let minimizer = bitvec::bitbox![u8, bitvec::order::Msb0; 0, 1, 1, 0, 1, 1];
             let block = Block::read_minimizer(&mut readable, 5, 3, 0, 100, &minimizer)?;
 
-            let mut kmers: Vec<Kmer> = Vec::new();
+            let mut kmers: Vec<Seq2Bit> = Vec::new();
             let mut datas: Vec<Data> = Vec::new();
-            for (kmer, data) in block {
-                kmers.push(kmer);
-                datas.push(data);
+            for kmer in block {
+                kmers.push(kmer.seq2bit().clone());
+                datas.push(kmer.data().clone());
             }
 
             assert_eq!(
@@ -372,11 +370,11 @@ mod tests {
             let minimizer = bitvec::bitbox![u8, bitvec::order::Msb0; 0, 1, 1, 0, 1, 1];
             let block = Block::read_minimizer(&mut readable, 5, 3, 1, 1, &minimizer)?;
 
-            let mut kmers: Vec<Kmer> = Vec::new();
+            let mut kmers: Vec<Seq2Bit> = Vec::new();
             let mut datas: Vec<Data> = Vec::new();
-            for (kmer, data) in block {
-                kmers.push(kmer);
-                datas.push(data);
+            for kmer in block {
+                kmers.push(kmer.seq2bit().clone());
+                datas.push(kmer.data().clone());
             }
 
             assert_eq!(
@@ -393,8 +391,10 @@ mod tests {
             let block = Block {
                 k: 5,
                 data_size: 1,
-                kmer: bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
-                data: vec![1, 2, 3],
+                kmer: Kmer::new(
+                    bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
+                    vec![1, 2, 3],
+                ),
                 minimizer_offset: 1,
                 offset: 0,
             };

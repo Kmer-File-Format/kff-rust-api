@@ -7,10 +7,12 @@
 /* project use */
 
 /* mod declaration */
+pub mod kmer;
 pub mod read;
 pub mod write;
 
 /* pub use */
+pub use kmer::{Data, Kmer, Seq2Bit};
 pub use read::KffRead;
 pub use write::KffWrite;
 

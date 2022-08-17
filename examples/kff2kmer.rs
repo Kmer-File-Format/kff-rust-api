@@ -5,9 +5,6 @@
 /* std use */
 
 /* crate use */
-
-use std::io::Read;
-
 use clap::Parser as _;
 
 /* project use */
@@ -52,10 +49,11 @@ fn main() -> error::Result<()> {
 
     log::trace!("Open file");
     let file = kff::read::Kff::<std::io::BufReader<std::fs::File>>::open(params.input)?;
+    let encoding = *(file.header().encoding());
 
     let mut iter = file.kmers();
-    while let Some(Ok((kmer, _data))) = iter.next() {
-        println!("{}", kmer);
+    while let Some(Ok(kmer)) = iter.next() {
+        println!("{}", String::from_utf8(kmer.seq(encoding))?);
     }
 
     Ok(())

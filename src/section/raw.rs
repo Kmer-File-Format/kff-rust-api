@@ -7,6 +7,7 @@
 /* project use */
 use crate::error;
 use crate::section;
+use crate::Kmer;
 
 /// Struct to Read and Write Raw section
 #[derive(getset::Getters, getset::Setters, getset::MutGetters)]
@@ -50,10 +51,7 @@ impl Raw {
     }
 
     /// Read a Raw section
-    pub fn read<R>(
-        &self,
-        inner: &mut R,
-    ) -> error::Result<Vec<(section::block::Kmer, section::block::Data)>>
+    pub fn read<R>(&self, inner: &mut R) -> error::Result<Vec<Kmer>>
     where
         R: std::io::Read + crate::KffRead,
     {
@@ -65,9 +63,7 @@ impl Raw {
             let block =
                 section::block::Block::read_raw(inner, self.k, self.data_size as usize, self.max)?;
 
-            for (kmer, data) in block {
-                output.push((kmer, data))
-            }
+            output.extend(block);
         }
 
         Ok(output)
@@ -136,27 +132,27 @@ mod tests {
         assert_eq!(
             kmers,
             vec![
-                (
+                Kmer::new(
                     bitvec::bitbox![u8, bitvec::order::Msb0;  0, 0, 0, 1, 1, 0, 1, 1, 1, 1],
                     vec![1]
                 ),
-                (
+                Kmer::new(
                     bitvec::bitbox![u8, bitvec::order::Msb0; 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
                     vec![2]
                 ),
-                (
+                Kmer::new(
                     bitvec::bitbox![u8, bitvec::order::Msb0; 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
                     vec![3]
                 ),
-                (
+                Kmer::new(
                     bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1],
                     vec![1]
                 ),
-                (
+                Kmer::new(
                     bitvec::bitbox![u8, bitvec::order::Msb0; 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
                     vec![2]
                 ),
-                (
+                Kmer::new(
                     bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1],
                     vec![1]
                 )
@@ -185,24 +181,24 @@ mod tests {
                 section::block::Block {
                     k: 5,
                     data_size: 1,
-                    kmer: bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
-                    data: vec![1, 2, 3],
+                    kmer: Kmer::new(bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
+                    vec![1, 2, 3]),
 		    minimizer_offset: 0,
 		    offset: 0,
                 },
                 section::block::Block{
                     k: 5,
                     data_size: 1,
-                    kmer: bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
-                    data: vec![1, 2],
+                    kmer: Kmer::new(bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+                    vec![1, 2]),
 		    minimizer_offset: 0,
 		    offset: 0,
                 },
                 section::block::Block {
                     k: 5,
 		    data_size: 1,
-                    kmer: bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1],
-                    data: vec![1],
+                    kmer: Kmer::new(bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1],
+                    vec![1]),
 		    minimizer_offset: 0,
 		    offset: 0,
                 },

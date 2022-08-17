@@ -7,8 +7,7 @@
 /* project use */
 use crate::error;
 use crate::read::Kff;
-use crate::section::block::Data;
-use crate::section::block::Kmer;
+use crate::Kmer;
 
 /* mod declaration */
 
@@ -18,8 +17,8 @@ where
     R: std::io::Read + std::io::BufRead + crate::KffRead,
 {
     inner: Kff<R>,
-    front: Option<Box<dyn Iterator<Item = (Kmer, Data)>>>,
-    back: Option<Box<dyn Iterator<Item = (Kmer, Data)>>>,
+    front: Option<Box<dyn Iterator<Item = Kmer>>>,
+    back: Option<Box<dyn Iterator<Item = Kmer>>>,
 }
 
 impl<R> KmerIterator<R>
@@ -40,7 +39,7 @@ impl<R> Iterator for KmerIterator<R>
 where
     R: std::io::Read + std::io::BufRead + crate::KffRead,
 {
-    type Item = error::Result<(Kmer, Data)>;
+    type Item = error::Result<Kmer>;
 
     fn next(&mut self) -> std::option::Option<Self::Item> {
         loop {
@@ -69,6 +68,8 @@ where
 mod tests {
     use super::*;
 
+    use crate::Seq2Bit;
+
     const KFF_FILE: &[u8] = &[
         75, 70, 70, 1, 0, 30, 0, 0, 0, 0, 0, 0, 118, 0, 0, 0, 0, 0, 0, 0, 4, 100, 97, 116, 97, 95,
         115, 105, 122, 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 107, 0, 0, 0, 0, 0, 0, 0, 0, 31, 109, 97,
@@ -89,7 +90,10 @@ mod tests {
     fn read_kmer() -> error::Result<()> {
         let reader = Kff::<std::io::BufReader<&[u8]>>::new(std::io::BufReader::new(KFF_FILE))?;
 
-        let kmers: Vec<Kmer> = reader.kmers().map(|x| x.unwrap().0).collect();
+        let kmers: Vec<Seq2Bit> = reader
+            .kmers()
+            .map(|x| x.unwrap().seq2bit().clone())
+            .collect();
 
         assert_eq!(
             kmers,
