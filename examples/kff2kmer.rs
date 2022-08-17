@@ -6,6 +6,8 @@
 
 /* crate use */
 
+use std::io::Read;
+
 use clap::Parser as _;
 
 /* project use */
@@ -30,6 +32,10 @@ pub struct Command {
     /// Timestamp (sec, ms, ns, none)
     #[clap(short = 'T', long = "timestamp")]
     pub ts: Option<stderrlog::Timestamp>,
+
+    /// Kff input file
+    #[clap(short = 'i', long = "input")]
+    pub input: std::path::PathBuf,
 }
 
 fn main() -> error::Result<()> {
@@ -44,7 +50,13 @@ fn main() -> error::Result<()> {
         .init()
         .unwrap();
 
-    log::trace!("Hello, word!");
+    log::trace!("Open file");
+    let file = kff::read::Kff::<std::io::BufReader<std::fs::File>>::open(params.input)?;
+
+    let mut iter = file.kmers();
+    while let Some(Ok((kmer, _data))) = iter.next() {
+        println!("{}", kmer);
+    }
 
     Ok(())
 }
