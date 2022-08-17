@@ -6,7 +6,7 @@
 
 /* project use */
 use crate::error;
-use crate::read::Kff;
+use crate::Kff;
 use crate::Kmer;
 
 /* mod declaration */

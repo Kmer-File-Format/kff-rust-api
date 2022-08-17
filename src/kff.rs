@@ -8,10 +8,9 @@
 use crate::error;
 use crate::section;
 use crate::Kmer;
+use crate::KmerIterator;
 
 use crate::section::values::AbcValues as _;
-
-use super::KmerIterator;
 
 /// Struct to read a kff file
 #[derive(getset::Getters, getset::Setters, getset::MutGetters)]
@@ -61,7 +60,7 @@ where
 
     /// Consume Kff object to create a KmerIterator
     pub fn kmers(self) -> KmerIterator<R> {
-        crate::read::KmerIterator::new(self)
+        KmerIterator::new(self)
     }
 
     /// Read Kff until last kmer section

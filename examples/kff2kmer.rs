@@ -48,7 +48,7 @@ fn main() -> error::Result<()> {
         .unwrap();
 
     log::trace!("Open file");
-    let file = kff::read::Kff::<std::io::BufReader<std::fs::File>>::open(params.input)?;
+    let file = kff::Kff::<std::io::BufReader<std::fs::File>>::open(params.input)?;
     let encoding = *(file.header().encoding());
 
     let mut iter = file.kmers();
