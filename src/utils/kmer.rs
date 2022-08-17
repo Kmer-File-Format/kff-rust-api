@@ -14,7 +14,12 @@ pub type Data = Vec<u8>;
 
 /// Represent a Kmer with data
 #[derive(
-    getset::Getters, getset::Setters, getset::MutGetters, std::fmt::Debug, std::cmp::PartialEq,
+    getset::Getters,
+    getset::Setters,
+    getset::MutGetters,
+    std::fmt::Debug,
+    std::cmp::PartialEq,
+    std::cmp::Eq,
 )]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct Kmer {
