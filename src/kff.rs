@@ -137,9 +137,20 @@ where
     }
 }
 
+impl<T> std::io::Seek for Kff<T>
+where
+    T: std::io::Read + std::io::Seek,
+{
+    fn seek(&mut self, pos: std::io::SeekFrom) -> std::io::Result<u64> {
+        self.inner.seek(pos)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use std::io::Seek;
 
     const KFF_FILE: &[u8] = &[
         b'K', b'F', b'F',       // Magic number
@@ -230,6 +241,16 @@ mod tests {
         let mut reader = Kff::new(inner.clone())?;
 
         assert!(reader.load_footer().is_err());
+
+        Ok(())
+    }
+
+    #[test]
+    fn seek() -> error::Result<()> {
+        let inner = std::io::Cursor::new(KFF_FILE.to_vec());
+        let mut reader = Kff::new(inner)?;
+
+        assert_eq!(reader.seek(std::io::SeekFrom::Start(2))?, 2);
 
         Ok(())
     }
