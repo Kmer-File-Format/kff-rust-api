@@ -10,7 +10,7 @@ use crate::kmer::Seq2Bit;
 use crate::Kmer;
 
 /// Struct to data present in KFF Raw or Minimizer block
-#[derive(getset::Getters, std::fmt::Debug)]
+#[derive(getset::Getters, std::fmt::Debug, std::default::Default)]
 #[getset(get = "pub")]
 pub struct Block {
     /// Size of kmer

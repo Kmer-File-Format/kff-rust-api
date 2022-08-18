@@ -10,7 +10,7 @@ use crate::section;
 use crate::Kmer;
 
 /// Struct to Read and Write Raw section
-#[derive(getset::Getters, getset::Setters, getset::MutGetters)]
+#[derive(getset::Getters, getset::Setters, getset::MutGetters, std::default::Default)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct Raw {
     /// Size of kmer

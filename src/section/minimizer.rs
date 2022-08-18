@@ -10,7 +10,7 @@ use crate::section;
 use crate::{Kmer, Seq2Bit};
 
 /// Struct to Read and Write Raw section
-#[derive(getset::Getters, getset::Setters, getset::MutGetters)]
+#[derive(getset::Getters, getset::Setters, getset::MutGetters, std::default::Default)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct Minimizer {
     /// Size of kmer

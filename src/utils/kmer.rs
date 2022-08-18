@@ -20,6 +20,7 @@ pub type Data = Vec<u8>;
     std::fmt::Debug,
     std::cmp::PartialEq,
     std::cmp::Eq,
+    std::default::Default,
 )]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct Kmer {
