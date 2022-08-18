@@ -8,7 +8,9 @@
 use crate::error;
 
 /// Struct to Read and Write Index section
-#[derive(getset::Getters, getset::Setters, getset::MutGetters, std::default::Default)]
+#[derive(
+    getset::Getters, getset::Setters, getset::MutGetters, std::default::Default, std::fmt::Debug,
+)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct Index {
     /// Vector of block type and relative position
@@ -45,7 +47,7 @@ impl Index {
     where
         R: std::io::Read + crate::KffRead,
     {
-        let mut output = Vec::new();
+        let mut pair = Vec::new();
 
         let nb_block = inner.read_u64()?;
 
@@ -53,13 +55,11 @@ impl Index {
             let section_type = inner.read_u8()?;
             let delta = inner.read_i64()?;
 
-            output.push((section_type, delta));
+            pair.push((section_type, delta));
         }
 
-        Ok(Self {
-            pair: output,
-            next_index: inner.read_u64()?,
-        })
+        let next_index = inner.read_u64()?;
+        Ok(Self { pair, next_index })
     }
 
     /// Write an Index section
