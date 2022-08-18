@@ -8,7 +8,7 @@
 use crate::error;
 
 /// Struct to Read and Write Index section
-#[derive(getset::Getters, getset::Setters, getset::MutGetters)]
+#[derive(getset::Getters, getset::Setters, getset::MutGetters, std::default::Default)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct Index {
     /// Vector of block type and relative position
@@ -35,6 +35,11 @@ impl Index {
 }
 
 impl Index {
+    /// Create an index
+    pub fn new(pair: Vec<(u8, i64)>, next_index: u64) -> Self {
+        Self { pair, next_index }
+    }
+
     /// Read an Index section
     pub fn read<R>(inner: &mut R) -> error::Result<Self>
     where
@@ -125,6 +130,24 @@ mod tests {
                 0, 0, 0, 0, 0, 45, 33, 0, // Next index section
             ]
         );
+
+        Ok(())
+    }
+
+    #[test]
+    fn skip() -> error::Result<()> {
+        let mut data: &[u8] = &[
+            0, 0, 0, 0, 0, 0, 0, 3, // number of pair
+            b'r', 0, 0, 0, 0, 0, 0, 55, 255, // Raw section
+            b't', 255, 0, 0, 0, 0, 0, 0, 255, // a T section with value in past
+            b'm', 0, 0, 0, 0, 0, 255, 0, 255, // Minimizer section
+            0, 0, 0, 0, 0, 45, 33, 0, // Next index section
+        ];
+
+        let index = Index::skip(&mut data)?;
+
+        assert_eq!(index.pair(), &[]);
+        assert_eq!(index.next_index(), &0);
 
         Ok(())
     }
