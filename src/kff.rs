@@ -3,10 +3,14 @@
 /* std use */
 
 /* crate use */
+use std::io::Seek;
 
 /* project use */
 use crate::error;
 use crate::section;
+use crate::utils;
+use crate::GlobalIndex;
+use crate::KffRead;
 use crate::Kmer;
 use crate::KmerIterator;
 
@@ -29,7 +33,10 @@ where
     /// Current Values extract from `inner`
     #[getset(set = "pub", get_mut = "pub")]
     values: section::Values,
-    // index: section::Index,
+
+    /// GlobalIndex present only if inner is seekable and first section is index or footer contains first_index
+    #[getset(set = "pub", get_mut = "pub")]
+    index: Option<utils::GlobalIndex>,
 }
 
 impl<R> Kff<R>
@@ -45,17 +52,8 @@ where
             inner,
             header,
             values,
+            index: None,
         })
-    }
-
-    /// Create a new Kff by read file match with path
-    pub fn open<P>(path: P) -> error::Result<Kff<std::io::BufReader<std::fs::File>>>
-    where
-        P: std::convert::AsRef<std::path::Path>,
-    {
-        std::fs::File::open(&path)
-            .map(std::io::BufReader::new)
-            .map(Kff::new)?
     }
 
     /// Consume Kff object to create a KmerIterator
@@ -95,9 +93,53 @@ where
     }
 }
 
+impl Kff<std::io::BufReader<std::fs::File>> {
+    /// Create a new Kff by read file match with path
+    pub fn open<P>(path: P) -> error::Result<Self>
+    where
+        P: std::convert::AsRef<std::path::Path>,
+    {
+        std::fs::File::open(&path)
+            .map(std::io::BufReader::new)
+            .map(Kff::new)?
+    }
+
+    /// Create a Kff and generate a global index
+    pub fn with_index<P>(path: P) -> error::Result<Self>
+    where
+        P: std::convert::AsRef<std::path::Path>,
+    {
+        let mut inner = std::fs::File::open(&path).map(std::io::BufReader::new)?;
+
+        let header = section::Header::read(&mut inner)?;
+        let values = section::Values::default();
+
+        let pos_first_section = inner.seek(std::io::SeekFrom::Current(0))?;
+        let index = match utils::GlobalIndex::new(&mut inner, pos_first_section) {
+            Ok(index) => Some(index),
+            Err(error::Error::Kff(error::Kff::NotAnIndex)) => {
+                let value = Kff::load_footer(&mut inner)?;
+
+                Some(GlobalIndex::new(
+                    &mut inner,
+                    *value.get("first_index").ok_or(error::Kff::NoFirstIndex)?,
+                )?)
+            }
+            Err(e) => return Err(e),
+        };
+
+        Ok(Self {
+            inner,
+            header,
+            values,
+            index,
+        })
+    }
+}
+
 impl<R> Kff<R>
 where
-    R: std::io::Read + std::io::Seek + crate::KffRead,
+    R: std::io::Read + std::io::Seek + KffRead,
 {
     /// Check readable match with a KFF file
     pub fn check(&mut self) -> error::Result<bool> {
@@ -119,20 +161,17 @@ where
     }
 
     /// Load footer, assume last section is a value and last value of this section is footer_size
-    pub fn load_footer(&mut self) -> error::Result<()> {
-        self.inner.seek(std::io::SeekFrom::End(-11))?;
-        let footer_size = self.inner.read_u64()?;
+    fn load_footer(inner: &mut R) -> error::Result<section::Values> {
+        inner.seek(std::io::SeekFrom::End(-11))?;
+        let footer_size = inner.read_u64()?;
 
-        self.inner
-            .seek(std::io::SeekFrom::End(-(footer_size as i64 + 3)))?;
+        inner.seek(std::io::SeekFrom::End(-(footer_size as i64 + 3)))?;
 
-        let v = self.inner.read_u8()?;
+        let v = inner.read_u8()?;
         if v != b'v' {
             Err(error::Kff::FooterSizeNotCorrect.into())
         } else {
-            self.values = section::Values::read(&mut self.inner)?;
-
-            Ok(())
+            section::Values::read(inner)
         }
     }
 }
@@ -230,17 +269,15 @@ mod tests {
     fn load_footer() -> error::Result<()> {
         let inner_len = KFF_FILE.len();
         let mut inner = std::io::Cursor::new(KFF_FILE.to_vec());
-        let mut reader = Kff::new(inner.clone())?;
 
-        assert!(reader.load_footer().is_ok());
+        let mut truth = section::Values::new();
+        truth.insert("footer_size".to_string(), 29);
 
-        assert_eq!(reader.values.get("footer_size"), Some(&29));
+        assert_eq!(Kff::load_footer(&mut inner)?, truth);
 
         inner.get_mut()[inner_len - 32] = b'f';
 
-        let mut reader = Kff::new(inner.clone())?;
-
-        assert!(reader.load_footer().is_err());
+        assert!(Kff::load_footer(&mut inner).is_err());
 
         Ok(())
     }

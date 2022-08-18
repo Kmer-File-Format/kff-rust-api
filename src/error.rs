@@ -53,6 +53,14 @@ pub enum Kff {
     /// Not a valid Kff section prefix
     #[error("'{0}' isn't a valid Kff section prefix")]
     NotASectionPrefix(u8),
+
+    /// Not an index
+    #[error("Section at position isn't an index section")]
+    NotAnIndex,
+
+    /// No 'first_index' in footer
+    #[error("Variable 'first_index' not present in footer it's seems not be an indexed Kff file")]
+    NoFirstIndex,
 }
 
 /// Alias of result

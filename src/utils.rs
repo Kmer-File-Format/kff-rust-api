@@ -17,6 +17,7 @@ pub use global_index::GlobalIndex;
 pub use kmer::{Data, Kmer, Seq2Bit};
 pub use read::KffRead;
 pub use write::KffWrite;
+
 #[inline]
 pub(crate) fn ceil_to_8(n: u64) -> u64 {
     (n + 7) & !(7)

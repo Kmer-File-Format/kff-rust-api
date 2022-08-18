@@ -27,7 +27,12 @@ impl GlobalIndex {
     {
         let mut pair = Vec::new();
 
-        let mut start_local_index = inner.seek(std::io::SeekFrom::Start(first_index + 1))? - 1;
+        let mut start_local_index = inner.seek(std::io::SeekFrom::Start(first_index))?;
+
+        let section_type = inner.read_u8()?;
+        if section_type != b'i' {
+            return Err(error::Kff::NotAnIndex.into());
+        }
 
         loop {
             let local_index = section::Index::read(inner)?;
