@@ -41,11 +41,12 @@ impl Minimizer {
                 .get("m")
                 .cloned()
                 .ok_or_else(|| error::Kff::FieldIsMissing("m".to_string()))?,
-            ordered: values
-                .get("ordered")
-                .cloned()
-                .ok_or_else(|| error::Kff::FieldIsMissing("ordered".to_string()))
-                .map(|x| x != 0)?,
+            ordered: true,
+            // ordered: values
+            //     .get("ordered")
+            //     .cloned()
+            //     .ok_or_else(|| error::Kff::FieldIsMissing("ordered".to_string()))
+            //     .map(|x| x != 0)?,
             max: values
                 .get("max")
                 .cloned()
