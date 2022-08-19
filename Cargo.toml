@@ -41,6 +41,7 @@ criterion      = { version = "0.3" }
 rand           = { version = "0.8" }
 tempfile       = { version = "3" }
 
+
 [profile.release]
 lto = 'thin'
 opt-level = 3

@@ -53,6 +53,8 @@ impl GlobalIndex {
             }
         }
 
+        pair.sort_unstable_by_key(|k| k.1);
+
         Ok(Self { pair })
     }
 }
@@ -90,15 +92,15 @@ mod tests {
         assert_eq!(
             index.pair(),
             &vec![
-                (114, 1),
                 (105, 0),
+                (114, 1),
                 (109, 3),
                 (116, 42),
                 (114, 46),
                 (109, 48),
-                (109, 100),
+                (116, 94),
                 (114, 98),
-                (116, 94)
+                (109, 100)
             ]
         );
 

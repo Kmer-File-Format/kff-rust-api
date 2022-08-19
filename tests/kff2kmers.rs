@@ -6,15 +6,17 @@ use std::process::{Command, Stdio};
 #[test]
 #[cfg(not(tarpaulin))]
 fn kff2kmers() -> kff::error::Result<()> {
+    let args = vec![
+        "run",
+        "--example",
+        "kff2kmer",
+        "--",
+        "-i",
+        "tests/data/test.kff",
+    ];
+
     let mut child = Command::new("cargo")
-        .args(&[
-            "run",
-            "--example",
-            "kff2kmer",
-            "--",
-            "-i",
-            "tests/data/test.kff",
-        ])
+        .args(&args)
         .stderr(Stdio::piped())
         .stdout(Stdio::piped())
         .spawn()
@@ -27,9 +29,7 @@ fn kff2kmers() -> kff::error::Result<()> {
         child.stdout.unwrap().read_to_string(&mut stdout)?;
         child.stderr.unwrap().read_to_string(&mut stderr)?;
 
-        println!("stdout: {}", stdout);
-        println!("stderr: {}", stderr);
-        panic!();
+        panic!("\nstdout: {}\nstderr: {}", stdout, stderr);
     }
 
     let mut value_str = String::new();
