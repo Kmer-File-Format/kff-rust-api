@@ -42,7 +42,7 @@ impl Index {
         Self { pair, next_index }
     }
 
-    /// Read an Index section
+    /// Read an Index section, section flag must be already read
     pub fn read<R>(inner: &mut R) -> error::Result<Self>
     where
         R: std::io::Read + crate::KffRead,
@@ -62,7 +62,7 @@ impl Index {
         Ok(Self { pair, next_index })
     }
 
-    /// Write an Index section
+    /// Write an Index section, section flag isn't write
     pub fn write<W>(&self, outer: &mut W) -> error::Result<()>
     where
         W: std::io::Write + crate::KffWrite,

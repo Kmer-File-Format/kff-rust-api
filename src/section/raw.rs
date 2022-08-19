@@ -50,7 +50,7 @@ impl Raw {
         })
     }
 
-    /// Read a Raw section
+    /// Read a Raw section, section flag must be already read
     pub fn read<R>(&self, inner: &mut R) -> error::Result<Vec<Kmer>>
     where
         R: std::io::Read + crate::KffRead,
@@ -69,7 +69,7 @@ impl Raw {
         Ok(output)
     }
 
-    /// Write a Raw section
+    /// Write a Raw section, section flag isn't write
     pub fn write<W>(&self, outer: &mut W, blocks: Vec<section::block::Block>) -> error::Result<()>
     where
         W: std::io::Write + crate::KffWrite,

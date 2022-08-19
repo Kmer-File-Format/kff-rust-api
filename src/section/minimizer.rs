@@ -57,7 +57,7 @@ impl Minimizer {
         })
     }
 
-    /// Read a Minimizer section
+    /// Read a Minimizer section, section flag must be already read
     pub fn read<R>(&self, inner: &mut R) -> error::Result<Vec<Kmer>>
     where
         R: std::io::Read + crate::KffRead,
@@ -84,7 +84,7 @@ impl Minimizer {
         Ok(output)
     }
 
-    /// Write a Raw section
+    /// Write a Raw section, section flag isn't read
     pub fn write<W>(
         &self,
         outer: &mut W,

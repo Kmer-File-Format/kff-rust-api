@@ -19,12 +19,12 @@ pub trait AbcValues: Sized {
     /// Build an empty Values but with a minimal capacity
     fn with_capacity(capacity: usize) -> Self;
 
-    /// Build a Values from a readable key are overwrite
+    /// Build a Values from a readable key are overwrite, section flag must be already read
     fn read<R>(inner: &mut R) -> error::Result<Self>
     where
         R: std::io::Read + crate::KffRead;
 
-    /// Write contents of Values in writables
+    /// Write contents of Values in writables, section flag isn't write
     fn write<W>(&self, outer: &mut W) -> error::Result<()>
     where
         W: std::io::Write;
