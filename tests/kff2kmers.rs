@@ -35,6 +35,7 @@ fn kff2kmers() -> kff::error::Result<()> {
     let mut value_str = String::new();
     child.stdout.unwrap().read_to_string(&mut value_str)?;
     value_str.pop().unwrap();
+
     let value: Vec<Vec<u8>> = value_str
         .split('\n')
         .map(|x| x.bytes().collect::<Vec<u8>>())

@@ -185,7 +185,7 @@ where
             .as_ref()
             .ok_or(error::Error::Kff(error::Kff::NoIndex))?;
 
-        self.values = match index.pair()[..n].iter().rev().find(|x| x.0 == b'r') {
+        self.values = match index.pair()[..n].iter().rev().find(|x| x.0 == b'v') {
             Some((_t, p)) => {
                 self.inner.seek(std::io::SeekFrom::Start(p + 1))?;
                 section::Values::read(&mut self.inner)?

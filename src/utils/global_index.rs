@@ -27,7 +27,7 @@ impl GlobalIndex {
     {
         let mut pair = Vec::new();
 
-        let mut start_local_index = inner.seek(std::io::SeekFrom::Start(first_index))?;
+        inner.seek(std::io::SeekFrom::Start(first_index))?;
 
         let section_type = inner.read_u8()?;
         if section_type != b'i' {
@@ -37,17 +37,19 @@ impl GlobalIndex {
         loop {
             let local_index = section::Index::read(inner)?;
 
+            let relative_to = inner.seek(std::io::SeekFrom::Current(0))?;
+
             pair.extend(
                 local_index
                     .pair()
                     .iter()
-                    .map(|(t, pos)| (*t, (start_local_index as i64 + *pos) as u64)),
+                    .map(|(t, pos)| (*t, (relative_to as i64 + *pos) as u64)),
             );
 
             if local_index.next_index() == &0 {
                 break;
             } else {
-                start_local_index = inner.seek(std::io::SeekFrom::Current(
+                inner.seek(std::io::SeekFrom::Current(
                     (*local_index.next_index()) as i64,
                 ))?;
             }
@@ -92,15 +94,15 @@ mod tests {
         assert_eq!(
             index.pair(),
             &vec![
-                (105, 0),
-                (114, 1),
-                (109, 3),
-                (116, 42),
-                (114, 46),
-                (109, 48),
-                (116, 94),
-                (114, 98),
-                (109, 100)
+                (105, 44),
+                (114, 45),
+                (109, 47),
+                (116, 85),
+                (114, 89),
+                (109, 91),
+                (116, 137),
+                (114, 141),
+                (109, 143)
             ]
         );
 

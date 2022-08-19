@@ -1,4 +1,4 @@
-//! Read a kff file and write in stdout kmer
+//! Read a kff file show index or show content of a section
 
 /* std use */
 
@@ -31,6 +31,14 @@ pub struct Command {
     /// Kff input file
     #[clap(short = 'i', long = "input")]
     pub input: std::path::PathBuf,
+
+    /// Flag to show index content
+    #[clap(short = 's', long = "show-index")]
+    pub show: bool,
+
+    /// Get target section
+    #[clap(short = 't', long = "target")]
+    pub target: Option<usize>,
 }
 
 fn main() -> error::Result<()> {
@@ -45,13 +53,25 @@ fn main() -> error::Result<()> {
         .init()
         .unwrap();
 
-    log::trace!("Open file");
-    let file = kff::Kff::<std::io::BufReader<std::fs::File>>::open(params.input)?;
-    let encoding = *(file.header().encoding());
+    let mut kff = kff::Kff::with_index(params.input)?;
 
-    let mut iter = file.kmers();
-    while let Some(Ok(kmer)) = iter.next() {
-        println!("{}", String::from_utf8(kmer.seq(encoding))?);
+    if params.show {
+        if let Some(index) = kff.index() {
+            println!("index, type, offset");
+            for (i, (t, p)) in index.pair().iter().enumerate() {
+                println!("{},{},{}", i, *t as char, p);
+            }
+        } else {
+            log::error!("This kff file didn't containts index");
+            return Ok(());
+        }
+    } else if let Some(target) = params.target {
+        let section = kff.kmer_of_section(target)?;
+        for kmer in section {
+            println!("{}", String::from_utf8(kmer.seq(*kff.header().encoding()))?);
+        }
+    } else {
+        log::error!("You must set option `show` or `target`")
     }
 
     Ok(())
