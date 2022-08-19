@@ -35,7 +35,6 @@ where
     values: section::Values,
 
     /// GlobalIndex present only if inner is seekable and first section is index or footer contains first_index
-    #[getset(set = "pub", get_mut = "pub")]
     index: Option<utils::GlobalIndex>,
 }
 
@@ -172,6 +171,40 @@ where
             Err(error::Kff::FooterSizeNotCorrect.into())
         } else {
             section::Values::read(inner)
+        }
+    }
+
+    /// Get kmer of nth section in index.
+    ///
+    /// If index isn't set return an Error
+    /// If we didn't found section value before target section return an Error
+    /// If section isn't a kmer section return an Error
+    pub fn kmer_of_section(&mut self, n: usize) -> error::Result<Vec<Kmer>> {
+        let index = self
+            .index
+            .as_ref()
+            .ok_or(error::Error::Kff(error::Kff::NoIndex))?;
+
+        self.values = match index.pair()[..n].iter().rev().find(|x| x.0 == b'r') {
+            Some((_t, p)) => {
+                self.inner.seek(std::io::SeekFrom::Start(p + 1))?;
+                section::Values::read(&mut self.inner)?
+            }
+            None => return Err(error::Kff::NoValueSectionBeforeTarget.into()),
+        };
+
+        self.inner
+            .seek(std::io::SeekFrom::Start(index.pair()[n].1))?;
+        match self.inner.read_u8()? {
+            b'r' => match section::Raw::new(&self.values) {
+                Ok(section) => section.read(&mut self.inner),
+                Err(e) => Err(e),
+            },
+            b'm' => match section::Minimizer::new(&self.values) {
+                Ok(section) => section.read(&mut self.inner),
+                Err(e) => Err(e),
+            },
+            _ => Err(error::Kff::NotAKmerSection.into()),
         }
     }
 }

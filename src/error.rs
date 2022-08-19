@@ -61,6 +61,18 @@ pub enum Kff {
     /// No 'first_index' in footer
     #[error("Variable 'first_index' not present in footer it's seems not be an indexed Kff file")]
     NoFirstIndex,
+
+    /// No global index
+    #[error("To read a kmers of a section, KFF file should be fully indexed")]
+    NoIndex,
+
+    /// No Value section before target section
+    #[error("No value section before target section")]
+    NoValueSectionBeforeTarget,
+
+    /// Not a kmer section
+    #[error("Not a kmer section, you try to read a section isn't ")]
+    NotAKmerSection,
 }
 
 /// Alias of result
