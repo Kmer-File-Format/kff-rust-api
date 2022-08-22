@@ -1,6 +1,6 @@
 [package]
 name = "kff"
-version = "0.1.0"
+version = "0.9.0"
 authors = ["Pierre Marijon <pierre@marijon.fr>"]
 edition = "2021"
 description = "Kmer File Format Rust parser"
@@ -12,6 +12,11 @@ documentation = "https://natir.github.io/kff/kff"
 
 readme = "Readme.md"
 license-file = "LICENSE"
+
+exclude = [
+	".copier-answers.yml",
+	".github/*"
+]
 
 
 [dependencies]
