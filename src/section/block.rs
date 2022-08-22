@@ -31,6 +31,17 @@ pub struct Block {
 }
 
 impl Block {
+    /// Create a new block
+    pub fn new(k: u64, data_size: usize, kmer: Kmer, minimizer_offset: usize) -> Self {
+        Self {
+            k,
+            data_size,
+            kmer,
+            minimizer_offset,
+            offset: 0,
+        }
+    }
+
     /// Read raw block
     pub fn read_raw<R>(inner: &mut R, k: u64, data_size: usize, max: u64) -> error::Result<Self>
     where
