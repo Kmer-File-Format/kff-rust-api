@@ -478,7 +478,7 @@ mod tests {
         writer.finalize()?;
 
         let mut inner = Vec::new();
-        let (mut readable, path) = file.keep().unwrap();
+        let (_, path) = file.keep().unwrap();
         let mut t = std::fs::File::open(path)?;
         t.read_to_end(&mut inner)?;
 
@@ -489,7 +489,7 @@ mod tests {
                 1, 0,  // Version number
                 27, // Encoding
                 1, 1, // Uniq, Canonical
-                0, 0, 0, 0, // Free size length
+                0, 0, 0, 0, // Free space size length
                 b'v', 0, 0, 0, 0, 0, 0, 0, 5, // Five values
                 b'o', b'r', b'd', b'e', b'r', b'e', b'd', 0, 0, 0, 0, 0, 0, 0, 0, 0, //
                 b'd', b'a', b't', b'a', b'_', b's', b'i', b'z', b'e', 0, 0, 0, 0, 0, 0, 0, 0, 1,

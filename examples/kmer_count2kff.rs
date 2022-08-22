@@ -56,10 +56,14 @@ fn main() -> error::Result<()> {
     let mut kmers = vec![];
     for l in input.lines() {
         let line = l?;
+        if line.is_empty() {
+            break;
+        }
+
         let values: Vec<&str> = line.split(',').collect();
         let mut seq = bitvec::vec::BitVec::<u8, bitvec::order::Msb0>::new();
 
-        kmer_size = seq.len();
+        kmer_size = values[0].len();
 
         for nuc in values[0].bytes() {
             let bits = (nuc >> 1) & 0b11;
