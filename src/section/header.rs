@@ -103,7 +103,9 @@ impl Header {
         outer.write_bool(&self.uniq_kmer)?; // Uniq kmer
         outer.write_bool(&self.canonical_kmer)?; // Canonical kmer
         outer.write_u32(&(self.free_block.len() as u32))?; // Size of free block
-        outer.write_ascii(&self.free_block)?; // Free block
+        if !self.free_block.is_empty() {
+            outer.write_ascii(&self.free_block)?; // Free block
+        }
 
         Ok(())
     }

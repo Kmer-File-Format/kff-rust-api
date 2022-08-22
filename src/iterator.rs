@@ -88,7 +88,7 @@ mod tests {
 
     #[test]
     fn read_kmer() -> error::Result<()> {
-        let reader = Kff::<std::io::BufReader<&[u8]>>::new(std::io::BufReader::new(KFF_FILE))?;
+        let reader = Kff::<std::io::BufReader<&[u8]>>::read(std::io::BufReader::new(KFF_FILE))?;
 
         let kmers: Vec<Seq2Bit> = reader
             .kmers()

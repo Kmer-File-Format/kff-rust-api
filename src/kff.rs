@@ -19,12 +19,9 @@ use crate::section::values::AbcValues as _;
 /// Struct to read a kff file
 #[derive(getset::Getters, getset::Setters, getset::MutGetters)]
 #[getset(get = "pub")]
-pub struct Kff<R>
-where
-    R: std::io::Read,
-{
+pub struct Kff<T> {
     /// Inner read source
-    inner: R,
+    inner: T,
 
     /// Header extract from `inner`
     #[getset(set = "pub", get_mut = "pub")]
@@ -43,7 +40,7 @@ where
     R: std::io::Read + std::io::BufRead + crate::KffRead,
 {
     /// Create a new Kff reader by accept mutable reference on [std::io::Read]
-    pub fn new(mut inner: R) -> error::Result<Self> {
+    pub fn read(mut inner: R) -> error::Result<Self> {
         let header = section::Header::read(&mut inner)?;
         let values = section::Values::default();
 
@@ -100,7 +97,7 @@ impl Kff<std::io::BufReader<std::fs::File>> {
     {
         std::fs::File::open(&path)
             .map(std::io::BufReader::new)
-            .map(Kff::new)?
+            .map(Kff::read)?
     }
 
     /// Create a Kff and generate a global index
@@ -218,10 +215,85 @@ where
     }
 }
 
+impl<W> Kff<W>
+where
+    W: std::io::Write + crate::KffWrite,
+{
+    /// Create a Kff object to write in inner
+    pub fn write(mut inner: W, header: section::Header) -> error::Result<Self> {
+        header.write(&mut inner)?;
+
+        Ok(Self {
+            inner,
+            header,
+            values: section::Values::default(),
+            index: None,
+        })
+    }
+
+    /// Write a Values section
+    pub fn write_values(&mut self, values: section::Values) -> error::Result<()> {
+        self.values = values;
+
+        self.inner.write_bytes(b"v")?;
+        self.values.write(&mut self.inner)?;
+
+        Ok(())
+    }
+
+    /// Write a Index section
+    pub fn write_index(&mut self, index: section::Index) -> error::Result<()> {
+        self.inner.write_bytes(b"i")?;
+        index.write(&mut self.inner)
+    }
+
+    /// Write a Raw section
+    pub fn write_raw(
+        &mut self,
+        raw: section::Raw,
+        blocks: Vec<section::block::Block>,
+    ) -> error::Result<()> {
+        self.inner.write_bytes(b"r")?;
+        raw.write(&mut self.inner, blocks)
+    }
+
+    /// Write a Minimizer section
+    pub fn write_minimizer(
+        &mut self,
+        section: section::Minimizer,
+        minimizer: crate::Seq2Bit,
+        blocks: Vec<section::block::Block>,
+    ) -> error::Result<()> {
+        self.inner.write_bytes(b"m")?;
+        section.write(&mut self.inner, minimizer, blocks)
+    }
+
+    /// Finalize write the final signature
+    pub fn finalize(&mut self) -> error::Result<()> {
+        self.inner.write_bytes(b"KFF")?;
+        self.inner.flush()?;
+
+        Ok(())
+    }
+}
+
+impl Kff<std::io::BufWriter<std::fs::File>> {
+    /// Intialize a Kff object to write file
+    pub fn create<P>(path: P, header: section::Header) -> error::Result<Self>
+    where
+        P: std::convert::AsRef<std::path::Path>,
+    {
+        std::fs::File::create(&path)
+            .map(std::io::BufWriter::new)
+            .map(|x| Kff::write(x, header))?
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    use std::io::Read;
     use std::io::Seek;
 
     const KFF_FILE: &[u8] = &[
@@ -247,7 +319,7 @@ mod tests {
     fn create_kff_reader() -> error::Result<()> {
         let inner = std::io::Cursor::new(KFF_FILE.to_vec());
 
-        let mut reader = Kff::new(inner)?;
+        let mut reader = Kff::read(inner)?;
         assert!(reader.check()?);
 
         let mut tmpfile = tempfile::NamedTempFile::new()?;
@@ -264,7 +336,7 @@ mod tests {
     fn check_header() -> error::Result<()> {
         let inner = std::io::Cursor::new(KFF_FILE.to_vec());
 
-        let reader = Kff::new(inner)?;
+        let reader = Kff::read(inner)?;
 
         assert_eq!(reader.header().major_version(), &1);
         assert_eq!(reader.header().minor_version(), &0);
@@ -281,17 +353,17 @@ mod tests {
         let inner_len = KFF_FILE.len();
         let mut readable = std::io::Cursor::new(KFF_FILE.to_vec());
 
-        let mut file = Kff::new(readable.clone())?;
+        let mut file = Kff::read(readable.clone())?;
 
         assert!(file.check()?); // Header init and check work
 
         readable.get_mut()[1] = b'K';
-        let file = Kff::new(readable.clone());
+        let file = Kff::read(readable.clone());
         assert!(file.is_err()); // Header init failled
 
         readable.get_mut()[1] = b'F';
         readable.get_mut()[inner_len - 1] = b'K';
-        let mut file = Kff::new(readable.clone())?;
+        let mut file = Kff::read(readable.clone())?;
 
         assert!(file.check().is_err()); // Header init work but check failled
 
@@ -318,9 +390,130 @@ mod tests {
     #[test]
     fn seek() -> error::Result<()> {
         let inner = std::io::Cursor::new(KFF_FILE.to_vec());
-        let mut reader = Kff::new(inner)?;
+        let mut reader = Kff::read(inner)?;
 
         assert_eq!(reader.seek(std::io::SeekFrom::Start(2))?, 2);
+
+        Ok(())
+    }
+
+    #[test]
+    fn write() -> error::Result<()> {
+        let file = tempfile::NamedTempFile::new()?;
+        let header = section::Header::new(1, 0, 0b00011011, true, true, b"".to_vec())?;
+        let mut writer = Kff::create(file.path(), header)?;
+
+        let mut values = section::Values::default();
+        values.insert("k".to_string(), 5);
+        values.insert("m".to_string(), 3);
+        values.insert("ordered".to_string(), false as u64);
+        values.insert("max".to_string(), 200);
+        values.insert("data_size".to_string(), 1);
+
+        writer.write_values(values.clone())?;
+
+        writer.write_raw(section::Raw::new(&values)?, vec![
+	    section::block::Block {
+                k: 5,
+                data_size: 1,
+                kmer: Kmer::new(bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
+				vec![1, 2, 3]),
+		minimizer_offset: 0,
+		offset: 0,
+            },
+            section::block::Block{
+                k: 5,
+                data_size: 1,
+                kmer: Kmer::new(bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+				vec![1, 2]),
+		minimizer_offset: 0,
+		offset: 0,
+            },
+            section::block::Block {
+                k: 5,
+		data_size: 1,
+                kmer: Kmer::new(bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1],
+				vec![1]),
+		minimizer_offset: 0,
+		offset: 0,
+            },
+	])?;
+
+        writer.write_minimizer(
+	    section::Minimizer::new(&values)?,
+	    bitvec::bitbox![u8, bitvec::order::Msb0; 0, 1, 1, 0, 1, 1],
+            vec![
+                section::block::Block{
+                    k: 5,
+                    data_size: 1,
+                    kmer: Kmer::new(bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
+                     vec![1, 2, 3]),
+		    minimizer_offset: 1,
+		    offset: 0,
+                },
+                section::block::Block {
+		    k: 5,
+		    data_size: 1,
+		    kmer: Kmer::new(bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+                    vec![1, 2]),
+		    minimizer_offset: 1,
+		    offset: 0,
+                },
+                section::block::Block {
+		    k: 5,
+                    data_size: 1,
+		    kmer: Kmer::new(bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 0, 1, 1, 0, 1, 1, 1, 1],
+		    vec![1]),
+		    minimizer_offset: 1,
+		    offset: 0,
+                }
+            ],
+	)?;
+
+        writer.write_index(section::Index::new(
+            vec![(b'v', -30), (b'r', -25), (b'm', -20)],
+            0,
+        ))?;
+
+        writer.finalize()?;
+
+        let mut inner = Vec::new();
+        let (mut readable, path) = file.keep().unwrap();
+        let mut t = std::fs::File::open(path)?;
+        t.read_to_end(&mut inner)?;
+
+        assert_eq!(
+            inner,
+            vec![
+                b'K', b'F', b'F', //
+                1, 0,  // Version number
+                27, // Encoding
+                1, 1, // Uniq, Canonical
+                0, 0, 0, 0, // Free size length
+                b'v', 0, 0, 0, 0, 0, 0, 0, 5, // Five values
+                b'o', b'r', b'd', b'e', b'r', b'e', b'd', 0, 0, 0, 0, 0, 0, 0, 0, 0, //
+                b'd', b'a', b't', b'a', b'_', b's', b'i', b'z', b'e', 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                b'm', 0, 0, 0, 0, 0, 0, 0, 0, 3, //
+                b'k', 0, 0, 0, 0, 0, 0, 0, 0, 5, //
+                b'm', b'a', b'x', 0, 0, 0, 0, 0, 0, 0, 0, 200, //
+                b'r', 0, 0, 0, 0, 0, 0, 0, 3, // Three block
+                3, 27, 244, 1, 2, 3, // Three kmer in block
+                2, 27, 240, 1, 2, // Two kmer in block
+                1, 27, 192, 1,    // One kmer in block
+                b'm', //
+                108,  // minimizer sequence
+                0, 0, 0, 0, 0, 0, 0, 3, // Three block
+                3, 1, 61, 1, 2, 3, // Three kmer minimizer at offset 1
+                2, 1, 60, 1, 2, // Two kmer minimizer at offset 1
+                1, 1, 48, 1, // One kmer minimizer at offset 1
+                b'i', 0, 0, 0, 0, 0, 0, 0, 3, // Three section indexed
+                b'v', 255, 255, 255, 255, 255, 255, 255, 226, // Value section
+                b'r', 255, 255, 255, 255, 255, 255, 255, 231, // Raw section
+                b'm', 255, 255, 255, 255, 255, 255, 255, 236, // Minimizer section
+                0, 0, 0, 0, 0, 0, 0, 0, // No other index
+                b'K', b'F', b'F', //
+            ]
+        );
 
         Ok(())
     }
