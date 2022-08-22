@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["KmerIterator","A Kmer Iterator that consume Kff file"]]};

@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Reader","A Raw section reader implement [data::Reader]"],["Writer","A Raw section writer implement [data::Writer]"]]});

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Minimizer","Struct to Read and Write Raw section"]]};

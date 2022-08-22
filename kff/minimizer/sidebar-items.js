@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Reader","A Minimizer section reader implement [data::Reader]"],["Writer","A Minimizer section writer implement [data::Writer]"]]});

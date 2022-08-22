@@ -1,1 +1,1 @@
-initSidebarItems({"type":[["BitBox","Syntaxic sugar around bitvec::BitBox"],["BitOrd","Order of bit for bitvec"],["BitSlice","Syntaxic sugar around bitvec::BitSlice"],["BitVec","Syntaxic sugar around bitvec::BitVec"],["Order","Read order of bytes in file"]]});
+window.SIDEBAR_ITEMS = {"mod":[["global_index","Build a global index of a kff file"],["kmer","Representation of a KFF kmer block"],["read","Utils function to read KFF"],["write","Utils function to write KFF"]]};

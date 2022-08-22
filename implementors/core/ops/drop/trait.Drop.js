@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["kff"] = [{"text":"impl&lt;'output, W&gt; Drop for Writer&lt;'output, W&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;W: Write + Seek + 'output,&nbsp;</span>","synthetic":false,"types":[]},{"text":"impl&lt;'output, W&gt; Drop for Writer&lt;'output, W&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;W: Write + Seek,&nbsp;</span>","synthetic":false,"types":[]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

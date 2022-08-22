@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Index","Struct to Read and Write Index section"]]};

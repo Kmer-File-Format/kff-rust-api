@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"trait":[["AbcValues","A trait to implement some function around Values alias"]],"type":[["Values","Struct to parse, manage and write Values section"]]};

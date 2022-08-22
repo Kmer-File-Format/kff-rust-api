@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":[["block","Representation of a KFF kmer block"],["header","Parse, manage and write Header information"],["index","Representation of a KFF index"],["minimizer","Read and Write Minimizer section"],["raw","Read and Write Raw section"],["values","Parse, manage and write Values section"]]};

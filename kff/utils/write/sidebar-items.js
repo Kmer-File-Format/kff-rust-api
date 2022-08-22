@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"trait":[["KffWrite","Define trait containts utils function to write kff"]]};

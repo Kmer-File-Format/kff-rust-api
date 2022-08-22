@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Reader","A Kff Reader"],["Writer","A Kff Writer"]]});
+window.SIDEBAR_ITEMS = {"struct":[["Kff","Struct to read a kff file"]]};

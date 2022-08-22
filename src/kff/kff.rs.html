@@ -1,105 +1,108 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/kff.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>kff.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../kff/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><span class="help-button">?</span>
-                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/kff.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>kff.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../kff/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../kff/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../kff/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><div id="settings-menu" tabindex="-1">
+                                <a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -519,524 +522,528 @@
 <span id="516">516</span>
 <span id="517">517</span>
 <span id="518">518</span>
-</pre><div class="example-wrap"><pre class="rust ">
-<span class="doccomment">//! Declaration of Kff::Reader and Kff::Writer</span>
+<span id="519">519</span>
+<span id="520">520</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Kmer File Format Rust parser</span>
+
+<span class="comment">/* std use */</span>
 
 <span class="comment">/* crate use */</span>
-<span class="kw">use</span> <span class="ident">anyhow</span>::<span class="prelude-ty">Result</span>;
-<span class="kw">use</span> <span class="ident">byteorder</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">std::io::Seek</span>;
 
-<span class="comment">/* local use */</span>
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">data</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">data</span>::<span class="ident">Writer</span> <span class="kw">as</span> <span class="ident">DataWriter</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">error</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">minimizer</span>::<span class="ident">Reader</span> <span class="kw">as</span> <span class="ident">MinimizerReader</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">minimizer</span>::<span class="ident">Writer</span> <span class="kw">as</span> <span class="ident">MinimizerWriter</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">raw</span>::<span class="ident">Reader</span> <span class="kw">as</span> <span class="ident">RawReader</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">raw</span>::<span class="ident">Writer</span> <span class="kw">as</span> <span class="ident">RawWriter</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">seq2bits</span>::<span class="ident">Seq2Bits</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">utils</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">utils</span>::<span class="ident">switch_56_n_78</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">variables</span>::<span class="ident">Reader</span> <span class="kw">as</span> <span class="ident">VariablesReader</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">variables</span>::<span class="ident">Variables</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">variables</span>::<span class="ident">Writer</span> <span class="kw">as</span> <span class="ident">VariablesWriter</span>;
+<span class="comment">/* project use */</span>
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::section</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::utils</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::GlobalIndex</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::KffRead</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Kmer</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::KmerIterator</span>;
 
-<span class="doccomment">/// A Kff Reader</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Reader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">R</span>: <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Read</span>,
-{
-    <span class="comment">// header</span>
-    <span class="ident">major</span>: <span class="ident">u8</span>,
-    <span class="ident">minor</span>: <span class="ident">u8</span>,
-    <span class="ident">encoding</span>: <span class="ident">u8</span>,
-    <span class="ident">rev_encoding</span>: <span class="ident">u8</span>,
-    <span class="ident">comment</span>: <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::section::values::AbcValues</span> <span class="kw">as</span> <span class="kw">_</span>;
 
-    <span class="comment">//</span>
-    <span class="ident">input</span>: <span class="ident">R</span>,
+<span class="doccomment">/// Struct to read a kff file</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">getset::Getters</span>, <span class="ident">getset::Setters</span>, <span class="ident">getset::MutGetters</span>)]</span>
+<span class="attribute">#[<span class="ident">getset</span>(<span class="ident">get</span> <span class="op">=</span> <span class="string">&quot;pub&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Kff</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Inner read source</span>
+    <span class="ident">inner</span>: <span class="ident">T</span>,
 
-    <span class="comment">// global variables</span>
-    <span class="ident">variables</span>: <span class="ident">Variables</span>,
+    <span class="doccomment">/// Header extract from `inner`</span>
+    <span class="attribute">#[<span class="ident">getset</span>(<span class="ident">set</span> <span class="op">=</span> <span class="string">&quot;pub&quot;</span>, <span class="ident">get_mut</span> <span class="op">=</span> <span class="string">&quot;pub&quot;</span>)]</span>
+    <span class="ident">header</span>: <span class="ident">section::Header</span>,
+
+    <span class="doccomment">/// Current Values extract from `inner`</span>
+    <span class="attribute">#[<span class="ident">getset</span>(<span class="ident">set</span> <span class="op">=</span> <span class="string">&quot;pub&quot;</span>, <span class="ident">get_mut</span> <span class="op">=</span> <span class="string">&quot;pub&quot;</span>)]</span>
+    <span class="ident">values</span>: <span class="ident">section::Values</span>,
+
+    <span class="doccomment">/// GlobalIndex present only if inner is seekable and first section is index or footer contains first_index</span>
+    <span class="ident">index</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">utils::GlobalIndex</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="ident">Reader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="ident">Kff</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">R</span>: <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Read</span>,
+    <span class="ident">R</span>: <span class="ident">std::io::Read</span> <span class="op">+</span> <span class="ident">std::io::BufRead</span> <span class="op">+</span> <span class="ident"><span class="kw">crate</span>::KffRead</span>,
 {
-    <span class="doccomment">/// Create a new Kff reader from a reading stream</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw-2">mut</span> <span class="ident">input</span>: <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">major</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">read_u8</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">minor</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">read_u8</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">encoding</span> <span class="op">=</span> <span class="ident">utils</span>::<span class="ident">valid_encoding</span>(<span class="ident">utils</span>::<span class="ident">switch_56_n_78</span>(<span class="ident">input</span>.<span class="ident">read_u8</span>()<span class="question-mark">?</span>))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">rev_encoding</span> <span class="op">=</span> <span class="ident">utils</span>::<span class="ident">rev_encoding</span>(<span class="ident">encoding</span>);
-
-        <span class="kw">let</span> <span class="ident">comment_len</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">read_u32</span>::<span class="op">&lt;</span><span class="ident">utils</span>::<span class="ident">Order</span><span class="op">&gt;</span>()<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">usize</span>;
-
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">comment</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0</span>; <span class="ident">comment_len</span>].<span class="ident">into_boxed_slice</span>();
-
-        <span class="ident">input</span>.<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">comment</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">comment</span> <span class="op">=</span> <span class="ident">comment</span>;
-
-        <span class="kw">if</span> <span class="ident">major</span> <span class="op">&lt;</span> <span class="number">1</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">Kff</span>(<span class="ident">error</span>::<span class="ident">Kff</span>::<span class="ident">NotSupportVersionNumber</span>).<span class="ident">into</span>());
-        }
-
-        <span class="kw">let</span> <span class="ident">variables</span> <span class="op">=</span> <span class="ident">Variables</span>::<span class="ident">default</span>();
+    <span class="doccomment">/// Create a new Kff reader by accept mutable reference on [std::io::Read]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">mut</span> <span class="ident">inner</span>: <span class="ident">R</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">header</span> <span class="op">=</span> <span class="ident">section::Header::read</span>(<span class="kw-2">&amp;mut</span> <span class="ident">inner</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">values</span> <span class="op">=</span> <span class="ident">section::Values::default</span>();
 
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-            <span class="ident">major</span>,
-            <span class="ident">minor</span>,
-            <span class="ident">encoding</span>,
-            <span class="ident">rev_encoding</span>,
-            <span class="ident">comment</span>,
-            <span class="ident">input</span>,
-            <span class="ident">variables</span>,
+            <span class="ident">inner</span>,
+            <span class="ident">header</span>,
+            <span class="ident">values</span>,
+            <span class="ident">index</span>: <span class="prelude-val">None</span>,
         })
     }
 
-    <span class="comment">// Getter</span>
-    <span class="doccomment">/// Get the major verion number</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">major</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
-        <span class="self">self</span>.<span class="ident">major</span>
+    <span class="doccomment">/// Consume Kff object to create a KmerIterator</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">kmers</span>(<span class="self">self</span>) -&gt; <span class="ident">KmerIterator</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> {
+        <span class="ident">KmerIterator::new</span>(<span class="self">self</span>)
     }
 
-    <span class="doccomment">/// Get the minor verion number</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">minor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
-        <span class="self">self</span>.<span class="ident">minor</span>
-    }
-
-    <span class="doccomment">/// Get encoding used</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encoding</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
-        <span class="self">self</span>.<span class="ident">encoding</span>
-    }
-
-    <span class="doccomment">/// Get reverse encoding used</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rev_encoding</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
-        <span class="self">self</span>.<span class="ident">rev_encoding</span>
-    }
-
-    <span class="doccomment">/// Get comment</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">comment</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">comment</span>
-    }
-
-    <span class="doccomment">/// Get a mutable reference to input stream</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">input</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="kw-2">mut</span> <span class="ident">R</span> {
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">input</span>
-    }
-
-    <span class="doccomment">/// Get a mutable reference of global variable</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">variables</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Variables</span> {
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">variables</span>
-    }
-
-    <span class="doccomment">/// Get the next kmer section we have to parse</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next_section</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">data</span>::<span class="ident">Reader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">input</span>.<span class="ident">read_u8</span>()<span class="question-mark">?</span> {
-            <span class="string">b&#39;r&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">RawReader</span>::<span class="ident">new</span>(<span class="self">self</span>)<span class="question-mark">?</span>)),
-            <span class="string">b&#39;m&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">MinimizerReader</span>::<span class="ident">new</span>(<span class="self">self</span>)<span class="question-mark">?</span>)),
-            <span class="string">b&#39;v&#39;</span> <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="self">self</span>.<span class="ident">variables</span>.<span class="ident">deserialize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">input</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">next_section</span>()
+    <span class="doccomment">/// Read Kff until last kmer section</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next_kmer_section</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">std::option::Option</span><span class="op">&lt;</span><span class="ident">error::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Kmer</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">loop</span> {
+            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">read_u8</span>() {
+                <span class="prelude-val">Ok</span>(<span class="string">b&#39;v&#39;</span>) =&gt; {
+                    <span class="self">self</span>.<span class="ident">values</span> <span class="op">=</span> {
+                        <span class="kw">match</span> <span class="ident">section::Values::read</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">inner</span>) {
+                            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)),
+                            <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
+                        }
+                    }
+                }
+                <span class="prelude-val">Ok</span>(<span class="string">b&#39;r&#39;</span>) =&gt; <span class="kw">match</span> <span class="ident">section::Raw::new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">values</span>) {
+                    <span class="prelude-val">Ok</span>(<span class="ident">section</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">section</span>.<span class="ident">read</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">inner</span>)),
+                    <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)),
+                },
+                <span class="prelude-val">Ok</span>(<span class="string">b&#39;m&#39;</span>) =&gt; <span class="kw">match</span> <span class="ident">section::Minimizer::new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">values</span>) {
+                    <span class="prelude-val">Ok</span>(<span class="ident">section</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">section</span>.<span class="ident">read</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">inner</span>)),
+                    <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)),
+                },
+                <span class="prelude-val">Ok</span>(<span class="string">b&#39;K&#39;</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">None</span>, <span class="comment">// It&#39;s the begin of last signature stop reading</span>
+                <span class="prelude-val">Ok</span>(<span class="string">b&#39;i&#39;</span>) =&gt; <span class="kw">match</span> <span class="ident">section::Index::skip</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">inner</span>) {
+                    <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)),
+                    <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="kw">continue</span>,
+                },
+                <span class="prelude-val">Ok</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">error::Kff::NotASectionPrefix</span>(<span class="ident">e</span>).<span class="ident">into</span>())), <span class="comment">// Any other value is an error</span>
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)),
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">Kff</span>(<span class="ident">error</span>::<span class="ident">Kff</span>::<span class="ident">UnknowSectionType</span>).<span class="ident">into</span>()),
         }
     }
 }
 
-<span class="doccomment">/// A Kff Writer</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Writer</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">W</span>: <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Write</span>,
-{
-    <span class="ident">output</span>: <span class="ident">W</span>,
-    <span class="ident">encoding</span>: <span class="ident">u8</span>,
-    <span class="ident">variables_buffer</span>: <span class="ident">Variables</span>,
-    <span class="ident">variables</span>: <span class="ident">Variables</span>,
-}
+<span class="kw">impl</span> <span class="ident">Kff</span><span class="op">&lt;</span><span class="ident">std::io::BufReader</span><span class="op">&lt;</span><span class="ident">std::fs::File</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Create a new Kff by read file match with path</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>(<span class="ident">path</span>: <span class="ident">P</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">P</span>: <span class="ident">std::convert::AsRef</span><span class="op">&lt;</span><span class="ident">std::path::Path</span><span class="op">&gt;</span>,
+    {
+        <span class="ident">std::fs::File::open</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)
+            .<span class="ident">map</span>(<span class="ident">std::io::BufReader::new</span>)
+            .<span class="ident">map</span>(<span class="ident">Kff::read</span>)<span class="question-mark">?</span>
+    }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span> <span class="ident">Writer</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">W</span>: <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Write</span> <span class="op">+</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Seek</span>,
-{
-    <span class="doccomment">/// Create a Kff Writer from a seekable output, encoding and comment</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw-2">mut</span> <span class="ident">output</span>: <span class="ident">W</span>, <span class="ident">encoding</span>: <span class="ident">u8</span>, <span class="ident">comment</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="comment">// write header</span>
-        <span class="ident">output</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span>[<span class="number">1u8</span>, <span class="number">0</span>, <span class="ident">switch_56_n_78</span>(<span class="ident">encoding</span>)])<span class="question-mark">?</span>;
-        <span class="ident">output</span>.<span class="ident">write_u32</span>::<span class="op">&lt;</span><span class="ident">BigEndian</span><span class="op">&gt;</span>(<span class="ident">comment</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>)<span class="question-mark">?</span>;
-        <span class="ident">output</span>.<span class="ident">write_all</span>(<span class="ident">comment</span>)<span class="question-mark">?</span>;
+    <span class="doccomment">/// Create a Kff and generate a global index</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_index</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>(<span class="ident">path</span>: <span class="ident">P</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">P</span>: <span class="ident">std::convert::AsRef</span><span class="op">&lt;</span><span class="ident">std::path::Path</span><span class="op">&gt;</span>,
+    {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">std::fs::File::open</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>).<span class="ident">map</span>(<span class="ident">std::io::BufReader::new</span>)<span class="question-mark">?</span>;
+
+        <span class="kw">let</span> <span class="ident">header</span> <span class="op">=</span> <span class="ident">section::Header::read</span>(<span class="kw-2">&amp;mut</span> <span class="ident">inner</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">values</span> <span class="op">=</span> <span class="ident">section::Values::default</span>();
+
+        <span class="kw">let</span> <span class="ident">pos_first_section</span> <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">seek</span>(<span class="ident">std::io::SeekFrom::Current</span>(<span class="number">0</span>))<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">utils::GlobalIndex::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">inner</span>, <span class="ident">pos_first_section</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">index</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">index</span>),
+            <span class="prelude-val">Err</span>(<span class="ident">error::Error::Kff</span>(<span class="ident">error::Kff::NotAnIndex</span>)) =&gt; {
+                <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">Kff::load_footer</span>(<span class="kw-2">&amp;mut</span> <span class="ident">inner</span>)<span class="question-mark">?</span>;
+
+                <span class="prelude-val">Some</span>(<span class="ident">GlobalIndex::new</span>(
+                    <span class="kw-2">&amp;mut</span> <span class="ident">inner</span>,
+                    <span class="kw-2">*</span><span class="ident">value</span>.<span class="ident">get</span>(<span class="string">&quot;first_index&quot;</span>).<span class="ident">ok_or</span>(<span class="ident">error::Kff::NoFirstIndex</span>)<span class="question-mark">?</span>,
+                )<span class="question-mark">?</span>)
+            }
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+        };
 
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-            <span class="ident">output</span>,
-            <span class="ident">encoding</span>,
-            <span class="ident">variables_buffer</span>: <span class="ident">Variables</span>::<span class="ident">default</span>(),
-            <span class="ident">variables</span>: <span class="ident">Variables</span>::<span class="ident">default</span>(),
+            <span class="ident">inner</span>,
+            <span class="ident">header</span>,
+            <span class="ident">values</span>,
+            <span class="ident">index</span>,
+        })
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="ident">Kff</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">R</span>: <span class="ident">std::io::Read</span> <span class="op">+</span> <span class="ident">std::io::Seek</span> <span class="op">+</span> <span class="ident">KffRead</span>,
+{
+    <span class="doccomment">/// Check readable match with a KFF file</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">seek</span>(<span class="ident">std::io::SeekFrom::Start</span>(<span class="number">0</span>))<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">magic_number</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">read_n_bytes</span>::<span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="kw">if</span> <span class="kw-2">&amp;</span><span class="ident">magic_number</span> <span class="op">!</span><span class="op">=</span> <span class="string">b&quot;KFF&quot;</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">error::Kff::MissingMagic</span>(<span class="string">&quot;start&quot;</span>.<span class="ident">to_string</span>()).<span class="ident">into</span>());
+        }
+
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">seek</span>(<span class="ident">std::io::SeekFrom::End</span>(<span class="op">-</span><span class="number">3</span>))<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">magic_number</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">read_n_bytes</span>::<span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="kw">if</span> <span class="kw-2">&amp;</span><span class="ident">magic_number</span> <span class="op">!</span><span class="op">=</span> <span class="string">b&quot;KFF&quot;</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">error::Kff::MissingMagic</span>(<span class="string">&quot;end&quot;</span>.<span class="ident">to_string</span>()).<span class="ident">into</span>());
+        }
+
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">seek</span>(<span class="ident">std::io::SeekFrom::Start</span>(<span class="number">0</span>))<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
+    }
+
+    <span class="doccomment">/// Load footer, assume last section is a value and last value of this section is footer_size</span>
+    <span class="kw">fn</span> <span class="ident">load_footer</span>(<span class="ident">inner</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span><span class="ident">section::Values</span><span class="op">&gt;</span> {
+        <span class="ident">inner</span>.<span class="ident">seek</span>(<span class="ident">std::io::SeekFrom::End</span>(<span class="op">-</span><span class="number">11</span>))<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">footer_size</span> <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">read_u64</span>()<span class="question-mark">?</span>;
+
+        <span class="ident">inner</span>.<span class="ident">seek</span>(<span class="ident">std::io::SeekFrom::End</span>(<span class="op">-</span>(<span class="ident">footer_size</span> <span class="kw">as</span> <span class="ident">i64</span> <span class="op">+</span> <span class="number">3</span>)))<span class="question-mark">?</span>;
+
+        <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">read_u8</span>()<span class="question-mark">?</span>;
+        <span class="kw">if</span> <span class="ident">v</span> <span class="op">!</span><span class="op">=</span> <span class="string">b&#39;v&#39;</span> {
+            <span class="prelude-val">Err</span>(<span class="ident">error::Kff::FooterSizeNotCorrect</span>.<span class="ident">into</span>())
+        } <span class="kw">else</span> {
+            <span class="ident">section::Values::read</span>(<span class="ident">inner</span>)
+        }
+    }
+
+    <span class="doccomment">/// Get kmer of nth section in index.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If index isn&#39;t set return an Error</span>
+    <span class="doccomment">/// If we didn&#39;t found section value before target section return an Error</span>
+    <span class="doccomment">/// If section isn&#39;t a kmer section return an Error</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">kmer_of_section</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Kmer</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">index</span>
+            .<span class="ident">as_ref</span>()
+            .<span class="ident">ok_or</span>(<span class="ident">error::Error::Kff</span>(<span class="ident">error::Kff::NoIndex</span>))<span class="question-mark">?</span>;
+
+        <span class="self">self</span>.<span class="ident">values</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">index</span>.<span class="ident">pair</span>()[..<span class="ident">n</span>].<span class="ident">iter</span>().<span class="ident">rev</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="number">0</span> <span class="op">==</span> <span class="string">b&#39;v&#39;</span>) {
+            <span class="prelude-val">Some</span>((<span class="ident">_t</span>, <span class="ident">p</span>)) =&gt; {
+                <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">seek</span>(<span class="ident">std::io::SeekFrom::Start</span>(<span class="ident">p</span> <span class="op">+</span> <span class="number">1</span>))<span class="question-mark">?</span>;
+                <span class="ident">section::Values::read</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">inner</span>)<span class="question-mark">?</span>
+            }
+            <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">error::Kff::NoValueSectionBeforeTarget</span>.<span class="ident">into</span>()),
+        };
+
+        <span class="self">self</span>.<span class="ident">inner</span>
+            .<span class="ident">seek</span>(<span class="ident">std::io::SeekFrom::Start</span>(<span class="ident">index</span>.<span class="ident">pair</span>()[<span class="ident">n</span>].<span class="number">1</span>))<span class="question-mark">?</span>;
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">read_u8</span>()<span class="question-mark">?</span> {
+            <span class="string">b&#39;r&#39;</span> =&gt; <span class="kw">match</span> <span class="ident">section::Raw::new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">values</span>) {
+                <span class="prelude-val">Ok</span>(<span class="ident">section</span>) =&gt; <span class="ident">section</span>.<span class="ident">read</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">inner</span>),
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+            },
+            <span class="string">b&#39;m&#39;</span> =&gt; <span class="kw">match</span> <span class="ident">section::Minimizer::new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">values</span>) {
+                <span class="prelude-val">Ok</span>(<span class="ident">section</span>) =&gt; <span class="ident">section</span>.<span class="ident">read</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">inner</span>),
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+            },
+            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">error::Kff::NotAKmerSection</span>.<span class="ident">into</span>()),
+        }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">std::io::Seek</span> <span class="kw">for</span> <span class="ident">Kff</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">std::io::Read</span> <span class="op">+</span> <span class="ident">std::io::Seek</span>,
+{
+    <span class="kw">fn</span> <span class="ident">seek</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">std::io::SeekFrom</span>) -&gt; <span class="ident">std::io::Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">seek</span>(<span class="ident">pos</span>)
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span> <span class="ident">Kff</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">W</span>: <span class="ident">std::io::Write</span> <span class="op">+</span> <span class="ident"><span class="kw">crate</span>::KffWrite</span>,
+{
+    <span class="doccomment">/// Create a Kff object to write in inner</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">mut</span> <span class="ident">inner</span>: <span class="ident">W</span>, <span class="ident">header</span>: <span class="ident">section::Header</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="ident">header</span>.<span class="ident">write</span>(<span class="kw-2">&amp;mut</span> <span class="ident">inner</span>)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
+            <span class="ident">inner</span>,
+            <span class="ident">header</span>,
+            <span class="ident">values</span>: <span class="ident">section::Values::default</span>(),
+            <span class="ident">index</span>: <span class="prelude-val">None</span>,
         })
     }
 
-    <span class="doccomment">/// Get encoding used</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encoding</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
-        <span class="self">self</span>.<span class="ident">encoding</span>
-    }
+    <span class="doccomment">/// Write a Values section</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_values</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">values</span>: <span class="ident">section::Values</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">values</span> <span class="op">=</span> <span class="ident">values</span>;
 
-    <span class="doccomment">/// Get a mutable reference of global variable</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">variables</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Variables</span> {
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">variables_buffer</span>
-    }
-
-    <span class="doccomment">/// Write variable section</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_variables</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">output</span>.<span class="ident">write_u8</span>(<span class="string">b&#39;v&#39;</span>)<span class="question-mark">?</span>;
-
-        <span class="self">self</span>.<span class="ident">variables_buffer</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">output</span>)<span class="question-mark">?</span>;
-
-        <span class="self">self</span>.<span class="ident">variables</span>.<span class="ident">extend</span>(<span class="self">self</span>.<span class="ident">variables_buffer</span>.<span class="ident">drain</span>());
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">write_bytes</span>(<span class="string">b&quot;v&quot;</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">write</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">inner</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Write a raw section, with sequence encode in 2 bits</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_raw_section</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
-        <span class="ident">seqs</span>: <span class="kw-2">&amp;</span>[<span class="ident">Seq2Bits</span>],
-        <span class="ident">datas</span>: <span class="kw-2">&amp;</span>[<span class="ident">A</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">output</span>.<span class="ident">write_u8</span>(<span class="string">b&#39;r&#39;</span>)<span class="question-mark">?</span>;
-
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">raw</span> <span class="op">=</span> <span class="ident">RawWriter</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">variables</span>, <span class="self">self</span>.<span class="ident">encoding</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">output</span>)<span class="question-mark">?</span>;
-
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nb_bytes</span> <span class="op">=</span> <span class="number">0</span>;
-
-        <span class="kw">for</span> (<span class="ident">seq</span>, <span class="ident">data</span>) <span class="kw">in</span> <span class="ident">seqs</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">datas</span>) {
-            <span class="ident">nb_bytes</span> <span class="op">+</span><span class="op">=</span> <span class="ident">raw</span>.<span class="ident">write_block</span>(<span class="kw-2">&amp;</span><span class="ident">seq</span>, <span class="kw-2">&amp;</span><span class="ident">data</span>.<span class="ident">as_ref</span>())<span class="question-mark">?</span>
-        }
-
-        <span class="ident">raw</span>.<span class="ident">close</span>()<span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(<span class="ident">nb_bytes</span>)
+    <span class="doccomment">/// Write a Index section</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_index</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">section::Index</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">write_bytes</span>(<span class="string">b&quot;i&quot;</span>)<span class="question-mark">?</span>;
+        <span class="ident">index</span>.<span class="ident">write</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">inner</span>)
     }
 
-    <span class="doccomment">/// Write a raw section with sequence encode in ASCII</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_raw_seq_section</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>, <span class="ident">B</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
-        <span class="ident">seqs</span>: <span class="kw-2">&amp;</span>[<span class="ident">A</span>],
-        <span class="ident">datas</span>: <span class="kw-2">&amp;</span>[<span class="ident">B</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="comment">// Todo it&#39;s ugly</span>
-        <span class="kw">let</span> <span class="ident">tmp</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Seq2Bits</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">seqs</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">utils</span>::<span class="ident">seq2bits</span>(<span class="ident">x</span>.<span class="ident">as_ref</span>(), <span class="self">self</span>.<span class="ident">encoding</span>))
-            .<span class="ident">collect</span>();
-
-        <span class="kw">let</span> <span class="ident">tmp2</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">datas</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">as_ref</span>()).<span class="ident">collect</span>();
-
-        <span class="self">self</span>.<span class="ident">write_raw_section</span>(<span class="kw-2">&amp;</span><span class="ident">tmp</span>[..], <span class="kw-2">&amp;</span><span class="ident">tmp2</span>[..])
+    <span class="doccomment">/// Write a Raw section</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_raw</span>(
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+        <span class="ident">raw</span>: <span class="ident">section::Raw</span>,
+        <span class="ident">blocks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">section::block::Block</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">write_bytes</span>(<span class="string">b&quot;r&quot;</span>)<span class="question-mark">?</span>;
+        <span class="ident">raw</span>.<span class="ident">write</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">inner</span>, <span class="ident">blocks</span>)
     }
 
-    <span class="doccomment">/// Write a minimizer section, with sequence encode in 2 bits</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_minimizer_section</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
-        <span class="ident">minimizer</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-        <span class="ident">mini_index</span>: <span class="kw-2">&amp;</span>[<span class="ident">u64</span>],
-        <span class="ident">seqs</span>: <span class="kw-2">&amp;</span>[<span class="ident">Seq2Bits</span>],
-        <span class="ident">datas</span>: <span class="kw-2">&amp;</span>[<span class="ident">A</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">output</span>.<span class="ident">write_u8</span>(<span class="string">b&#39;m&#39;</span>)<span class="question-mark">?</span>;
-
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">minimizer</span> <span class="op">=</span>
-            <span class="ident">MinimizerWriter</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">variables</span>, <span class="ident">minimizer</span>, <span class="self">self</span>.<span class="ident">encoding</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">output</span>)<span class="question-mark">?</span>;
-
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nb_bytes</span> <span class="op">=</span> <span class="number">0</span>;
-
-        <span class="kw">for</span> (<span class="ident">index</span>, (<span class="ident">seq</span>, <span class="ident">data</span>)) <span class="kw">in</span> <span class="ident">mini_index</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">seqs</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">datas</span>)) {
-            <span class="ident">nb_bytes</span> <span class="op">+</span><span class="op">=</span> <span class="ident">minimizer</span>.<span class="ident">write_block</span>(<span class="kw-2">*</span><span class="ident">index</span>, <span class="kw-2">&amp;</span><span class="ident">seq</span>, <span class="kw-2">&amp;</span><span class="ident">data</span>.<span class="ident">as_ref</span>())<span class="question-mark">?</span>
-        }
-
-        <span class="ident">minimizer</span>.<span class="ident">close</span>()<span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(<span class="ident">nb_bytes</span>)
+    <span class="doccomment">/// Write a Minimizer section</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_minimizer</span>(
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+        <span class="ident">section</span>: <span class="ident">section::Minimizer</span>,
+        <span class="ident">minimizer</span>: <span class="ident"><span class="kw">crate</span>::Seq2Bit</span>,
+        <span class="ident">blocks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">section::block::Block</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">write_bytes</span>(<span class="string">b&quot;m&quot;</span>)<span class="question-mark">?</span>;
+        <span class="ident">section</span>.<span class="ident">write</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">inner</span>, <span class="ident">minimizer</span>, <span class="ident">blocks</span>)
     }
 
-    <span class="doccomment">/// Write a raw section with sequence not encode in ASCII</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_minimizer_seq_section</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>, <span class="ident">B</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
-        <span class="ident">minimizer</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-        <span class="ident">mini_index</span>: <span class="kw-2">&amp;</span>[<span class="ident">u64</span>],
-        <span class="ident">seqs</span>: <span class="kw-2">&amp;</span>[<span class="ident">A</span>],
-        <span class="ident">datas</span>: <span class="kw-2">&amp;</span>[<span class="ident">B</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="comment">// Todo it&#39;s ugly</span>
+    <span class="doccomment">/// Finalize write the final signature</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">finalize</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">write_bytes</span>(<span class="string">b&quot;KFF&quot;</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">flush</span>()<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">tmp</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Seq2Bits</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">seqs</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">utils</span>::<span class="ident">seq2bits</span>(<span class="ident">x</span>.<span class="ident">as_ref</span>(), <span class="self">self</span>.<span class="ident">encoding</span>))
-            .<span class="ident">collect</span>();
+        <span class="prelude-val">Ok</span>(())
+    }
+}
 
-        <span class="kw">let</span> <span class="ident">tmp2</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">datas</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">as_ref</span>()).<span class="ident">collect</span>();
-
-        <span class="self">self</span>.<span class="ident">write_minimizer_section</span>(<span class="ident">minimizer</span>, <span class="ident">mini_index</span>, <span class="kw-2">&amp;</span><span class="ident">tmp</span>[..], <span class="kw-2">&amp;</span><span class="ident">tmp2</span>[..])
+<span class="kw">impl</span> <span class="ident">Kff</span><span class="op">&lt;</span><span class="ident">std::io::BufWriter</span><span class="op">&lt;</span><span class="ident">std::fs::File</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Intialize a Kff object to write file</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>(<span class="ident">path</span>: <span class="ident">P</span>, <span class="ident">header</span>: <span class="ident">section::Header</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">P</span>: <span class="ident">std::convert::AsRef</span><span class="op">&lt;</span><span class="ident">std::path::Path</span><span class="op">&gt;</span>,
+    {
+        <span class="ident">std::fs::File::create</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)
+            .<span class="ident">map</span>(<span class="ident">std::io::BufWriter::new</span>)
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">Kff::write</span>(<span class="ident">x</span>, <span class="ident">header</span>))<span class="question-mark">?</span>
     }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">seq2bits</span>::<span class="ident">Bits2Nuc</span>;
+    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+
+    <span class="kw">use</span> <span class="ident">std::io::Read</span>;
+    <span class="kw">use</span> <span class="ident">std::io::Seek</span>;
+
+    <span class="kw">const</span> <span class="ident">KFF_FILE</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[
+        <span class="string">b&#39;K&#39;</span>, <span class="string">b&#39;F&#39;</span>, <span class="string">b&#39;F&#39;</span>,       <span class="comment">// Magic number</span>
+        <span class="number">1</span>,          <span class="comment">// Major version number</span>
+        <span class="number">0</span>,          <span class="comment">// Minor version number</span>
+        <span class="number">0b00101110</span>, <span class="comment">// Encoding</span>
+        <span class="number">1</span>,          <span class="comment">// Uniq kmer</span>
+        <span class="number">0</span>,          <span class="comment">// Canonical kmer</span>
+        <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">4</span>, <span class="comment">// Free space size</span>
+        <span class="string">b&#39;t&#39;</span>, <span class="string">b&#39;e&#39;</span>, <span class="string">b&#39;s&#39;</span>, <span class="string">b&#39;t&#39;</span>, <span class="comment">// Free space</span>
+        <span class="string">b&#39;v&#39;</span>, <span class="comment">// Footer</span>
+        <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="comment">// Footer nb variables</span>
+        <span class="string">b&#39;f&#39;</span>, <span class="string">b&#39;o&#39;</span>, <span class="string">b&#39;o&#39;</span>, <span class="string">b&#39;t&#39;</span>, <span class="string">b&#39;e&#39;</span>, <span class="string">b&#39;r&#39;</span>, <span class="string">b&#39;_&#39;</span>, <span class="string">b&#39;s&#39;</span>, <span class="string">b&#39;i&#39;</span>, <span class="string">b&#39;z&#39;</span>, <span class="string">b&#39;e&#39;</span>,
+        <span class="number">0</span>, <span class="comment">// name of variable footer_size</span>
+        <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">29</span>, <span class="comment">// value of variable footer_size</span>
+        <span class="string">b&#39;K&#39;</span>, <span class="string">b&#39;F&#39;</span>, <span class="string">b&#39;F&#39;</span>, <span class="comment">// Magic number</span>
+    ];
+
+    <span class="kw">use</span> <span class="ident">std::io::Write</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">read</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[
-            <span class="number">1</span>, <span class="number">0</span>, <span class="number">30</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">// version 1.0 encoding 0b00011011</span>
-            <span class="string">b&#39;v&#39;</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">// 3 variables</span>
-            <span class="number">109</span>, <span class="number">97</span>, <span class="number">120</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">// max -&gt; 5</span>
-            <span class="number">100</span>, <span class="number">97</span>, <span class="number">116</span>, <span class="number">97</span>, <span class="number">95</span>, <span class="number">115</span>, <span class="number">105</span>, <span class="number">122</span>, <span class="number">101</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-            <span class="number">0</span>, <span class="comment">// data size -&gt; 1</span>
-            <span class="number">107</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">// variable k -&gt; 5</span>
-            <span class="string">b&#39;r&#39;</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="number">0b00000011</span>, <span class="number">0b11011110</span>, <span class="number">0b00111101</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>,
-            <span class="comment">// Raw block, 5 kmer in block,</span>
-            <span class="string">b&#39;v&#39;</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">// 1 variable</span>
-            <span class="number">109</span>, <span class="number">0</span>, <span class="number">4</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">// m -&gt; 4</span>
-            <span class="string">b&#39;m&#39;</span>, <span class="number">0b10100101</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="number">2</span>, <span class="number">0b00000010</span>, <span class="number">0b01110011</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>,
-            <span class="number">5</span>,
-            <span class="comment">// Minimizer block, minimizer -&gt; TTCC, 1 block, 5 kmer, minimizer index -&gt; 2</span>
-        ];
+    <span class="kw">fn</span> <span class="ident">create_kff_reader</span>() -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">std::io::Cursor::new</span>(<span class="ident">KFF_FILE</span>.<span class="ident">to_vec</span>());
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span> <span class="kw">super</span>::<span class="ident">Reader</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">input</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span> <span class="ident">Kff::read</span>(<span class="ident">inner</span>)<span class="question-mark">?</span>;
+        <span class="macro">assert!</span>(<span class="ident">reader</span>.<span class="ident">check</span>()<span class="question-mark">?</span>);
 
-        <span class="kw">let</span> <span class="ident">rev_encoding</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">rev_encoding</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tmpfile</span> <span class="op">=</span> <span class="ident">tempfile::NamedTempFile::new</span>()<span class="question-mark">?</span>;
+        <span class="ident">tmpfile</span>.<span class="ident">write_all</span>(<span class="ident">KFF_FILE</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span>: <span class="ident">Kff</span><span class="op">&lt;</span><span class="ident">std::io::BufReader</span><span class="op">&lt;</span><span class="ident">std::fs::File</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
+            <span class="ident">Kff</span>::<span class="op">&lt;</span><span class="ident">std::io::BufReader</span><span class="op">&lt;</span><span class="ident">std::fs::File</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::open</span>(<span class="ident">tmpfile</span>.<span class="ident">path</span>())<span class="question-mark">?</span>;
 
-        {
-            <span class="kw">let</span> <span class="ident">section</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">next_section</span>().<span class="ident">unwrap</span>();
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">it</span> <span class="op">=</span> <span class="ident">section</span>.<span class="ident">into_iter</span>();
+        <span class="macro">assert!</span>(<span class="ident">reader</span>.<span class="ident">check</span>()<span class="question-mark">?</span>);
 
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;T&#39;</span>].<span class="ident">into_boxed_slice</span>(),
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">1</span>]);
-
-            <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;A&#39;</span>].<span class="ident">into_boxed_slice</span>(),
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">2</span>]);
-
-            <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;A&#39;</span>, <span class="string">b&#39;G&#39;</span>].<span class="ident">into_boxed_slice</span>()
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">3</span>]);
-
-            <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;A&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;G&#39;</span>].<span class="ident">into_boxed_slice</span>()
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">4</span>]);
-
-            <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;A&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;C&#39;</span>].<span class="ident">into_boxed_slice</span>()
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">5</span>]);
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">is_none</span>());
-        }
-
-        {
-            <span class="kw">let</span> <span class="ident">section</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">next_section</span>().<span class="ident">unwrap</span>();
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">it</span> <span class="op">=</span> <span class="ident">section</span>.<span class="ident">into_iter</span>();
-
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;C&#39;</span>].<span class="ident">into_boxed_slice</span>(),
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">1</span>]);
-
-            <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;C&#39;</span>].<span class="ident">into_boxed_slice</span>(),
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">2</span>]);
-
-            <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;G&#39;</span>].<span class="ident">into_boxed_slice</span>(),
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">3</span>]);
-
-            <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;A&#39;</span>].<span class="ident">into_boxed_slice</span>(),
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">4</span>]);
-
-            <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;A&#39;</span>, <span class="string">b&#39;G&#39;</span>].<span class="ident">into_boxed_slice</span>(),
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">5</span>]);
-
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">is_none</span>());
-        }
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">reader</span>.<span class="ident">next_section</span>().<span class="ident">is_err</span>());
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">realistic_bin_read</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[
-            <span class="number">1</span>, <span class="number">0</span>, <span class="number">30</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">// version 1.0 encoding 0b00011011</span>
-            <span class="string">b&#39;v&#39;</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">// 3 variables</span>
-            <span class="number">109</span>, <span class="number">97</span>, <span class="number">120</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">// max -&gt; 5</span>
-            <span class="number">100</span>, <span class="number">97</span>, <span class="number">116</span>, <span class="number">97</span>, <span class="number">95</span>, <span class="number">115</span>, <span class="number">105</span>, <span class="number">122</span>, <span class="number">101</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-            <span class="number">0</span>, <span class="comment">// data size -&gt; 1</span>
-            <span class="number">107</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">// variable k -&gt; 5</span>
-            <span class="string">b&#39;r&#39;</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="number">0b00000011</span>, <span class="number">0b11011110</span>, <span class="number">0b00111101</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>,
-            <span class="comment">// Raw block, 5 kmer in block,</span>
-            <span class="string">b&#39;v&#39;</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">// 1 variable</span>
-            <span class="number">109</span>, <span class="number">0</span>, <span class="number">4</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">// m -&gt; 4</span>
-            <span class="string">b&#39;m&#39;</span>, <span class="number">0b10100101</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="number">2</span>, <span class="number">0b00000010</span>, <span class="number">0b01110011</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>,
-            <span class="number">5</span>,
-            <span class="comment">// Minimizer block, minimizer -&gt; TTCC, 1 block, 5 kmer, minimizer index -&gt; 2</span>
-        ];
+    <span class="kw">fn</span> <span class="ident">check_header</span>() -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">std::io::Cursor::new</span>(<span class="ident">KFF_FILE</span>.<span class="ident">to_vec</span>());
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span> <span class="kw">super</span>::<span class="ident">Reader</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">input</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">reader</span> <span class="op">=</span> <span class="ident">Kff::read</span>(<span class="ident">inner</span>)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nb_kmer</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="macro">assert_eq!</span>(<span class="ident">reader</span>.<span class="ident">header</span>().<span class="ident">major_version</span>(), <span class="kw-2">&amp;</span><span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">reader</span>.<span class="ident">header</span>().<span class="ident">minor_version</span>(), <span class="kw-2">&amp;</span><span class="number">0</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">reader</span>.<span class="ident">header</span>().<span class="ident">encoding</span>(), <span class="kw-2">&amp;</span><span class="number">0b00101110</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">reader</span>.<span class="ident">header</span>().<span class="ident">uniq_kmer</span>(), <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">reader</span>.<span class="ident">header</span>().<span class="ident">canonical_kmer</span>(), <span class="kw-2">&amp;</span><span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">reader</span>.<span class="ident">header</span>().<span class="ident">free_block</span>(), <span class="string">b&quot;test&quot;</span>);
 
-        <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">section</span>) <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">next_section</span>() {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">it</span> <span class="op">=</span> <span class="ident">section</span>.<span class="ident">into_iter</span>();
-            <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="kw">_</span>)) <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>() {
-                <span class="ident">nb_kmer</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-            }
-        }
-
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">nb_kmer</span>, <span class="number">10</span>);
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">write_read</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">output</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0u8</span>; <span class="number">0</span>];
-        <span class="kw">let</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Cursor</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">output</span>);
+    <span class="kw">fn</span> <span class="ident">check</span>() -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">inner_len</span> <span class="op">=</span> <span class="ident">KFF_FILE</span>.<span class="ident">len</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">readable</span> <span class="op">=</span> <span class="ident">std::io::Cursor::new</span>(<span class="ident">KFF_FILE</span>.<span class="ident">to_vec</span>());
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">writer</span> <span class="op">=</span> <span class="kw">super</span>::<span class="ident">Writer</span>::<span class="ident">new</span>(<span class="ident">buffer</span>, <span class="number">0b00011011</span>, <span class="string">b&quot;&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">Kff::read</span>(<span class="ident">readable</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
 
-        <span class="ident">writer</span>.<span class="ident">variables</span>().<span class="ident">insert</span>(<span class="string">&quot;k&quot;</span>.<span class="ident">to_string</span>(), <span class="number">5</span>);
-        <span class="ident">writer</span>.<span class="ident">variables</span>().<span class="ident">insert</span>(<span class="string">&quot;max&quot;</span>.<span class="ident">to_string</span>(), <span class="number">5</span>);
-        <span class="ident">writer</span>.<span class="ident">variables</span>().<span class="ident">insert</span>(<span class="string">&quot;data_size&quot;</span>.<span class="ident">to_string</span>(), <span class="number">1</span>);
+        <span class="macro">assert!</span>(<span class="ident">file</span>.<span class="ident">check</span>()<span class="question-mark">?</span>); <span class="comment">// Header init and check work</span>
 
-        <span class="ident">writer</span>.<span class="ident">write_variables</span>().<span class="ident">unwrap</span>();
+        <span class="ident">readable</span>.<span class="ident">get_mut</span>()[<span class="number">1</span>] <span class="op">=</span> <span class="string">b&#39;K&#39;</span>;
+        <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">Kff::read</span>(<span class="ident">readable</span>.<span class="ident">clone</span>());
+        <span class="macro">assert!</span>(<span class="ident">file</span>.<span class="ident">is_err</span>()); <span class="comment">// Header init failled</span>
 
-        <span class="ident">writer</span>
-            .<span class="ident">write_raw_seq_section</span>(<span class="kw-2">&amp;</span>[<span class="string">b&quot;GCGGGGATC&quot;</span>], <span class="kw-2">&amp;</span>[<span class="macro">vec</span><span class="macro">!</span>[<span class="number">1u8</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]])
-            .<span class="ident">unwrap</span>();
+        <span class="ident">readable</span>.<span class="ident">get_mut</span>()[<span class="number">1</span>] <span class="op">=</span> <span class="string">b&#39;F&#39;</span>;
+        <span class="ident">readable</span>.<span class="ident">get_mut</span>()[<span class="ident">inner_len</span> <span class="op">-</span> <span class="number">1</span>] <span class="op">=</span> <span class="string">b&#39;K&#39;</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">Kff::read</span>(<span class="ident">readable</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
 
-        <span class="ident">writer</span>.<span class="ident">variables</span>().<span class="ident">insert</span>(<span class="string">&quot;m&quot;</span>.<span class="ident">to_string</span>(), <span class="number">4</span>);
+        <span class="macro">assert!</span>(<span class="ident">file</span>.<span class="ident">check</span>().<span class="ident">is_err</span>()); <span class="comment">// Header init work but check failled</span>
 
-        <span class="ident">writer</span>.<span class="ident">write_variables</span>().<span class="ident">unwrap</span>();
+        <span class="prelude-val">Ok</span>(())
+    }
 
-        <span class="ident">writer</span>
-            .<span class="ident">write_minimizer_seq_section</span>(<span class="string">b&quot;CCTT&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">2</span>], <span class="kw-2">&amp;</span>[<span class="string">b&quot;AGCTG&quot;</span>], <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>]])
-            .<span class="ident">unwrap</span>();
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">load_footer</span>() -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">inner_len</span> <span class="op">=</span> <span class="ident">KFF_FILE</span>.<span class="ident">len</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">std::io::Cursor::new</span>(<span class="ident">KFF_FILE</span>.<span class="ident">to_vec</span>());
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">input</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Cursor</span>::<span class="ident">new</span>(<span class="ident">output</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span> <span class="kw">super</span>::<span class="ident">Reader</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">input</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">truth</span> <span class="op">=</span> <span class="ident">section::Values::new</span>();
+        <span class="ident">truth</span>.<span class="ident">insert</span>(<span class="string">&quot;footer_size&quot;</span>.<span class="ident">to_string</span>(), <span class="number">29</span>);
 
-        <span class="kw">let</span> <span class="ident">rev_encoding</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">rev_encoding</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">Kff::load_footer</span>(<span class="kw-2">&amp;mut</span> <span class="ident">inner</span>)<span class="question-mark">?</span>, <span class="ident">truth</span>);
 
-        {
-            <span class="kw">let</span> <span class="ident">section</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">next_section</span>().<span class="ident">unwrap</span>();
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">it</span> <span class="op">=</span> <span class="ident">section</span>.<span class="ident">into_iter</span>();
+        <span class="ident">inner</span>.<span class="ident">get_mut</span>()[<span class="ident">inner_len</span> <span class="op">-</span> <span class="number">32</span>] <span class="op">=</span> <span class="string">b&#39;f&#39;</span>;
 
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;G&#39;</span>].<span class="ident">into_boxed_slice</span>(),
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">1</span>]);
+        <span class="macro">assert!</span>(<span class="ident">Kff::load_footer</span>(<span class="kw-2">&amp;mut</span> <span class="ident">inner</span>).<span class="ident">is_err</span>());
 
-            <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;G&#39;</span>].<span class="ident">into_boxed_slice</span>(),
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">2</span>]);
+        <span class="prelude-val">Ok</span>(())
+    }
 
-            <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;A&#39;</span>].<span class="ident">into_boxed_slice</span>()
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">3</span>]);
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">seek</span>() -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">std::io::Cursor::new</span>(<span class="ident">KFF_FILE</span>.<span class="ident">to_vec</span>());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span> <span class="ident">Kff::read</span>(<span class="ident">inner</span>)<span class="question-mark">?</span>;
 
-            <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;A&#39;</span>, <span class="string">b&#39;T&#39;</span>].<span class="ident">into_boxed_slice</span>()
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">4</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">reader</span>.<span class="ident">seek</span>(<span class="ident">std::io::SeekFrom::Start</span>(<span class="number">2</span>))<span class="question-mark">?</span>, <span class="number">2</span>);
 
-            <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;A&#39;</span>, <span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;C&#39;</span>].<span class="ident">into_boxed_slice</span>()
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">5</span>]);
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">is_none</span>());
-        }
+        <span class="prelude-val">Ok</span>(())
+    }
 
-        {
-            <span class="kw">let</span> <span class="ident">section</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">next_section</span>().<span class="ident">unwrap</span>();
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">it</span> <span class="op">=</span> <span class="ident">section</span>.<span class="ident">into_iter</span>();
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">write</span>() -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">tempfile::NamedTempFile::new</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">header</span> <span class="op">=</span> <span class="ident">section::Header::new</span>(<span class="number">1</span>, <span class="number">0</span>, <span class="number">0b00011011</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="string">b&quot;&quot;</span>.<span class="ident">to_vec</span>())<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">writer</span> <span class="op">=</span> <span class="ident">Kff::create</span>(<span class="ident">file</span>.<span class="ident">path</span>(), <span class="ident">header</span>)<span class="question-mark">?</span>;
 
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;A&#39;</span>, <span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;T&#39;</span>].<span class="ident">into_boxed_slice</span>(),
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">6</span>]);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">values</span> <span class="op">=</span> <span class="ident">section::Values::default</span>();
+        <span class="ident">values</span>.<span class="ident">insert</span>(<span class="string">&quot;k&quot;</span>.<span class="ident">to_string</span>(), <span class="number">5</span>);
+        <span class="ident">values</span>.<span class="ident">insert</span>(<span class="string">&quot;m&quot;</span>.<span class="ident">to_string</span>(), <span class="number">3</span>);
+        <span class="ident">values</span>.<span class="ident">insert</span>(<span class="string">&quot;ordered&quot;</span>.<span class="ident">to_string</span>(), <span class="bool-val">false</span> <span class="kw">as</span> <span class="ident">u64</span>);
+        <span class="ident">values</span>.<span class="ident">insert</span>(<span class="string">&quot;max&quot;</span>.<span class="ident">to_string</span>(), <span class="number">200</span>);
+        <span class="ident">values</span>.<span class="ident">insert</span>(<span class="string">&quot;data_size&quot;</span>.<span class="ident">to_string</span>(), <span class="number">1</span>);
 
-            <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;G&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;T&#39;</span>].<span class="ident">into_boxed_slice</span>(),
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">7</span>]);
+        <span class="ident">writer</span>.<span class="ident">write_values</span>(<span class="ident">values</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
 
-            <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;C&#39;</span>].<span class="ident">into_boxed_slice</span>(),
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">8</span>]);
+        <span class="ident">writer</span>.<span class="ident">write_raw</span>(<span class="ident">section::Raw::new</span>(<span class="kw-2">&amp;</span><span class="ident">values</span>)<span class="question-mark">?</span>, <span class="macro">vec!</span>[
+	    <span class="ident">section::block::Block</span> {
+                <span class="ident">k</span>: <span class="number">5</span>,
+                <span class="ident">data_size</span>: <span class="number">1</span>,
+                <span class="ident">kmer</span>: <span class="ident">Kmer::new</span>(<span class="macro">bitvec::bitbox!</span>[<span class="ident">u8</span>, <span class="ident">bitvec::order::Msb0</span>; <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>],
+				<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]),
+		<span class="ident">minimizer_offset</span>: <span class="number">0</span>,
+		<span class="ident">offset</span>: <span class="number">0</span>,
+            },
+            <span class="ident">section::block::Block</span>{
+                <span class="ident">k</span>: <span class="number">5</span>,
+                <span class="ident">data_size</span>: <span class="number">1</span>,
+                <span class="ident">kmer</span>: <span class="ident">Kmer::new</span>(<span class="macro">bitvec::bitbox!</span>[<span class="ident">u8</span>, <span class="ident">bitvec::order::Msb0</span>; <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>],
+				<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>]),
+		<span class="ident">minimizer_offset</span>: <span class="number">0</span>,
+		<span class="ident">offset</span>: <span class="number">0</span>,
+            },
+            <span class="ident">section::block::Block</span> {
+                <span class="ident">k</span>: <span class="number">5</span>,
+		<span class="ident">data_size</span>: <span class="number">1</span>,
+                <span class="ident">kmer</span>: <span class="ident">Kmer::new</span>(<span class="macro">bitvec::bitbox!</span>[<span class="ident">u8</span>, <span class="ident">bitvec::order::Msb0</span>; <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>],
+				<span class="macro">vec!</span>[<span class="number">1</span>]),
+		<span class="ident">minimizer_offset</span>: <span class="number">0</span>,
+		<span class="ident">offset</span>: <span class="number">0</span>,
+            },
+	])<span class="question-mark">?</span>;
 
-            <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;T&#39;</span>].<span class="ident">into_boxed_slice</span>(),
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">9</span>]);
+        <span class="ident">writer</span>.<span class="ident">write_minimizer</span>(
+	    <span class="ident">section::Minimizer::new</span>(<span class="kw-2">&amp;</span><span class="ident">values</span>)<span class="question-mark">?</span>,
+	    <span class="macro">bitvec::bitbox!</span>[<span class="ident">u8</span>, <span class="ident">bitvec::order::Msb0</span>; <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>],
+            <span class="macro">vec!</span>[
+                <span class="ident">section::block::Block</span>{
+                    <span class="ident">k</span>: <span class="number">5</span>,
+                    <span class="ident">data_size</span>: <span class="number">1</span>,
+                    <span class="ident">kmer</span>: <span class="ident">Kmer::new</span>(<span class="macro">bitvec::bitbox!</span>[<span class="ident">u8</span>, <span class="ident">bitvec::order::Msb0</span>; <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>],
+                     <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]),
+		    <span class="ident">minimizer_offset</span>: <span class="number">1</span>,
+		    <span class="ident">offset</span>: <span class="number">0</span>,
+                },
+                <span class="ident">section::block::Block</span> {
+		    <span class="ident">k</span>: <span class="number">5</span>,
+		    <span class="ident">data_size</span>: <span class="number">1</span>,
+		    <span class="ident">kmer</span>: <span class="ident">Kmer::new</span>(<span class="macro">bitvec::bitbox!</span>[<span class="ident">u8</span>, <span class="ident">bitvec::order::Msb0</span>; <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>],
+                    <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>]),
+		    <span class="ident">minimizer_offset</span>: <span class="number">1</span>,
+		    <span class="ident">offset</span>: <span class="number">0</span>,
+                },
+                <span class="ident">section::block::Block</span> {
+		    <span class="ident">k</span>: <span class="number">5</span>,
+                    <span class="ident">data_size</span>: <span class="number">1</span>,
+		    <span class="ident">kmer</span>: <span class="ident">Kmer::new</span>(<span class="macro">bitvec::bitbox!</span>[<span class="ident">u8</span>, <span class="ident">bitvec::order::Msb0</span>; <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>],
+		    <span class="macro">vec!</span>[<span class="number">1</span>]),
+		    <span class="ident">minimizer_offset</span>: <span class="number">1</span>,
+		    <span class="ident">offset</span>: <span class="number">0</span>,
+                }
+            ],
+	)<span class="question-mark">?</span>;
 
-            <span class="ident">value</span> <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">value</span>.<span class="ident">seq</span>().<span class="ident">into_nuc</span>(<span class="ident">rev_encoding</span>),
-                <span class="macro">vec</span><span class="macro">!</span>[<span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;C&#39;</span>, <span class="string">b&#39;T&#39;</span>, <span class="string">b&#39;G&#39;</span>].<span class="ident">into_boxed_slice</span>(),
-            );
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>.<span class="ident">data</span>(), <span class="kw-2">&amp;</span>[<span class="number">10</span>]);
+        <span class="ident">writer</span>.<span class="ident">write_index</span>(<span class="ident">section::Index::new</span>(
+            <span class="macro">vec!</span>[(<span class="string">b&#39;v&#39;</span>, <span class="op">-</span><span class="number">30</span>), (<span class="string">b&#39;r&#39;</span>, <span class="op">-</span><span class="number">25</span>), (<span class="string">b&#39;m&#39;</span>, <span class="op">-</span><span class="number">20</span>)],
+            <span class="number">0</span>,
+        ))<span class="question-mark">?</span>;
 
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">is_none</span>());
-        }
+        <span class="ident">writer</span>.<span class="ident">finalize</span>()<span class="question-mark">?</span>;
 
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">reader</span>.<span class="ident">next_section</span>().<span class="ident">is_err</span>());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+        <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">path</span>) <span class="op">=</span> <span class="ident">file</span>.<span class="ident">keep</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">std::fs::File::open</span>(<span class="ident">path</span>)<span class="question-mark">?</span>;
+        <span class="ident">t</span>.<span class="ident">read_to_end</span>(<span class="kw-2">&amp;mut</span> <span class="ident">inner</span>)<span class="question-mark">?</span>;
+
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">inner</span>,
+            <span class="macro">vec!</span>[
+                <span class="string">b&#39;K&#39;</span>, <span class="string">b&#39;F&#39;</span>, <span class="string">b&#39;F&#39;</span>, <span class="comment">//</span>
+                <span class="number">1</span>, <span class="number">0</span>,  <span class="comment">// Version number</span>
+                <span class="number">27</span>, <span class="comment">// Encoding</span>
+                <span class="number">1</span>, <span class="number">1</span>, <span class="comment">// Uniq, Canonical</span>
+                <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">// Free space size length</span>
+                <span class="string">b&#39;v&#39;</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="comment">// Five values</span>
+                <span class="string">b&#39;o&#39;</span>, <span class="string">b&#39;r&#39;</span>, <span class="string">b&#39;d&#39;</span>, <span class="string">b&#39;e&#39;</span>, <span class="string">b&#39;r&#39;</span>, <span class="string">b&#39;e&#39;</span>, <span class="string">b&#39;d&#39;</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">//</span>
+                <span class="string">b&#39;d&#39;</span>, <span class="string">b&#39;a&#39;</span>, <span class="string">b&#39;t&#39;</span>, <span class="string">b&#39;a&#39;</span>, <span class="string">b&#39;_&#39;</span>, <span class="string">b&#39;s&#39;</span>, <span class="string">b&#39;i&#39;</span>, <span class="string">b&#39;z&#39;</span>, <span class="string">b&#39;e&#39;</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>,
+                <span class="string">b&#39;m&#39;</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="comment">//</span>
+                <span class="string">b&#39;k&#39;</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="comment">//</span>
+                <span class="string">b&#39;m&#39;</span>, <span class="string">b&#39;a&#39;</span>, <span class="string">b&#39;x&#39;</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">200</span>, <span class="comment">//</span>
+                <span class="string">b&#39;r&#39;</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="comment">// Three block</span>
+                <span class="number">3</span>, <span class="number">27</span>, <span class="number">244</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="comment">// Three kmer in block</span>
+                <span class="number">2</span>, <span class="number">27</span>, <span class="number">240</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="comment">// Two kmer in block</span>
+                <span class="number">1</span>, <span class="number">27</span>, <span class="number">192</span>, <span class="number">1</span>,    <span class="comment">// One kmer in block</span>
+                <span class="string">b&#39;m&#39;</span>, <span class="comment">//</span>
+                <span class="number">108</span>,  <span class="comment">// minimizer sequence</span>
+                <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="comment">// Three block</span>
+                <span class="number">3</span>, <span class="number">1</span>, <span class="number">61</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="comment">// Three kmer minimizer at offset 1</span>
+                <span class="number">2</span>, <span class="number">1</span>, <span class="number">60</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="comment">// Two kmer minimizer at offset 1</span>
+                <span class="number">1</span>, <span class="number">1</span>, <span class="number">48</span>, <span class="number">1</span>, <span class="comment">// One kmer minimizer at offset 1</span>
+                <span class="string">b&#39;i&#39;</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="comment">// Three section indexed</span>
+                <span class="string">b&#39;v&#39;</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">226</span>, <span class="comment">// Value section</span>
+                <span class="string">b&#39;r&#39;</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">231</span>, <span class="comment">// Raw section</span>
+                <span class="string">b&#39;m&#39;</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">236</span>, <span class="comment">// Minimizer section</span>
+                <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">// No other index</span>
+                <span class="string">b&#39;K&#39;</span>, <span class="string">b&#39;F&#39;</span>, <span class="string">b&#39;F&#39;</span>, <span class="comment">//</span>
+            ]
+        );
+
+        <span class="prelude-val">Ok</span>(())
     }
 }
-</pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "kff";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="kff" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.63.0 (4b91a6ea7 2022-08-08)" ></div>
+</body></html>
