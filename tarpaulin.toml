@@ -1,0 +1,6 @@
+[default]
+engine = "Llvm"
+
+[report]
+output-dir = "website"
+out = [ "Html" ]

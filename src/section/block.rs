@@ -478,7 +478,7 @@ mod tests {
         assert_eq!(writable, vec![0, 0, 0, 1, 0, 0, 0, 0]);
         writable.clear();
 
-        write_nb_kmer(&mut writable, u64::MAX as u64, u64::MAX as u64)?;
+        write_nb_kmer(&mut writable, u64::MAX, u64::MAX)?;
         assert_eq!(writable, vec![255, 255, 255, 255, 255, 255, 255, 255]);
         writable.clear();
 

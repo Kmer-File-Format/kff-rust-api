@@ -1,11 +1,12 @@
-![Test](https://github.com/Kmer-File-Format/kff-rust-api/workflows/Test/badge.svg)
-![Lints](https://github.com/Kmer-File-Format/kff-rust-api/workflows/Lints/badge.svg)
-![MSRV](https://github.com/Kmer-File-Format/kff-rust-api/workflows/MSRV/badge.svg)
-[![CodeCov](https://codecov.io/gh/Kmer-File-Format/kff-rust-api/branch/master/graph/badge.svg)](https://codecov.io/gh/Kmer-File-Format/kff-rust-api)
-[![Documentation](https://github.com/Kmer-File-Format/kff-rust-api/workflows/Documentation/badge.svg)](https://kmer-file-format.github.io/kff-rust-api/kff/)
+# Kmer File Format Rust parser 🧬 💻
 
-
-# Kmer File Format Rust parser
+![tests](https://github.com/Kmer-File-Format/kff-rust-api/workflows/tests/badge.svg)
+![lints](https://github.com/Kmer-File-Format/kff-rust-api/workflows/lints/badge.svg)
+![msrv](https://github.com/Kmer-File-Format/kff-rust-api/workflows/msrv/badge.svg)
+[![website](https://github.com/Kmer-File-Format/kff-rust-api/workflows/website/badge.svg)](https://kmer-file-format.github.io/kff-rust-api)
+[![dev-doc](https://img.shields.io/badge/dev-doc-blue)](https://kmer-file-format.github.io/kff-rust-api/doc/kff)
+[![license](https://img.shields.io/badge/license-AGPL-purple)](https://github.com/Kmer-File-Format/kff-rust-api//blob/main/LICENSE)
+[![copier](https://img.shields.io/badge/copier-template-yellow)](https://github.com/natir/copier-rust)
 
 ## Usage
 

@@ -1,0 +1,27 @@
+name: msrv
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  msrv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Get Minimal Support Rust Version
+        id: msrv
+        run: |
+          msrv=$(grep 'rust-version' Cargo.toml | sed 's/rust-version = \"\([0-9\.]*\)\"/\1/')
+          echo "rust_version=$msrv" >> "$GITHUB_ENV"
+      - name: Check readme
+        run: grep $rust_version Readme.md
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: $rust_version
+      - name: Run check
+        run: cargo check

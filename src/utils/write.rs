@@ -15,7 +15,7 @@ pub trait KffWrite {
     /// Function that write bytes plus a '\0' at end
     fn write_ascii(&mut self, ascii: &[u8]) -> error::Result<()> {
         self.write_bytes(ascii)?;
-        self.write_bytes(&[b'\0'])
+        self.write_bytes(b"\0")
     }
 
     /// Function that write one bit and convert it as bool

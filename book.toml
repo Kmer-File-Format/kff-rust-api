@@ -1,0 +1,19 @@
+[book]
+title        = "kff"
+authors      = ["Pierre Marijon"]
+description  = "Kmer File Format Rust parser"
+language     = "en"
+multilingual = false
+src          = "website"
+
+[build]
+build-dir      = "public"
+create-missing = false
+
+[output.html]
+smart-punctuation = true
+mathjax-support = true
+git-repository-url = "https://github.com/Kmer-File-Format/kff-rust-api"
+git-repository-icon = "fa-github"
+edit-url-template = "https://github.com/Kmer-File-Format/kff-rust-api/edit/main/{path}"
+site-url = "https://kmer-file-format.github.io/kff-rust-api"

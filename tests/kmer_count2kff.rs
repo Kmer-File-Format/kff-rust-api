@@ -5,7 +5,6 @@ use std::io::Read;
 use std::process::{Command, Stdio};
 
 /* crate use */
-use tempfile;
 
 #[test]
 fn kff2kmers() -> kff::error::Result<()> {
