@@ -185,6 +185,8 @@ mod tests {
         let mut outer = Vec::new();
         values.write_as_footer(&mut outer)?;
 
+        let footer_size_write = *outer.last().unwrap() as usize - 1;
+
         outer.sort();
 
         assert_eq!(
@@ -197,7 +199,7 @@ mod tests {
             ]
         );
 
-        assert_eq!(outer.len(), *outer.last().unwrap() as usize - 1);
+        assert_eq!(outer.len(), footer_size_write);
 
         Ok(())
     }
