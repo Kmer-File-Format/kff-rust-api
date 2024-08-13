@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["error","Error struct of project kff"],["iterator","An iterator over all kmer present in a Kff file"],["kff","Kmer File Format Rust parser"],["section","Struct and function to manage section"],["utils","Utils function for KFF"]]};
+window.SIDEBAR_ITEMS = {"mod":["error","iterator","kff","section","utils"]};

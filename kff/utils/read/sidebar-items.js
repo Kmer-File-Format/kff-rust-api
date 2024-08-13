@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":[["KffRead","Define trait containts utils function to parsing kff"]]};
+window.SIDEBAR_ITEMS = {"trait":["KffRead"]};

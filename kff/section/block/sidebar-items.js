@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Block","Struct to data present in KFF Raw or Minimizer block"]]};
+window.SIDEBAR_ITEMS = {"struct":["Block"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Kff","Struct to read a kff file"]]};
+window.SIDEBAR_ITEMS = {"struct":["Kff"]};

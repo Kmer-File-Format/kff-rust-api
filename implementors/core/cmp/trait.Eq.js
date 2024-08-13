@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["kff"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.63.0/core/cmp/trait.Eq.html\" title=\"trait core::cmp::Eq\">Eq</a> for <a class=\"struct\" href=\"kff/utils/kmer/struct.Kmer.html\" title=\"struct kff::utils::kmer::Kmer\">Kmer</a>","synthetic":false,"types":["kff::utils::kmer::Kmer"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

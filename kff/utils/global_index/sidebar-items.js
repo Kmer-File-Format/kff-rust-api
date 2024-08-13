@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["GlobalIndex","Struct that manage and build a global index of a Kff file"]]};
+window.SIDEBAR_ITEMS = {"struct":["GlobalIndex"]};

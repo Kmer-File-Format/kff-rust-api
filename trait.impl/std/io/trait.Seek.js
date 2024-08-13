@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"kff":[["impl&lt;T&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.80.1/std/io/trait.Seek.html\" title=\"trait std::io::Seek\">Seek</a> for <a class=\"struct\" href=\"kff/kff/struct.Kff.html\" title=\"struct kff::kff::Kff\">Kff</a>&lt;T&gt;<div class=\"where\">where\n    T: <a class=\"trait\" href=\"https://doc.rust-lang.org/1.80.1/std/io/trait.Read.html\" title=\"trait std::io::Read\">Read</a> + <a class=\"trait\" href=\"https://doc.rust-lang.org/1.80.1/std/io/trait.Seek.html\" title=\"trait std::io::Seek\">Seek</a>,</div>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Kmer","Represent a Kmer with data"]],"type":[["Data","Represent data associate to a kmer"],["Seq2Bit","Represent a sequence in 2 bit"]]};
+window.SIDEBAR_ITEMS = {"struct":["Kmer"],"type":["Data","Seq2Bit"]};

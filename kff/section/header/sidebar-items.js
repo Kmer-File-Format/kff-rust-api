@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Header","Struct to parse, manage and write Header information"]]};
+window.SIDEBAR_ITEMS = {"struct":["Header"]};
