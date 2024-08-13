@@ -422,21 +422,28 @@ mod tests {
         let value = read_nb_kmer(&mut readable, u8::MAX.into())?;
         assert_eq!(value, 1);
 
+        let mut readable: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8];
         let value = read_nb_kmer(&mut readable, u8::MAX as u64 + 1)?;
+        println!("{:?}", value.to_be_bytes());
         assert_eq!(value, 258);
 
+        let mut readable: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8];
         let value = read_nb_kmer(&mut readable, u16::MAX.into())?;
         assert_eq!(value, 258);
 
+        let mut readable: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8];
         let value = read_nb_kmer(&mut readable, u16::MAX as u64 + 1)?;
         assert_eq!(value, 16909060);
 
+        let mut readable: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8];
         let value = read_nb_kmer(&mut readable, u32::MAX.into())?;
         assert_eq!(value, 16909060);
 
+        let mut readable: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8];
         let value = read_nb_kmer(&mut readable, u32::MAX as u64 + 1)?;
         assert_eq!(value, 72623859790382856);
 
+        let mut readable: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8];
         let value = read_nb_kmer(&mut readable, u64::MAX)?;
         assert_eq!(value, 72623859790382856);
 

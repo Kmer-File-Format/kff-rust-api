@@ -23,7 +23,7 @@ pub struct Command {
 
     /// Verbose mode (-v, -vv, -vvv, etc)
     #[clap(short = 'v', long = "verbosity", action = clap::ArgAction::Count)]
-    pub verbosity: usize,
+    pub verbosity: u8,
 
     /// Timestamp (sec, ms, ns, none)
     #[clap(short = 'T', long = "timestamp")]
@@ -45,7 +45,7 @@ fn main() -> error::Result<()> {
     // Setup logger
     stderrlog::new()
         .quiet(params.quiet)
-        .verbosity(params.verbosity)
+        .verbosity(params.verbosity as usize)
         .timestamp(params.ts.unwrap_or(stderrlog::Timestamp::Off))
         .init()
         .unwrap();

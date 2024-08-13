@@ -501,11 +501,11 @@ mod tests {
                 1, 1, // Uniq, Canonical
                 0, 0, 0, 0, // Free space size length
                 b'v', 0, 0, 0, 0, 0, 0, 0, 5, // Five values
-                b'o', b'r', b'd', b'e', b'r', b'e', b'd', 0, 0, 0, 0, 0, 0, 0, 0, 0, //
-                b'd', b'a', b't', b'a', b'_', b's', b'i', b'z', b'e', 0, 0, 0, 0, 0, 0, 0, 0, 1,
                 b'm', 0, 0, 0, 0, 0, 0, 0, 0, 3, //
+                b'o', b'r', b'd', b'e', b'r', b'e', b'd', 0, 0, 0, 0, 0, 0, 0, 0, 0, //
                 b'k', 0, 0, 0, 0, 0, 0, 0, 0, 5, //
                 b'm', b'a', b'x', 0, 0, 0, 0, 0, 0, 0, 0, 200, //
+                b'd', b'a', b't', b'a', b'_', b's', b'i', b'z', b'e', 0, 0, 0, 0, 0, 0, 0, 0, 1,
                 b'r', 0, 0, 0, 0, 0, 0, 0, 3, // Three block
                 3, 27, 244, 1, 2, 3, // Three kmer in block
                 2, 27, 240, 1, 2, // Two kmer in block
