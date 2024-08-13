@@ -110,7 +110,7 @@ impl Kff<std::io::BufReader<std::fs::File>> {
         let header = section::Header::read(&mut inner)?;
         let values = section::Values::default();
 
-        let pos_first_section = inner.seek(std::io::SeekFrom::Current(0))?;
+        let pos_first_section = inner.stream_position()?;
         let index = match utils::GlobalIndex::new(&mut inner, pos_first_section) {
             Ok(index) => Some(index),
             Err(error::Error::Kff(error::Kff::NotAnIndex)) => {
@@ -251,7 +251,7 @@ where
     pub fn write_raw(
         &mut self,
         raw: section::Raw,
-        blocks: Vec<section::block::Block>,
+        blocks: &[section::block::Block],
     ) -> error::Result<()> {
         self.inner.write_bytes(b"r")?;
         raw.write(&mut self.inner, blocks)
@@ -262,7 +262,7 @@ where
         &mut self,
         section: section::Minimizer,
         minimizer: crate::Seq2Bit,
-        blocks: Vec<section::block::Block>,
+        blocks: &[section::block::Block],
     ) -> error::Result<()> {
         self.inner.write_bytes(b"m")?;
         section.write(&mut self.inner, minimizer, blocks)
@@ -412,7 +412,7 @@ mod tests {
 
         writer.write_values(values.clone())?;
 
-        writer.write_raw(section::Raw::new(&values)?, vec![
+        writer.write_raw(section::Raw::new(&values)?, &[
 	    section::block::Block {
                 k: 5,
                 data_size: 1,
@@ -442,7 +442,7 @@ mod tests {
         writer.write_minimizer(
 	    section::Minimizer::new(&values)?,
 	    bitvec::bitbox![u8, bitvec::order::Msb0; 0, 1, 1, 0, 1, 1],
-            vec![
+            &[
                 section::block::Block{
                     k: 5,
                     data_size: 1,

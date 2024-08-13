@@ -22,7 +22,7 @@ pub struct Command {
     pub quiet: bool,
 
     /// Verbose mode (-v, -vv, -vvv, etc)
-    #[clap(short = 'v', long = "verbosity", parse(from_occurrences))]
+    #[clap(short = 'v', long = "verbosity", action = clap::ArgAction::Count)]
     pub verbosity: usize,
 
     /// Timestamp (sec, ms, ns, none)
@@ -101,7 +101,7 @@ fn main() -> error::Result<()> {
     values.insert("data_size".to_string(), 1);
 
     kff.write_values(values.clone())?;
-    kff.write_raw(kff::section::Raw::new(&values)?, kmers)?;
+    kff.write_raw(kff::section::Raw::new(&values)?, &kmers)?;
     kff.finalize()?;
     log::info!("End create kff file");
 

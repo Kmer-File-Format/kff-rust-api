@@ -8,7 +8,6 @@ use std::process::{Command, Stdio};
 use tempfile;
 
 #[test]
-#[cfg(not(tarpaulin))]
 fn kff2kmers() -> kff::error::Result<()> {
     let tmp_file = tempfile::NamedTempFile::new().unwrap();
 

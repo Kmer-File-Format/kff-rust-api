@@ -37,7 +37,7 @@ impl GlobalIndex {
         loop {
             let local_index = section::Index::read(inner)?;
 
-            let relative_to = inner.seek(std::io::SeekFrom::Current(0))?;
+            let relative_to = inner.stream_position()?;
 
             pair.extend(
                 local_index

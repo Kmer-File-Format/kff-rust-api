@@ -4,7 +4,6 @@ use std::io::Read;
 use std::process::{Command, Stdio};
 
 #[test]
-#[cfg(not(tarpaulin))]
 fn get_index() -> kff::error::Result<()> {
     let args = vec![
         "run",
@@ -103,7 +102,6 @@ fn get_index() -> kff::error::Result<()> {
 }
 
 #[test]
-#[cfg(not(tarpaulin))]
 fn get_section() -> kff::error::Result<()> {
     let args = vec![
         "run",

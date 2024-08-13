@@ -4,7 +4,6 @@ use std::io::Read;
 use std::process::{Command, Stdio};
 
 #[test]
-#[cfg(not(tarpaulin))]
 fn kff2kmers() -> kff::error::Result<()> {
     let args = vec![
         "run",

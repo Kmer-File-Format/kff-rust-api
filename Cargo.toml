@@ -28,20 +28,20 @@ log            = { version = "0.4" }
 
 getset         = { version = "0.1" }
 
-rustc-hash     = { version = "1" }
+rustc-hash     = { version = "2" }
 
 bitvec         = { version = "1" }
 
 
 [dev-dependencies]
 # CLI management
-clap           = { version = "3", features = ["derive"] }
+clap           = { version = "4", features = ["derive"] }
 
 # Logging management
-stderrlog      = { version = "0.4" }
+stderrlog      = { version = "0.6" }
 
 # Profiling
-criterion      = { version = "0.3" }
+criterion      = { version = "0.5" }
 
 rand           = { version = "0.8" }
 tempfile       = { version = "3" }

@@ -159,6 +159,8 @@ mod tests {
         let mut outer = Vec::new();
         values.write(&mut outer)?;
 
+        outer.sort();
+
         assert_eq!(
             outer,
             &[

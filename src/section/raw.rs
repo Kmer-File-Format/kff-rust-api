@@ -71,7 +71,7 @@ impl Raw {
     }
 
     /// Write a Raw section, section flag isn't write
-    pub fn write<W>(&self, outer: &mut W, blocks: Vec<section::block::Block>) -> error::Result<()>
+    pub fn write<W>(&self, outer: &mut W, blocks: &[section::block::Block]) -> error::Result<()>
     where
         W: std::io::Write + crate::KffWrite,
     {
@@ -178,7 +178,7 @@ mod tests {
 
         raw.write(
             &mut writable,
-            vec![
+            &[
                 section::block::Block {
                     k: 5,
                     data_size: 1,
