@@ -139,6 +139,8 @@ where
 {
     /// Check readable match with a KFF file
     pub fn check(&mut self) -> error::Result<bool> {
+        let cursor_position = self.inner.stream_position()?;
+
         self.inner.seek(std::io::SeekFrom::Start(0))?;
         let magic_number = self.inner.read_n_bytes::<3>()?;
         if &magic_number != b"KFF" {
@@ -151,7 +153,7 @@ where
             return Err(error::Kff::MissingMagic("end".to_string()).into());
         }
 
-        self.inner.seek(std::io::SeekFrom::Start(0))?;
+        self.inner.seek(std::io::SeekFrom::Start(cursor_position))?;
 
         Ok(true)
     }
@@ -357,6 +359,14 @@ mod tests {
 
         assert!(file.check()?); // Header init and check work
 
+        // move cursor before check
+        let mut second = readable.clone();
+        let mut file = Kff::read(second.clone())?;
+        second.seek_relative(10)?;
+        assert!(matches!(second.stream_position(), Ok(10)));
+        assert!(file.check()?);
+        assert!(matches!(second.stream_position(), Ok(10)));
+
         readable.get_mut()[1] = b'K';
         let file = Kff::read(readable.clone());
         assert!(file.is_err()); // Header init failled
@@ -365,7 +375,7 @@ mod tests {
         readable.get_mut()[inner_len - 1] = b'K';
         let mut file = Kff::read(readable.clone())?;
 
-        assert!(file.check().is_err()); // Header init work but check failled
+        assert!(file.check().is_err()); // Header init work but footer failled
 
         Ok(())
     }
