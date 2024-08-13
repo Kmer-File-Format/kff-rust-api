@@ -292,7 +292,7 @@
     }
 
     <span class="doccomment">/// Write a Raw section, section flag isn't write
-    </span><span class="kw">pub fn </span>write&lt;W&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, outer: <span class="kw-2">&amp;mut </span>W, blocks: <span class="kw-2">&amp;</span>Vec&lt;section::block::Block&gt;) -&gt; error::Result&lt;()&gt;
+    </span><span class="kw">pub fn </span>write&lt;W&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, outer: <span class="kw-2">&amp;mut </span>W, blocks: <span class="kw-2">&amp;</span>[section::block::Block]) -&gt; error::Result&lt;()&gt;
     <span class="kw">where
         </span>W: std::io::Write + <span class="kw">crate</span>::KffWrite,
     {
@@ -399,7 +399,7 @@
 
         raw.write(
             <span class="kw-2">&amp;mut </span>writable,
-            <span class="kw-2">&amp;</span><span class="macro">vec!</span>[
+            <span class="kw-2">&amp;</span>[
                 section::block::Block {
                     k: <span class="number">5</span>,
                     data_size: <span class="number">1</span>,

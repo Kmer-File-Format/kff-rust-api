@@ -341,7 +341,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         outer: <span class="kw-2">&amp;mut </span>W,
         minimizer: Seq2Bit,
-        blocks: <span class="kw-2">&amp;</span>Vec&lt;section::block::Block&gt;,
+        blocks: <span class="kw-2">&amp;</span>[section::block::Block],
     ) -&gt; error::Result&lt;()&gt;
     <span class="kw">where
         </span>W: std::io::Write + <span class="kw">crate</span>::KffWrite,
@@ -458,7 +458,7 @@
         minimizer.write(
             <span class="kw-2">&amp;mut </span>writable,
 	    <span class="macro">bitvec::bitbox!</span>[u8, bitvec::order::Msb0; <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>],
-            <span class="kw-2">&amp;</span><span class="macro">vec!</span>[
+            <span class="kw-2">&amp;</span>[
                 section::block::Block{
                     k: <span class="number">5</span>,
                     data_size: <span class="number">1</span>,

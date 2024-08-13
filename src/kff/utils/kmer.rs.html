@@ -376,7 +376,7 @@
 <span class="doccomment">/// Convert a nucleotide in internal encoding
 </span><span class="attr">#[inline]
 </span><span class="kw">fn </span>nuc2internal(nuc: u8) -&gt; u8 {
-    (nuc <span class="kw">as </span>u8 &gt;&gt; <span class="number">1</span>) &amp; <span class="number">0b11
+    (nuc &gt;&gt; <span class="number">1</span>) &amp; <span class="number">0b11
 </span>}
 
 <span class="kw">const </span>INTERNAL2NUC: [u8; <span class="number">4</span>] = [<span class="string">b'A'</span>, <span class="string">b'C'</span>, <span class="string">b'T'</span>, <span class="string">b'G'</span>];

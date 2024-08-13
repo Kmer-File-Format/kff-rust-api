@@ -148,7 +148,7 @@
         <span class="kw">loop </span>{
             <span class="kw">let </span>local_index = section::Index::read(inner)<span class="question-mark">?</span>;
 
-            <span class="kw">let </span>relative_to = inner.seek(std::io::SeekFrom::Current(<span class="number">0</span>))<span class="question-mark">?</span>;
+            <span class="kw">let </span>relative_to = inner.stream_position()<span class="question-mark">?</span>;
 
             pair.extend(
                 local_index

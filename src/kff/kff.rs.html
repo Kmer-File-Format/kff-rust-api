@@ -518,6 +518,17 @@
 <a href="#518" id="518">518</a>
 <a href="#519" id="519">519</a>
 <a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Kmer File Format Rust parser
 
 </span><span class="comment">/* std use */
@@ -630,7 +641,7 @@
         <span class="kw">let </span>header = section::Header::read(<span class="kw-2">&amp;mut </span>inner)<span class="question-mark">?</span>;
         <span class="kw">let </span>values = section::Values::default();
 
-        <span class="kw">let </span>pos_first_section = inner.seek(std::io::SeekFrom::Current(<span class="number">0</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>pos_first_section = inner.stream_position()<span class="question-mark">?</span>;
         <span class="kw">let </span>index = <span class="kw">match </span>utils::GlobalIndex::new(<span class="kw-2">&amp;mut </span>inner, pos_first_section) {
             <span class="prelude-val">Ok</span>(index) =&gt; <span class="prelude-val">Some</span>(index),
             <span class="prelude-val">Err</span>(error::Error::Kff(error::Kff::NotAnIndex)) =&gt; {
@@ -659,6 +670,8 @@
 {
     <span class="doccomment">/// Check readable match with a KFF file
     </span><span class="kw">pub fn </span>check(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; error::Result&lt;bool&gt; {
+        <span class="kw">let </span>cursor_position = <span class="self">self</span>.inner.stream_position()<span class="question-mark">?</span>;
+
         <span class="self">self</span>.inner.seek(std::io::SeekFrom::Start(<span class="number">0</span>))<span class="question-mark">?</span>;
         <span class="kw">let </span>magic_number = <span class="self">self</span>.inner.read_n_bytes::&lt;<span class="number">3</span>&gt;()<span class="question-mark">?</span>;
         <span class="kw">if </span><span class="kw-2">&amp;</span>magic_number != <span class="string">b"KFF" </span>{
@@ -671,7 +684,7 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(error::Kff::MissingMagic(<span class="string">"end"</span>.to_string()).into());
         }
 
-        <span class="self">self</span>.inner.seek(std::io::SeekFrom::Start(<span class="number">0</span>))<span class="question-mark">?</span>;
+        <span class="self">self</span>.inner.seek(std::io::SeekFrom::Start(cursor_position))<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
     }
@@ -771,7 +784,8 @@
     </span><span class="kw">pub fn </span>write_raw(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         raw: section::Raw,
-        blocks: <span class="kw-2">&amp;</span>Vec&lt;section::block::Block&gt;,
+
+        blocks: <span class="kw-2">&amp;</span>[section::block::Block],
     ) -&gt; error::Result&lt;()&gt; {
         <span class="self">self</span>.inner.write_bytes(<span class="string">b"r"</span>)<span class="question-mark">?</span>;
         raw.write(<span class="kw-2">&amp;mut </span><span class="self">self</span>.inner, blocks)
@@ -782,7 +796,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         section: section::Minimizer,
         minimizer: <span class="kw">crate</span>::Seq2Bit,
-        blocks: <span class="kw-2">&amp;</span>Vec&lt;section::block::Block&gt;,
+        blocks: <span class="kw-2">&amp;</span>[section::block::Block],
     ) -&gt; error::Result&lt;()&gt; {
         <span class="self">self</span>.inner.write_bytes(<span class="string">b"m"</span>)<span class="question-mark">?</span>;
         section.write(<span class="kw-2">&amp;mut </span><span class="self">self</span>.inner, minimizer, blocks)
@@ -877,7 +891,15 @@
 
         <span class="macro">assert!</span>(file.check()<span class="question-mark">?</span>); <span class="comment">// Header init and check work
 
-        </span>readable.get_mut()[<span class="number">1</span>] = <span class="string">b'K'</span>;
+        // move cursor before check
+        </span><span class="kw">let </span><span class="kw-2">mut </span>second = readable.clone();
+        <span class="kw">let </span><span class="kw-2">mut </span>file = Kff::read(second.clone())<span class="question-mark">?</span>;
+        second.seek_relative(<span class="number">10</span>)<span class="question-mark">?</span>;
+        <span class="macro">assert!</span>(<span class="macro">matches!</span>(second.stream_position(), <span class="prelude-val">Ok</span>(<span class="number">10</span>)));
+        <span class="macro">assert!</span>(file.check()<span class="question-mark">?</span>);
+        <span class="macro">assert!</span>(<span class="macro">matches!</span>(second.stream_position(), <span class="prelude-val">Ok</span>(<span class="number">10</span>)));
+
+        readable.get_mut()[<span class="number">1</span>] = <span class="string">b'K'</span>;
         <span class="kw">let </span>file = Kff::read(readable.clone());
         <span class="macro">assert!</span>(file.is_err()); <span class="comment">// Header init failled
 
@@ -885,7 +907,7 @@
         readable.get_mut()[inner_len - <span class="number">1</span>] = <span class="string">b'K'</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>file = Kff::read(readable.clone())<span class="question-mark">?</span>;
 
-        <span class="macro">assert!</span>(file.check().is_err()); <span class="comment">// Header init work but check failled
+        <span class="macro">assert!</span>(file.check().is_err()); <span class="comment">// Header init work but footer failled
 
         </span><span class="prelude-val">Ok</span>(())
     }
@@ -932,7 +954,7 @@
 
         writer.write_values(values.clone())<span class="question-mark">?</span>;
 
-        writer.write_raw(section::Raw::new(<span class="kw-2">&amp;</span>values)<span class="question-mark">?</span>, <span class="kw-2">&amp;</span><span class="macro">vec!</span>[
+        writer.write_raw(section::Raw::new(<span class="kw-2">&amp;</span>values)<span class="question-mark">?</span>, <span class="kw-2">&amp;</span>[
 	    section::block::Block {
                 k: <span class="number">5</span>,
                 data_size: <span class="number">1</span>,
@@ -962,7 +984,7 @@
         writer.write_minimizer(
 	    section::Minimizer::new(<span class="kw-2">&amp;</span>values)<span class="question-mark">?</span>,
 	    <span class="macro">bitvec::bitbox!</span>[u8, bitvec::order::Msb0; <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>],
-            <span class="kw-2">&amp;</span><span class="macro">vec!</span>[
+            <span class="kw-2">&amp;</span>[
                 section::block::Block{
                     k: <span class="number">5</span>,
                     data_size: <span class="number">1</span>,
@@ -1011,12 +1033,12 @@
                 </span><span class="number">1</span>, <span class="number">1</span>, <span class="comment">// Uniq, Canonical
                 </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">// Free space size length
                 </span><span class="string">b'v'</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="comment">// Five values
+                </span><span class="string">b'm'</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="comment">//
                 </span><span class="string">b'o'</span>, <span class="string">b'r'</span>, <span class="string">b'd'</span>, <span class="string">b'e'</span>, <span class="string">b'r'</span>, <span class="string">b'e'</span>, <span class="string">b'd'</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="comment">//
-                </span><span class="string">b'd'</span>, <span class="string">b'a'</span>, <span class="string">b't'</span>, <span class="string">b'a'</span>, <span class="string">b'_'</span>, <span class="string">b's'</span>, <span class="string">b'i'</span>, <span class="string">b'z'</span>, <span class="string">b'e'</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>,
-                <span class="string">b'm'</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="comment">//
                 </span><span class="string">b'k'</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="comment">//
                 </span><span class="string">b'm'</span>, <span class="string">b'a'</span>, <span class="string">b'x'</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">200</span>, <span class="comment">//
-                </span><span class="string">b'r'</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="comment">// Three block
+                </span><span class="string">b'd'</span>, <span class="string">b'a'</span>, <span class="string">b't'</span>, <span class="string">b'a'</span>, <span class="string">b'_'</span>, <span class="string">b's'</span>, <span class="string">b'i'</span>, <span class="string">b'z'</span>, <span class="string">b'e'</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>,
+                <span class="string">b'r'</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="comment">// Three block
                 </span><span class="number">3</span>, <span class="number">27</span>, <span class="number">244</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="comment">// Three kmer in block
                 </span><span class="number">2</span>, <span class="number">27</span>, <span class="number">240</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="comment">// Two kmer in block
                 </span><span class="number">1</span>, <span class="number">27</span>, <span class="number">192</span>, <span class="number">1</span>,    <span class="comment">// One kmer in block

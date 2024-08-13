@@ -482,6 +482,9 @@
 <a href="#482" id="482">482</a>
 <a href="#483" id="483">483</a>
 <a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Representation of a KFF kmer block
 
 </span><span class="comment">/* std use */
@@ -627,15 +630,12 @@
             <span class="self">self</span>.minimizer_offset <span class="kw">as </span>u64,
         )<span class="question-mark">?</span>;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>kmer = bitvec::vec::BitVec::from_bitslice(
-            <span class="kw-2">&amp;</span><span class="self">self</span>.kmer.seq2bit()[..(<span class="self">self</span>.minimizer_offset <span class="kw">as </span>usize * <span class="number">2</span>)],
-        );
+        <span class="kw">let </span><span class="kw-2">mut </span>kmer =
+            bitvec::vec::BitVec::from_bitslice(<span class="kw-2">&amp;</span><span class="self">self</span>.kmer.seq2bit()[..(<span class="self">self</span>.minimizer_offset * <span class="number">2</span>)]);
 
-        kmer.extend_from_bitslice(
-            <span class="kw-2">&amp;</span><span class="self">self</span>.kmer.seq2bit()[((<span class="self">self</span>.minimizer_offset + m * <span class="number">2</span>) <span class="kw">as </span>usize + <span class="number">1</span>)..],
-        );
+        kmer.extend_from_bitslice(<span class="kw-2">&amp;</span><span class="self">self</span>.kmer.seq2bit()[((<span class="self">self</span>.minimizer_offset + m * <span class="number">2</span>) + <span class="number">1</span>)..]);
 
-        kmer.resize((<span class="self">self</span>.minimizer_offset + m * <span class="number">2</span>) <span class="kw">as </span>usize, <span class="bool-val">false</span>);
+        kmer.resize(<span class="self">self</span>.minimizer_offset + m * <span class="number">2</span>, <span class="bool-val">false</span>);
 
         outer.write_bytes(kmer.as_raw_slice())<span class="question-mark">?</span>;
         outer.write_bytes(<span class="self">self</span>.kmer.data().as_slice())<span class="question-mark">?</span>;
@@ -649,8 +649,7 @@
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
             <span class="kw">let </span>k_range = <span class="self">self</span>.offset * <span class="number">2</span>..(<span class="self">self</span>.offset + <span class="self">self</span>.k <span class="kw">as </span>usize) * <span class="number">2</span>;
-            <span class="kw">let </span>d_range =
-                <span class="self">self</span>.offset * <span class="self">self</span>.data_size <span class="kw">as </span>usize..(<span class="self">self</span>.offset + <span class="number">1</span>) * <span class="self">self</span>.data_size <span class="kw">as </span>usize;
+            <span class="kw">let </span>d_range = <span class="self">self</span>.offset * <span class="self">self</span>.data_size..(<span class="self">self</span>.offset + <span class="number">1</span>) * <span class="self">self</span>.data_size;
 
             <span class="self">self</span>.offset += <span class="number">1</span>;
             <span class="prelude-val">Some</span>(Kmer::new(
@@ -674,7 +673,7 @@
     </span>R: std::io::Read + <span class="kw">crate</span>::KffRead,
 {
     <span class="kw">match </span>max.leading_zeros() {
-        <span class="number">0</span>..=<span class="number">31 </span>=&gt; <span class="prelude-val">Ok</span>(inner.read_u64()<span class="question-mark">? </span><span class="kw">as </span>u64),
+        <span class="number">0</span>..=<span class="number">31 </span>=&gt; <span class="prelude-val">Ok</span>(inner.read_u64()<span class="question-mark">?</span>),
         <span class="number">32</span>..=<span class="number">47 </span>=&gt; <span class="prelude-val">Ok</span>(inner.read_u32()<span class="question-mark">? </span><span class="kw">as </span>u64),
         <span class="number">48</span>..=<span class="number">55 </span>=&gt; <span class="prelude-val">Ok</span>(inner.read_u16()<span class="question-mark">? </span><span class="kw">as </span>u64),
         <span class="number">56</span>..=<span class="number">64 </span>=&gt; <span class="prelude-val">Ok</span>(inner.read_u8()<span class="question-mark">? </span><span class="kw">as </span>u64),
@@ -906,26 +905,33 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>max_value_read() -&gt; error::Result&lt;()&gt; {
-        <span class="kw">let </span>readable: <span class="kw-2">&amp;</span>[u8] = <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>];
-        <span class="kw">let </span>value = read_nb_kmer(<span class="kw-2">&amp;mut </span>readable.clone(), u8::MAX.into())<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>readable: <span class="kw-2">&amp;</span>[u8] = <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>];
+        <span class="kw">let </span>value = read_nb_kmer(<span class="kw-2">&amp;mut </span>readable, u8::MAX.into())<span class="question-mark">?</span>;
         <span class="macro">assert_eq!</span>(value, <span class="number">1</span>);
 
-        <span class="kw">let </span>value = read_nb_kmer(<span class="kw-2">&amp;mut </span>readable.clone(), u8::MAX <span class="kw">as </span>u64 + <span class="number">1</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>readable: <span class="kw-2">&amp;</span>[u8] = <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>];
+        <span class="kw">let </span>value = read_nb_kmer(<span class="kw-2">&amp;mut </span>readable, u8::MAX <span class="kw">as </span>u64 + <span class="number">1</span>)<span class="question-mark">?</span>;
+        <span class="macro">println!</span>(<span class="string">"{:?}"</span>, value.to_be_bytes());
         <span class="macro">assert_eq!</span>(value, <span class="number">258</span>);
 
-        <span class="kw">let </span>value = read_nb_kmer(<span class="kw-2">&amp;mut </span>readable.clone(), u16::MAX.into())<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>readable: <span class="kw-2">&amp;</span>[u8] = <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>];
+        <span class="kw">let </span>value = read_nb_kmer(<span class="kw-2">&amp;mut </span>readable, u16::MAX.into())<span class="question-mark">?</span>;
         <span class="macro">assert_eq!</span>(value, <span class="number">258</span>);
 
-        <span class="kw">let </span>value = read_nb_kmer(<span class="kw-2">&amp;mut </span>readable.clone(), u16::MAX <span class="kw">as </span>u64 + <span class="number">1</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>readable: <span class="kw-2">&amp;</span>[u8] = <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>];
+        <span class="kw">let </span>value = read_nb_kmer(<span class="kw-2">&amp;mut </span>readable, u16::MAX <span class="kw">as </span>u64 + <span class="number">1</span>)<span class="question-mark">?</span>;
         <span class="macro">assert_eq!</span>(value, <span class="number">16909060</span>);
 
-        <span class="kw">let </span>value = read_nb_kmer(<span class="kw-2">&amp;mut </span>readable.clone(), u32::MAX.into())<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>readable: <span class="kw-2">&amp;</span>[u8] = <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>];
+        <span class="kw">let </span>value = read_nb_kmer(<span class="kw-2">&amp;mut </span>readable, u32::MAX.into())<span class="question-mark">?</span>;
         <span class="macro">assert_eq!</span>(value, <span class="number">16909060</span>);
 
-        <span class="kw">let </span>value = read_nb_kmer(<span class="kw-2">&amp;mut </span>readable.clone(), u32::MAX <span class="kw">as </span>u64 + <span class="number">1</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>readable: <span class="kw-2">&amp;</span>[u8] = <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>];
+        <span class="kw">let </span>value = read_nb_kmer(<span class="kw-2">&amp;mut </span>readable, u32::MAX <span class="kw">as </span>u64 + <span class="number">1</span>)<span class="question-mark">?</span>;
         <span class="macro">assert_eq!</span>(value, <span class="number">72623859790382856</span>);
 
-        <span class="kw">let </span>value = read_nb_kmer(<span class="kw-2">&amp;mut </span>readable.clone(), u64::MAX)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>readable: <span class="kw-2">&amp;</span>[u8] = <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>];
+        <span class="kw">let </span>value = read_nb_kmer(<span class="kw-2">&amp;mut </span>readable, u64::MAX)<span class="question-mark">?</span>;
         <span class="macro">assert_eq!</span>(value, <span class="number">72623859790382856</span>);
 
         <span class="prelude-val">Ok</span>(())
