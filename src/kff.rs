@@ -110,7 +110,7 @@ impl Kff<std::io::BufReader<std::fs::File>> {
         let header = section::Header::read(&mut inner)?;
         let values = section::Values::default();
 
-        let pos_first_section = inner.seek(std::io::SeekFrom::Current(0))?;
+        let pos_first_section = inner.stream_position()?;
         let index = match utils::GlobalIndex::new(&mut inner, pos_first_section) {
             Ok(index) => Some(index),
             Err(error::Error::Kff(error::Kff::NotAnIndex)) => {
@@ -139,6 +139,8 @@ where
 {
     /// Check readable match with a KFF file
     pub fn check(&mut self) -> error::Result<bool> {
+        let cursor_position = self.inner.stream_position()?;
+
         self.inner.seek(std::io::SeekFrom::Start(0))?;
         let magic_number = self.inner.read_n_bytes::<3>()?;
         if &magic_number != b"KFF" {
@@ -151,7 +153,7 @@ where
             return Err(error::Kff::MissingMagic("end".to_string()).into());
         }
 
-        self.inner.seek(std::io::SeekFrom::Start(0))?;
+        self.inner.seek(std::io::SeekFrom::Start(cursor_position))?;
 
         Ok(true)
     }
@@ -251,7 +253,8 @@ where
     pub fn write_raw(
         &mut self,
         raw: section::Raw,
-        blocks: &Vec<section::block::Block>,
+
+        blocks: &[section::block::Block],
     ) -> error::Result<()> {
         self.inner.write_bytes(b"r")?;
         raw.write(&mut self.inner, blocks)
@@ -262,7 +265,7 @@ where
         &mut self,
         section: section::Minimizer,
         minimizer: crate::Seq2Bit,
-        blocks: &Vec<section::block::Block>,
+        blocks: &[section::block::Block],
     ) -> error::Result<()> {
         self.inner.write_bytes(b"m")?;
         section.write(&mut self.inner, minimizer, blocks)
@@ -357,6 +360,14 @@ mod tests {
 
         assert!(file.check()?); // Header init and check work
 
+        // move cursor before check
+        let mut second = readable.clone();
+        let mut file = Kff::read(second.clone())?;
+        second.seek_relative(10)?;
+        assert!(matches!(second.stream_position(), Ok(10)));
+        assert!(file.check()?);
+        assert!(matches!(second.stream_position(), Ok(10)));
+
         readable.get_mut()[1] = b'K';
         let file = Kff::read(readable.clone());
         assert!(file.is_err()); // Header init failled
@@ -365,7 +376,7 @@ mod tests {
         readable.get_mut()[inner_len - 1] = b'K';
         let mut file = Kff::read(readable.clone())?;
 
-        assert!(file.check().is_err()); // Header init work but check failled
+        assert!(file.check().is_err()); // Header init work but footer failled
 
         Ok(())
     }
@@ -412,7 +423,7 @@ mod tests {
 
         writer.write_values(values.clone())?;
 
-        writer.write_raw(section::Raw::new(&values)?, &vec![
+        writer.write_raw(section::Raw::new(&values)?, &[
 	    section::block::Block {
                 k: 5,
                 data_size: 1,
@@ -442,7 +453,7 @@ mod tests {
         writer.write_minimizer(
 	    section::Minimizer::new(&values)?,
 	    bitvec::bitbox![u8, bitvec::order::Msb0; 0, 1, 1, 0, 1, 1],
-            &vec![
+            &[
                 section::block::Block{
                     k: 5,
                     data_size: 1,
@@ -491,11 +502,11 @@ mod tests {
                 1, 1, // Uniq, Canonical
                 0, 0, 0, 0, // Free space size length
                 b'v', 0, 0, 0, 0, 0, 0, 0, 5, // Five values
-                b'o', b'r', b'd', b'e', b'r', b'e', b'd', 0, 0, 0, 0, 0, 0, 0, 0, 0, //
-                b'd', b'a', b't', b'a', b'_', b's', b'i', b'z', b'e', 0, 0, 0, 0, 0, 0, 0, 0, 1,
                 b'm', 0, 0, 0, 0, 0, 0, 0, 0, 3, //
+                b'o', b'r', b'd', b'e', b'r', b'e', b'd', 0, 0, 0, 0, 0, 0, 0, 0, 0, //
                 b'k', 0, 0, 0, 0, 0, 0, 0, 0, 5, //
                 b'm', b'a', b'x', 0, 0, 0, 0, 0, 0, 0, 0, 200, //
+                b'd', b'a', b't', b'a', b'_', b's', b'i', b'z', b'e', 0, 0, 0, 0, 0, 0, 0, 0, 1,
                 b'r', 0, 0, 0, 0, 0, 0, 0, 3, // Three block
                 3, 27, 244, 1, 2, 3, // Three kmer in block
                 2, 27, 240, 1, 2, // Two kmer in block

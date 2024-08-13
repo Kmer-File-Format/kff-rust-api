@@ -143,15 +143,12 @@ impl Block {
             self.minimizer_offset as u64,
         )?;
 
-        let mut kmer = bitvec::vec::BitVec::from_bitslice(
-            &self.kmer.seq2bit()[..(self.minimizer_offset as usize * 2)],
-        );
+        let mut kmer =
+            bitvec::vec::BitVec::from_bitslice(&self.kmer.seq2bit()[..(self.minimizer_offset * 2)]);
 
-        kmer.extend_from_bitslice(
-            &self.kmer.seq2bit()[((self.minimizer_offset + m * 2) as usize + 1)..],
-        );
+        kmer.extend_from_bitslice(&self.kmer.seq2bit()[((self.minimizer_offset + m * 2) + 1)..]);
 
-        kmer.resize((self.minimizer_offset + m * 2) as usize, false);
+        kmer.resize(self.minimizer_offset + m * 2, false);
 
         outer.write_bytes(kmer.as_raw_slice())?;
         outer.write_bytes(self.kmer.data().as_slice())?;
@@ -165,8 +162,7 @@ impl Block {
             None
         } else {
             let k_range = self.offset * 2..(self.offset + self.k as usize) * 2;
-            let d_range =
-                self.offset * self.data_size as usize..(self.offset + 1) * self.data_size as usize;
+            let d_range = self.offset * self.data_size..(self.offset + 1) * self.data_size;
 
             self.offset += 1;
             Some(Kmer::new(
@@ -190,7 +186,7 @@ where
     R: std::io::Read + crate::KffRead,
 {
     match max.leading_zeros() {
-        0..=31 => Ok(inner.read_u64()? as u64),
+        0..=31 => Ok(inner.read_u64()?),
         32..=47 => Ok(inner.read_u32()? as u64),
         48..=55 => Ok(inner.read_u16()? as u64),
         56..=64 => Ok(inner.read_u8()? as u64),
@@ -422,26 +418,33 @@ mod tests {
 
     #[test]
     fn max_value_read() -> error::Result<()> {
-        let readable: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8];
-        let value = read_nb_kmer(&mut readable.clone(), u8::MAX.into())?;
+        let mut readable: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8];
+        let value = read_nb_kmer(&mut readable, u8::MAX.into())?;
         assert_eq!(value, 1);
 
-        let value = read_nb_kmer(&mut readable.clone(), u8::MAX as u64 + 1)?;
+        let mut readable: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8];
+        let value = read_nb_kmer(&mut readable, u8::MAX as u64 + 1)?;
+        println!("{:?}", value.to_be_bytes());
         assert_eq!(value, 258);
 
-        let value = read_nb_kmer(&mut readable.clone(), u16::MAX.into())?;
+        let mut readable: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8];
+        let value = read_nb_kmer(&mut readable, u16::MAX.into())?;
         assert_eq!(value, 258);
 
-        let value = read_nb_kmer(&mut readable.clone(), u16::MAX as u64 + 1)?;
+        let mut readable: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8];
+        let value = read_nb_kmer(&mut readable, u16::MAX as u64 + 1)?;
         assert_eq!(value, 16909060);
 
-        let value = read_nb_kmer(&mut readable.clone(), u32::MAX.into())?;
+        let mut readable: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8];
+        let value = read_nb_kmer(&mut readable, u32::MAX.into())?;
         assert_eq!(value, 16909060);
 
-        let value = read_nb_kmer(&mut readable.clone(), u32::MAX as u64 + 1)?;
+        let mut readable: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8];
+        let value = read_nb_kmer(&mut readable, u32::MAX as u64 + 1)?;
         assert_eq!(value, 72623859790382856);
 
-        let value = read_nb_kmer(&mut readable.clone(), u64::MAX)?;
+        let mut readable: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8];
+        let value = read_nb_kmer(&mut readable, u64::MAX)?;
         assert_eq!(value, 72623859790382856);
 
         Ok(())

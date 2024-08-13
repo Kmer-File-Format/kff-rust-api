@@ -53,7 +53,7 @@ impl Kmer {
 /// Convert a nucleotide in internal encoding
 #[inline]
 fn nuc2internal(nuc: u8) -> u8 {
-    (nuc as u8 >> 1) & 0b11
+    (nuc >> 1) & 0b11
 }
 
 const INTERNAL2NUC: [u8; 4] = [b'A', b'C', b'T', b'G'];

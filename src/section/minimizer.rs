@@ -90,7 +90,7 @@ impl Minimizer {
         &self,
         outer: &mut W,
         minimizer: Seq2Bit,
-        blocks: &Vec<section::block::Block>,
+        blocks: &[section::block::Block],
     ) -> error::Result<()>
     where
         W: std::io::Write + crate::KffWrite,
@@ -207,7 +207,7 @@ mod tests {
         minimizer.write(
             &mut writable,
 	    bitvec::bitbox![u8, bitvec::order::Msb0; 0, 1, 1, 0, 1, 1],
-            &vec![
+            &[
                 section::block::Block{
                     k: 5,
                     data_size: 1,
