@@ -101,7 +101,7 @@ fn main() -> error::Result<()> {
     values.insert("data_size".to_string(), 1);
 
     kff.write_values(values.clone())?;
-    kff.write_raw(kff::section::Raw::new(&values)?, kmers)?;
+    kff.write_raw(kff::section::Raw::new(&values)?, &kmers)?;
     kff.finalize()?;
     log::info!("End create kff file");
 
