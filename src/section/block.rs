@@ -146,9 +146,7 @@ impl Block {
         let mut kmer =
             bitvec::vec::BitVec::from_bitslice(&self.kmer.seq2bit()[..(self.minimizer_offset * 2)]);
 
-        kmer.extend_from_bitslice(&self.kmer.seq2bit()[((self.minimizer_offset + m * 2) + 1)..]);
-
-        kmer.resize(self.minimizer_offset + m * 2, false);
+        kmer.extend_from_bitslice(&self.kmer.seq2bit()[((self.minimizer_offset + m) * 2)..]);
 
         outer.write_bytes(kmer.as_raw_slice())?;
         outer.write_bytes(self.kmer.data().as_slice())?;
