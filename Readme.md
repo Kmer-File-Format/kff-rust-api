@@ -27,7 +27,7 @@ Currently the minimum supported Rust version is 1.62.
 
 ### Open a file
 
-`kff::Kff`` is the main object in the library.
+`kff::Kff` is the main object in the library.
 This is the object needed to manipulate a binary kff file.
 
 ```rust
@@ -37,7 +37,7 @@ let file = kff::Kff::<std::io::BufReader<std::fs::File>>::open(kff_path).expect(
 ### Read header and encoding
 
 When you open a file to read it, the header (including the encoding) is automatically read.
-It is accessible via the file property *encoding*.
+It is accessible via the file property *header*. You can access the encoding through the *encoding* header.
 
 ```rust
 let header = file.header();
@@ -46,8 +46,8 @@ let encoding = file.header().encoding();
 
 ### Enumerating kmers from a file
 
-This high level reader API is made to be very easy to use.
-This part of the API allow you to enumerate each pair of kmer / data through the whole file, hiding all the kff datastructures.
+This high-level reader API is made to be very easy to use.
+This part of the API allows you to enumerate each pair of kmer/data through the whole file, hiding all the kff data structures.
 
 ```rust
 let mut file = kff::Kff::<std::io::BufReader<std::fs::File>>::open(kff_path).expect("could not open kff file");
@@ -63,11 +63,9 @@ for kmer in file.kmers() {
 TODO
 
 
-### How to know properties of my kmers ?
+### How to know the properties of my kmers?
 
-The values stored in the file (e.g. k or data_size) are accessible through the *get_var* method.
-You also need to know the encoding used to translate you data from 2-bits to strings.
-The *get_encoding* function return an array of the 4 encoded values in order A, C, G, T.
+The values stored in the file (e.g. k or data_size) are accessible through the *values* method.
 
 ```rust
 let vars: &kff::section::Values = file.values();
@@ -78,11 +76,11 @@ let m: Option<&u64> = vars.get("m");
 ## Write a file
 
 ### Open/close a file
-Creating a kff file requires to create a header.
+Creating a kff file requires creating a header.
 The header first contains the kff file version (minor and major).
 You then have to fill in if the kmers are unique and/or canonical.
-Then you have to write the encoding that you use.
-If you want, you can finish the header by adding some metadata (as a vector of bytes).
+Then you have to write the encoding you are using.
+Optionally, you can add some data in a vector of bytes.
 
 ```rust
 const ENCODING: u8 = 0b00011011; // A C T G, 2 bits per letter
@@ -99,13 +97,13 @@ let file = Kff::create(output_file, header).expect("unable to initiate kff");
 ### String sequences to binary
 
 This crate provides two functions to transform a DNA string into a byte array coding for the binary sequence:
-- `from_ascii` from sequence with associated data (e.g. kmers)
-- `seq2bits` for sequence without any associated data (e.g. minimizers).
+- `from_ascii` for a sequence with associated data (e.g. kmers)
+- `seq2bits` for a sequence without any associated data (e.g. minimizers).
 You can, of course, use another one of your own.
 
 ### Write values
 
-As defined in the standard, writing values is necessary for writing some other sections. nPlease refer to the standard for more information on which value to write.
+As defined in the standard, writing values is necessary for writing some other sections. Please refer to the standard for more information on which value to write.
 
 ```rust
 let mut file = Kff::create(/*output_file*/, /*header*/).expect("unable to initiate kff");
@@ -124,11 +122,9 @@ file.write_values(values.clone()).expect("unable to write values");
 TODO
 
 
-
-
 ### Minimizer sequences section
 
-Writing a minimizer section consists in creating one or multiple blocks and then writing them.
+Writing a minimizer section consists of creating one or multiple blocks and then writing them.
 
 Creating a block:
 ```rust
