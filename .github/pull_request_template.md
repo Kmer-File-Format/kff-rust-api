@@ -15,10 +15,10 @@ Please delete options that are not relevant.
 
 # Checklist:
 
-- [ ] I run `cargo fmt`
-- [ ] I run `cargo clippy`
-- [ ] I run `cargo test`
+- [ ] I run `cargo fmt --all`
+- [ ] I run `cargo clippy --all-targets`
+- [ ] I run `cargo test --all-targets`
 - [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
+- [ ] I have made corresponding changes to the documentation and [check it](https://kmer-file-format.github.io/kff-rust-api/contributing.html#website-pull-request)
 - [ ] New and existing unit tests pass locally with my changes
 - [ ] I have check my test covered almost all new code

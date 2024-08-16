@@ -2,7 +2,7 @@
 
 Contributions are welcome, and they are greatly appreciated! Every little bit helps, and credit will always be given.
 
-Keep in mind as you contribute, that code, docs and other material submitted to this projects are considered licensed under MIT license.
+Keep in mind as you contribute, that code, docs and other material submitted to this projects are considered licensed under AGPL license.
 
 ## Setup developement environment
 
@@ -31,7 +31,7 @@ You can check your new code are covered by run:
 ```bash
 cargo tarpaulin
 ```
-And open `target/coverage/tarpaulin-report.html`
+And open `website/tarpaulin-report.html`
 
 ### Documentation pull request
 
@@ -45,6 +45,8 @@ And open `target/doc/kff/index.html` to check effect of your change.
 
 After change you can run:
 ```
+cargo tarpaulin
+cargo doc --target-dir website
 mdbook serve
 ```
 To check effect of your change.

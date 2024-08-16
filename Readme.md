@@ -12,15 +12,22 @@ Welcome in the rust library description for Reading or Writing kff files.
 
 ## Usage
 
+Add this in you Cargo.toml
 ```toml
 kff = { version = "0.9" }
 ```
 
+- [How to read a KFF file](https://kmer-file-format.github.io/kff-rust-api/read.html)
+- [How to write a KFF file](https://kmer-file-format.github.io/kff-rust-api/write.html)
+- You could also check [example](https://github.com/Kmer-File-Format/kff-rust-api/tree/main/examples)
+
 ## Documentation
 
-The documentation of this crate is [available online](https://kmer-file-format.github.io/kff-rust-api/index.html).
+An overview of features is [available](https://kmer-file-format.github.io/kff-rust-api/index.html), as well as detailed documentation of the [release version](https://docs.rs/kff/latest/kff/) and the version under [development](https://kmer-file-format.github.io/kff-rust-api/index.html).
 
 ## Contributors
+
+- Pierre Marijon
 - Lucas Robidou
 
 ## Minimum supported Rust version
