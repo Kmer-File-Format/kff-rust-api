@@ -57,7 +57,7 @@ where
         KmerIterator::new(self)
     }
 
-    /// Read Kff until last kmer section
+    /// Read Kff until next kmer section
     pub fn next_kmer_section(&mut self) -> std::option::Option<error::Result<Vec<Kmer>>> {
         loop {
             match self.inner.read_u8() {
