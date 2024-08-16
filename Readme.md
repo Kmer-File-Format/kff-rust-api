@@ -8,11 +8,20 @@
 [![license](https://img.shields.io/badge/license-AGPL-purple)](https://github.com/Kmer-File-Format/kff-rust-api//blob/main/LICENSE)
 [![copier](https://img.shields.io/badge/copier-template-yellow)](https://github.com/natir/copier-rust)
 
+Welcome in the rust library description for Reading or Writing kff files.
+
 ## Usage
 
-```
+```toml
 kff = { version = "0.9" }
 ```
+
+## Documentation
+
+The documentation of this crate is [available online](https://kmer-file-format.github.io/kff-rust-api/index.html).
+
+## Contributors
+- Lucas Robidou
 
 ## Minimum supported Rust version
 

@@ -89,7 +89,7 @@ fn nuc2bits(nuc: u8, encoding: u8) -> Seq2Bit {
 }
 
 /// Convert a sequence of nucleotide in Seq2Bit
-fn seq2bits(seq: &[u8], encoding: u8) -> Seq2Bit {
+pub fn seq2bits(seq: &[u8], encoding: u8) -> Seq2Bit {
     let mut bits = bitvec::vec::BitVec::with_capacity(seq.len() * 2);
 
     for nuc in seq {
@@ -100,7 +100,7 @@ fn seq2bits(seq: &[u8], encoding: u8) -> Seq2Bit {
 }
 
 /// Convert a Seq2Bit in sequence of nucleotide
-fn bits2seq(bits: &Seq2Bit, encoding: u8) -> Vec<u8> {
+pub fn bits2seq(bits: &Seq2Bit, encoding: u8) -> Vec<u8> {
     let rev_encoding = rev_encoding(encoding);
 
     let mut ret = Vec::with_capacity(bits.len());

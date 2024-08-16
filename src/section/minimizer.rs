@@ -248,4 +248,44 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn write_single_block() -> error::Result<()> {
+        let mut values = section::Values::with_capacity(4);
+
+        values.insert("k".to_string(), 5);
+        values.insert("m".to_string(), 4);
+        values.insert("ordered".to_string(), false as u64);
+        values.insert("max".to_string(), 100);
+        values.insert("data_size".to_string(), 1);
+
+        let minimizer = Minimizer::new(&values)?;
+
+        let mut writable = Vec::new();
+
+        let minimizer_val = bitvec::bitbox![u8, bitvec::order::Msb0; 0, 1, 1, 0, 1, 1, 0, 1];
+        let block = section::block::Block {
+            k: 5,
+            data_size: 1,
+            kmer: Kmer::new(
+                bitvec::bitbox![u8, bitvec::order::Msb0; 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1],
+                vec![1, 2, 3],
+            ),
+            minimizer_offset: 4,
+            offset: 0,
+        };
+        minimizer.write(&mut writable, minimizer_val, &[block])?;
+
+        assert_eq!(
+            writable,
+            vec![
+                0b01101101, // minimizer sequence
+                0, 0, 0, 0, 0, 0, 0, 1, // number of block
+                5, 4, 0b00101101, 0b11000000, 1, 2, // kmer without minimizer
+                3, // one block with 3 kmer and 1 bytes data
+            ]
+        );
+
+        Ok(())
+    }
 }
