@@ -10,11 +10,39 @@
 
 Welcome in the rust library description for Reading or Writing kff files.
 
+The crate offers the features of the [C++ API](https://github.com/Kmer-File-Format/kff-cpp-api)
+and reads and writes the same bytes (the tests compare it with files written by the C++ API):
+- high level reading: enumerate the kmers or the blocks of a file with their data (`KmerReader`);
+- low level reading: header, footer, index and each section, with jumps and copies (`Reader`);
+- low level writing: header, values, raw, minimizer and index sections, with the index and the
+  footer written automatically (`Writer`).
+
 ## Usage
 
 Add this in you Cargo.toml
 ```toml
-kff = { version = "0.9" }
+kff = { version = "0.10" }
+```
+
+```rust
+// Write a file
+let mut writer = kff::Writer::create("file.kff")?;
+let encoding = writer.encoding();
+let mut values = writer.values_section()?;
+values.write_var("k", 5)?;
+values.write_var("max", 10)?;
+values.write_var("data_size", 1)?;
+values.close()?;
+let mut raw = writer.raw_section()?;
+raw.write_compacted_sequence(&encoding.encode(b"ACGTACG")?, 7, &[1, 2, 3])?;
+raw.close()?;
+writer.close()?;
+
+// Read its kmers
+let mut reader = kff::KmerReader::open("file.kff")?;
+while let Some(kmer) = reader.next_kmer()? {
+    println!("{} {:?}", String::from_utf8_lossy(&kmer.to_ascii()), kmer.data);
+}
 ```
 
 - [How to read a KFF file](https://kmer-file-format.github.io/kff-rust-api/read.html)
