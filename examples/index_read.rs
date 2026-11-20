@@ -1,77 +1,80 @@
-//! Read a kff file show index or show content of a section
-
-/* std use */
+//! Print the index of a KFF file, or the kmers of one of its indexed sections
 
 /* crate use */
 use clap::Parser as _;
 
 /* project use */
-use kff::error;
+use kff::{error, BlockReader, SectionType};
 
-/// Example: Kmer File Format Rust parser
+/// Print the index of a KFF file or the kmers of one of its sections
 #[derive(clap::Parser, std::fmt::Debug)]
-#[clap(
-    name = "kff",
-    version = "0.1",
-    author = "Pierre Marijon <pierre@marijon.fr>"
-)]
+#[clap(name = "index_read")]
 pub struct Command {
-    /// Silence all output
-    #[clap(short = 'q', long = "quiet")]
-    pub quiet: bool,
-
-    /// Verbose mode (-v, -vv, -vvv, etc)
-    #[clap(short = 'v', long = "verbosity",  action = clap::ArgAction::Count)]
-    pub verbosity: u8,
-
-    /// Timestamp (sec, ms, ns, none)
-    #[clap(short = 'T', long = "timestamp")]
-    pub ts: Option<stderrlog::Timestamp>,
-
-    /// Kff input file
+    /// KFF input file
     #[clap(short = 'i', long = "input")]
     pub input: std::path::PathBuf,
 
-    /// Flag to show index content
+    /// Print the sections registered in the index: number, type and position in the file
     #[clap(short = 's', long = "show-index")]
     pub show: bool,
 
-    /// Get target section
+    /// Print the kmers of the section of this number
     #[clap(short = 't', long = "target")]
     pub target: Option<usize>,
 }
 
 fn main() -> error::Result<()> {
-    // parse cli
     let params = Command::parse();
 
-    // Setup logger
-    stderrlog::new()
-        .quiet(params.quiet)
-        .verbosity(params.verbosity as usize)
-        .timestamp(params.ts.unwrap_or(stderrlog::Timestamp::Off))
-        .init()
-        .unwrap();
-
-    let mut kff = kff::Kff::with_index(params.input)?;
+    let mut reader = kff::Reader::open(params.input)?;
+    if !reader.is_indexed() {
+        eprintln!("This KFF file has no index");
+        std::process::exit(1);
+    }
+    let sections: Vec<(u64, SectionType)> = reader.indexed_sections().into_iter().collect();
 
     if params.show {
-        if let Some(index) = kff.index() {
-            println!("index, type, offset");
-            for (i, (t, p)) in index.pair().iter().enumerate() {
-                println!("{},{},{}", i, *t as char, p);
-            }
-        } else {
-            log::error!("This kff file didn't containts index");
-            return Ok(());
+        println!("index, type, offset");
+        for (i, (position, section_type)) in sections.iter().enumerate() {
+            println!("{},{},{}", i, section_type.as_byte() as char, position);
         }
     } else if let Some(target) = params.target {
-        let section = kff.kmer_of_section(target)?;
-        for kmer in section {
-            println!("{}", String::from_utf8(kmer.seq(*kff.header().encoding()))?);
+        let (position, section_type) = match sections.get(target) {
+            Some(section) => *section,
+            None => {
+                eprintln!("The index contains {} sections", sections.len());
+                std::process::exit(1);
+            }
+        };
+        if !section_type.has_kmers() {
+            eprintln!("Section {} is not a raw or minimizer section", target);
+            std::process::exit(1);
+        }
+
+        // The variables of the section are in the last values section before it
+        let values = sections[..target]
+            .iter()
+            .rev()
+            .find(|(_, section_type)| *section_type == SectionType::Values);
+        if let Some((values_position, _)) = values {
+            reader.jump_to(*values_position)?;
+            reader.read_values()?;
+        }
+
+        reader.jump_to(position)?;
+        let encoding = reader.encoding();
+        let mut section = reader.open_block_section()?.unwrap();
+        while let Some(block) = section.read_block()? {
+            for (kmer, _) in block.kmers() {
+                println!(
+                    "{}",
+                    String::from_utf8_lossy(&encoding.decode(&kmer, block.k as usize))
+                );
+            }
         }
     } else {
-        log::error!("You must set option `show` or `target`")
+        eprintln!("Use the option --show-index or --target");
+        std::process::exit(1);
     }
 
     Ok(())
