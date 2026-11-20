@@ -1,6 +1,4 @@
-//! Read a kff file and write in stdout kmer
-
-/* std use */
+//! Print the kmers of a KFF file, one per line, with their data in hexadecimal
 
 /* crate use */
 use clap::Parser as _;
@@ -8,50 +6,35 @@ use clap::Parser as _;
 /* project use */
 use kff::error;
 
-/// Example: Kmer File Format Rust parser
+/// Print the kmers of a KFF file, one per line
 #[derive(clap::Parser, std::fmt::Debug)]
-#[clap(
-    name = "kff",
-    version = "0.1",
-    author = "Pierre Marijon <pierre@marijon.fr>"
-)]
+#[clap(name = "kff2kmer")]
 pub struct Command {
-    /// Silence all output
-    #[clap(short = 'q', long = "quiet")]
-    pub quiet: bool,
-
-    /// Verbose mode (-v, -vv, -vvv, etc)
-    #[clap(short = 'v', long = "verbosity", action = clap::ArgAction::Count)]
-    pub verbosity: u8,
-
-    /// Timestamp (sec, ms, ns, none)
-    #[clap(short = 'T', long = "timestamp")]
-    pub ts: Option<stderrlog::Timestamp>,
-
-    /// Kff input file
+    /// KFF input file
     #[clap(short = 'i', long = "input")]
     pub input: std::path::PathBuf,
+
+    /// Print the data of the kmers in hexadecimal, after a tabulation
+    #[clap(short = 'd', long = "data")]
+    pub data: bool,
 }
 
 fn main() -> error::Result<()> {
-    // parse cli
     let params = Command::parse();
 
-    // Setup logger
-    stderrlog::new()
-        .quiet(params.quiet)
-        .verbosity(params.verbosity as usize)
-        .timestamp(params.ts.unwrap_or(stderrlog::Timestamp::Off))
-        .init()
-        .unwrap();
-
-    log::trace!("Open file");
-    let file = kff::Kff::<std::io::BufReader<std::fs::File>>::open(params.input)?;
-    let encoding = *(file.header().encoding());
-
-    let mut iter = file.kmers();
-    while let Some(Ok(kmer)) = iter.next() {
-        println!("{}", String::from_utf8(kmer.seq(encoding))?);
+    let mut reader = kff::KmerReader::open(params.input)?;
+    let stdout = std::io::stdout();
+    let mut out = std::io::BufWriter::new(stdout.lock());
+    while let Some(kmer) = reader.next_kmer()? {
+        use std::io::Write as _;
+        out.write_all(&kmer.to_ascii())?;
+        if params.data {
+            out.write_all(b"\t")?;
+            for byte in kmer.data {
+                write!(out, "{:02x}", byte)?;
+            }
+        }
+        out.write_all(b"\n")?;
     }
 
     Ok(())
