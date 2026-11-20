@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The number of kmers of a block and the position of the minimizer use `ceil(log2(max))` and
   `ceil(log2(k + max - 1))` bits rounded to bytes, as the C++ API (they used 1, 2, 4 or 8 bytes).
 - The variables of a values section are written sorted by name, as the C++ API.
+- The minimum supported Rust version is 1.71 (it was 1.62): it is needed by the dependencies of
+  `thiserror`.
 
 ### Added
 - Index and footer written automatically, footer and index chain discovered when a file is opened.

@@ -19,7 +19,7 @@ and reads and writes the same bytes (the tests compare it with files written by 
 
 ## Usage
 
-Add this in you Cargo.toml
+Add this in your Cargo.toml
 ```toml
 kff = { version = "0.10" }
 ```
@@ -60,4 +60,8 @@ An overview of features is [available](https://kmer-file-format.github.io/kff-ru
 
 ## Minimum supported Rust version
 
-Currently the minimum supported Rust version is 1.62.
+Currently the minimum supported Rust version is 1.71.
+
+It is the version needed to build the library and its dependencies (`thiserror` uses `syn`,
+`quote` and `proc-macro2`, which need Rust 1.71). The tests and the examples use more dependencies
+(`clap`, `tempfile`) and need a recent stable Rust.

@@ -5,6 +5,9 @@
 `NAME.txt`, the kmers read by the C++ high level reader (one line per kmer: nucleotides, a
 tabulation and the data in hexadecimal).
 
+The kmers are read block by block with `next_block`, not with `next_kmer`: in kff-cpp-api 1.1,
+`next_kmer` loses the kmers of the last block, except the first one, when the file has no footer.
+
 `tests/cpp_compat.rs` checks that this crate reads the same kmers, and that it writes the same bytes
 when the sections are written again.
 

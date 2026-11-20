@@ -4,7 +4,7 @@ version = "0.10.0"
 authors = ["Pierre Marijon <pierre@marijon.fr>"]
 edition = "2021"
 description = "Kmer File Format Rust parser and writer, with the features of the C++ API"
-rust-version = "1.62"
+rust-version = "1.71"
 
 homepage = "https://github.com/natir/kff"
 repository = "https://github.com/natir/kff"
